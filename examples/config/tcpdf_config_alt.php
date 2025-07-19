@@ -22,7 +22,7 @@
 
 
 /**
- * Alternative configuration file for TCPDF.
+ * Alternative configuration file for limePdf
  * @author Brad Smith
  * @package com.limepdf
  * @version 1.0.0
@@ -92,22 +92,22 @@ define ('PDF_PAGE_ORIENTATION', 'P');
 /**
  * Document creator.
  */
-define ('PDF_CREATOR', 'LimePDF');
+define ('PDF_CREATOR', 'limePDF');
 
 /**
  * Document author.
  */
-define ('PDF_AUTHOR', 'LimePDF');
+define ('PDF_AUTHOR', 'limePDF');
 
 /**
  * Header title.
  */
-define ('PDF_HEADER_TITLE', 'LimePDF Example');
+define ('PDF_HEADER_TITLE', 'limePDF Example');
 
 /**
  * Header description string.
  */
-define ('PDF_HEADER_STRING', "LimePDF\nwww.limePDF.com");
+define ('PDF_HEADER_STRING', "limePDF\nwww.limePDF.com");
 
 /**
  * Document unit of measure [pt=point, mm=millimeter, cm=centimeter, in=inch].
