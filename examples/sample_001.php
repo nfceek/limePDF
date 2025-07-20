@@ -19,76 +19,124 @@ use LimePDF\Config\ConfigManager;
 
 require_once '../vendor/autoload.php'; 
 
-
-
 // Instantiate and load ConfigManager
 $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
-/* Dump the internal config array for verification
-echo "<pre>";
-print_r($config->toArray()); // Assumes you have a toArray() method in ConfigManager
-echo "</pre>";
-*/
-
 // set the doc title & test text
-$pdfTitle = 'limePDF Sample 001';
-$pdfLogo = './images/limePDF_logo.png';
+$pdfTitle = 'limePDF Sample 001A';
+$pdfLogo = realpath(__DIR__ . '/images/tcpdf_logo.jpg'); // returns false if not found
 $pdfText = 'Sample # 001<br><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p>';
-
 
 // Change the $config array ars to be injected or used as necessary
 $cfgArray = $config->toArray();
-	$author = $cfgArray['author'];
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],
+    'logo' => [
+        'file' => __DIR__ . '/images/limePDF_logo.png',
+        'width' => $cfgArray['headerLogoWidth'],
+    ],
+    'headerString' => $cfgArray['headerString'],
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
 
-	$creator = $cfgArray['creator'];
-
-	$headerLogoWidth = $cfgArray['headerlogowidth'];
-	$headerString = $cfgArray['headerstring'];
-	$keywords = $cfgArray['keywords'];
-
-	$pageFormat = $cfgArray['pageformat'];
-	$pageOrientation = $cfgArray['pageorientation'];
-
-
-	$subject = $cfgArray['subject'];
-	$unit = $cfgArray['unit'];
 
 //-------- do not edit below ------------------------------------------------
 
 // create new PDF document
-$pdf = new TCPDF($pageOrientation, $unit, $pageFormat, true, 'UTF-8', false);
+$pdf = new TCPDF(
+    $pdfConfig['layout']['orientation'],
+    $pdfConfig['layout']['unit'],
+    $pdfConfig['layout']['pageFormat'],
+    true,
+    'UTF-8',
+    false
+);
+
+$pdf->setHeaderData(
+    $pdfConfig['logo']['file'],
+    $pdfConfig['logo']['width'],
+    $pdfTitle,
+    $pdfConfig['headerString']
+);
+
 
 // set document information
-$pdf->setCreator($creator);
-$pdf->setAuthor($author);
+$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setAuthor($pdfConfig['author']);
 $pdf->setTitle($pdfTitle);
-$pdf->setSubject($subject);
-$pdf->setKeywords($keywords);
+$pdf->setSubject($pdfConfig['meta']['subject']);
+$pdf->setKeywords($pdfConfig['meta']['keywords']);
 
 // set default header data
-$pdf->setHeaderData($pdfLogo, $headerLogoWidth, $pdfTitle, $headerString, array(0,64,255), array(0,64,128));
+$pdf->setHeaderData(
+	$pdfConfig['logo']['file'],
+	$pdfConfig['logo']['width'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
+	array(0,64,255),
+	array(0,64,128)
+);
+//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 001', PDF_HEADER_STRING, array(0,64,255), array(0,64,128));
 
 $pdf->setFooterData(array(0,64,0), array(0,64,128));
 
 // set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+// set header and footer fonts
+$pdf->setHeaderFont(
+	[$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
