@@ -28,7 +28,21 @@
  */
 
 // Include the main TCPDF library (search for installation path).
-require_once('limePDF_include.php');
+//require_once('limePDF_include.php');
+
+use LimePDF\Config\ConfigManager;
+
+//require_once __DIR__ . '/vendor/autoload.php'; // Composer autoloader
+require_once '../vendor/autoload.php'; // Composer autoloader
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+    // Optional overrides here
+]);
+
+// Now $config is ready to be injected or used
+
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
