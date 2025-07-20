@@ -46,37 +46,67 @@ class ConfigManager
         return $this->config;
     }
 
+    public function toArray(): array {
+    return $this->config;
+    }
+
     protected function getDefaults(): array
     {
         return [
-            'margin_top' => 27,
-            'margin_bottom' => 25,
-            'margin_left' => 15,
-            'margin_right' => 15,
-            'margin_header' => 5,
-            'margin_footer' => 10,
-            'font_family' => 'helvetica',
-            'font_size_main' => 10,
-            'font_size_data' => 8,
-            'font_monospaced' => 'courier',
-            'image_scale_ratio' => 1.25,
-            'page_format' => 'A4',
-            'page_orientation' => 'P',
+
+            'allowedtcpdftags' => '',            
+            'author' => 'limePdf',
+
+            'blankimage' => '_blank.png',
+
+            'cellheightratio' => 1.25,            
             'creator' => 'limePDF',
-            'author' => 'limePDF',
-            'header_title' => 'limePDF Example',
-            'header_string' => "limePDF\nwww.limePDF.com",
+            'curlopts' => 'array()',
+
+            'fontnamemain' => 'helvetica',
+            'fontsizemain' => 10,
+            'fontnamedata' => 'helvetica',
+            'fontsizedata' => 8,
+            'fontmonospaced' => 'courier',                     
+
+            'headmagnification' => 1.1,
+            'headerlogo' => '$tcpdf_header_logo',
+            'headerlogowidth' => 0,
+            'headertitle' => 'limePDF Example',
+            'headerstring' => "limePDF.com",
+            'headerlogowidth' => 30,            
+ 
+            'imagescaleratio' => 1.25,
+
+            'keywords' => 'limePDF,TCPDF, PDF, example, test, guide',  
+
+            'marginheader' => 5,
+            'marginfooter' => 10,
+            'margintop' => 27,
+            'marginbottom' => 25,
+            'marginleft' => 15,
+            'marginright' => 15,            
+
+            'pageformat' => 'A4',
+            'pageorientation' => 'P',
+            'pathmain' => 'dirname(__FILE__)/',
+            'pathfonts' => '$k_path_main/fonts/',
+            'pathurl' => '$k_path_url',
+            'pathimages' => '$tcpdf_images_path',
+            'pathcache' => '$K_PATH_CACHE',
+
+            'subject' => 'limePDF Tutorial',
+            'smallratio' => '2/3',
+
+            'titlemagnification' => 1.3,       
+            'thaitopchars' => true,
+            'tcpdfcallsinhtml' => false,
+            'tcpdfthrowexceptionerror' => false,
+            'timezone' => '@date_default_timezone_get()',
+
             'unit' => 'mm',
-            'timezone' => 'UTC',
-            'head_magnification' => 1.1,
-            'cell_height_ratio' => 1.25,
-            'title_magnification' => 1.3,
-            'small_ratio' => 2/3,
-            'thai_topchars' => true,
-            'html_calls_enabled' => false,
-            'allowed_html_tags' => '',
-            'throw_exception_on_error' => false,
-            'blank_image' => '_blank.png',
+
+
         ];
     }
 }

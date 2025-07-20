@@ -9,53 +9,67 @@
 //
 // Author: Brad Smith
 //
-// (c) Copyright 2025, Brad Smith*
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
 //  * Original TCPDF Copyright (c) 2002-2023:
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @author Brad Smith
- * @package com.limepdf
- * @version 1.0.0
- * @since 2025-07-19
- * @group header
- * @group footer
- * @group page
- * @group pdf
- */
-
-// Include the main TCPDF library (search for installation path).
-//require_once('limePDF_include.php');
-
 use LimePDF\Config\ConfigManager;
 
-//require_once __DIR__ . '/vendor/autoload.php'; // Composer autoloader
-require_once '../vendor/autoload.php'; // Composer autoloader
+require_once '../vendor/autoload.php'; 
+
+
 
 // Instantiate and load ConfigManager
 $config = new ConfigManager();
 $config->loadFromArray([
-    // Optional overrides here
 ]);
 
-// Now $config is ready to be injected or used
+/* Dump the internal config array for verification
+echo "<pre>";
+print_r($config->toArray()); // Assumes you have a toArray() method in ConfigManager
+echo "</pre>";
+*/
 
+// set the doc title & test text
+$pdfTitle = 'limePDF Sample 001';
+$pdfLogo = './images/limePDF_logo.png';
+$pdfText = 'Sample # 001<br><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p>';
+
+
+// Change the $config array ars to be injected or used as necessary
+$cfgArray = $config->toArray();
+	$author = $cfgArray['author'];
+
+	$creator = $cfgArray['creator'];
+
+	$headerLogoWidth = $cfgArray['headerlogowidth'];
+	$headerString = $cfgArray['headerstring'];
+	$keywords = $cfgArray['keywords'];
+
+	$pageFormat = $cfgArray['pageformat'];
+	$pageOrientation = $cfgArray['pageorientation'];
+
+
+	$subject = $cfgArray['subject'];
+	$unit = $cfgArray['unit'];
+
+//-------- do not edit below ------------------------------------------------
 
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new TCPDF($pageOrientation, $unit, $pageFormat, true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('limePDF');
-$pdf->setTitle('limePDF Sample 001');
-$pdf->setSubject('limePDF Tutorial');
-$pdf->setKeywords('limePDF,TCPDF, PDF, example, test, guide');
+$pdf->setCreator($creator);
+$pdf->setAuthor($author);
+$pdf->setTitle($pdfTitle);
+$pdf->setSubject($subject);
+$pdf->setKeywords($keywords);
 
 // set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 001', PDF_HEADER_STRING, array(0,64,255), array(0,64,128));
+$pdf->setHeaderData($pdfLogo, $headerLogoWidth, $pdfTitle, $headerString, array(0,64,255), array(0,64,128));
+
 $pdf->setFooterData(array(0,64,0), array(0,64,128));
 
 // set header and footer fonts
@@ -101,12 +115,7 @@ $pdf->AddPage();
 $pdf->setTextShadow(array('enabled'=>true, 'depth_w'=>0.2, 'depth_h'=>0.2, 'color'=>array(196,196,196), 'opacity'=>1, 'blend_mode'=>'Normal'));
 
 // Set some content to print
-$html = <<<EOD
-<h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1>
-<i>This is the first Sample file for the limePDF library.</i>
-<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p>
-<p>Please check the source code documentation and other examples for further information.</p>
-EOD;
+$html = $pdfText;
 
 // Print text using writeHTMLCell()
 $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
@@ -115,7 +124,7 @@ $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
 // Close and output PDF document
 // This method has several options, check the source code documentation for more information.
-$pdf->Output('example_001.pdf', 'I');
+$pdf->Output('sample_001.pdf', 'I');
 
 //============================================================+
 // END OF FILE
