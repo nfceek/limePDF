@@ -1,0 +1,134 @@
+	protected function setPageFormat($format, $orientation='P') {
+	protected function adjustCellPadding($brd=0) {
+	protected function setContentMark($page=0) {
+	protected function setHeader() {
+	protected function setFooter() {
+	protected function inPageBody() {
+	protected function setTableHeader() {
+	protected function getFontsList() {
+	protected function _putEmbeddedFiles() {
+	protected function checkPageBreak($h=0, $y=null, $addpage=true) {
+	protected function getCellCode($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M') {
+	protected function replaceChar($oldchar, $newchar) {
+	protected function getCellBorder($x, $y, $w, $h, $brd) {
+	protected function getRemainingWidth() {
+	protected function fitBlock($w, $h, $x, $y, $fitonpage=false) {
+	protected function ImagePngAlpha($file, $x, $y, $wpx, $hpx, $w, $h, $type, $link, $align, $resize, $dpi, $palign, $filehash='') {
+	protected function getGDgamma($img, $c) {
+	protected static $cleaned_ids = array();
+	protected function _dochecks() {
+	protected function getInternalPageNumberAliases($a= '') {
+	protected function getAllInternalPageNumberAliases() {
+	protected function replaceRightShiftPageNumAliases($page, $aliases, $diff) {
+	protected function setPageBoxTypes($boxes) {
+	protected function _putpages() {
+	protected function _getannotsrefs($n) {
+	protected function _putannotsobjs() {
+	protected function _putAPXObject($w=0, $h=0, $stream='') {
+	protected function _putfonts() {
+	protected function _puttruetypeunicode($font) {
+	protected function _putcidfont0($font) {
+	protected function _putimages() {
+	protected function _putxobjects() {
+	protected function _putspotcolors() {
+	protected function _getxobjectdict() {
+	protected function _putresourcedict() {
+	protected function _putresources() {
+	protected function _putinfo() {
+	protected function _putXMP() {
+	protected function _putcatalog() {
+	protected function _putviewerpreferences() {
+	protected function _putheader() {
+	protected function _enddoc() {
+	protected function _beginpage($orientation='', $format='') {
+	protected function _endpage() {
+	protected function _newobj() {
+	protected function _getobj($objid=null) {
+	protected function _dounderline($x, $y, $txt) {
+	protected function _dounderlinew($x, $y, $w) {
+	protected function _dolinethrough($x, $y, $txt) {
+	protected function _dolinethroughw($x, $y, $w) {
+	protected function _dooverline($x, $y, $txt) {
+	protected function _dooverlinew($x, $y, $w) {
+	protected function _datastring($s, $n=0) {
+	protected function _datestring($n=0, $timestamp=0) {
+	protected function _textstring($s, $n=0) {
+	protected function _getrawstream($s, $n=0) {
+	protected function _out($s) {
+	protected function _objectkey($n) {
+	protected function _encrypt_data($n, $s) {
+	protected function _putencryption() {
+	protected function _Uvalue() {
+	protected function _UEvalue() {
+	protected function _Ovalue() {
+	protected function _OEvalue() {
+	protected function _fixAES256Password($password) {
+	protected function _generateencryptionkey() {
+	protected function Transform($tm) {
+	protected function _outPoint($x, $y) {
+	protected function _outLine($x, $y) {
+	protected function _outRect($x, $y, $w, $h, $op) {
+	protected function _outCurve($x1, $y1, $x2, $y2, $x3, $y3) {
+	protected function _outCurveV($x2, $y2, $x3, $y3) {
+	protected function _outCurveY($x1, $y1, $x3, $y3) {
+	protected function _outellipticalarc($xc, $yc, $rx, $ry, $xang=0, $angs=0, $angf=360, $pie=false, $nc=2, $startpoint=true, $ccw=true, $svg=false) {
+	protected function _putdests() {
+	protected function sortBookmarks() {
+	protected function _putbookmarks() {
+	protected function _putjavascript() {
+	protected function _addfield($type, $name, $x, $y, $w, $h, $prop) {
+	protected function _putsignature() {
+	protected function getSignatureAppearanceArray($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
+	protected function applyTSA($signature) {
+	protected function _putocg() {
+	protected function addExtGState($parms) {
+	protected function setExtGState($gs) {
+	protected function _putextgstates() {
+	protected function Clip($x, $y, $w, $h) {
+	protected function getCSSBorderWidth($width) {
+	protected function getCSSBorderDashStyle($style) {
+	protected function getCSSBorderStyle($cssborder) {
+	protected function getCSSFontSpacing($spacing, $parent=0) {
+	protected function getCSSFontStretching($stretch, $parent=100) {
+	protected function getHtmlDomArray($html) {
+	protected function getSpaceString() {
+	protected function hashTCPDFtag($data) {
+	protected function unserializeTCPDFtag($data) {
+	protected function allowedTCPDFtag($method) {
+	protected function isRelativePath($path) {
+	protected function hasExtForbiddenProtocol($path) {
+	protected function openHTMLTagHandler($dom, $key, $cell) {
+	protected function closeHTMLTagHandler($dom, $key, $cell, $maxbottomliney=0) {
+	protected function addHTMLVertSpace($hbz=0, $hb=0, $cell=false, $firsttag=false, $lasttag=false) {
+	protected function getBorderStartPosition() {
+	protected function drawHTMLTagBorder($tag, $xmax) {
+	protected function swapMargins($reverse=true) {
+	protected function putHtmlListBullet($listdepth, $listtype='', $size=10) {
+	protected function getGraphicVars() {
+	protected function setGraphicVars($gvars, $extended=false) {
+	protected function _outSaveGraphicsState() {
+	protected function _outRestoreGraphicsState() {
+	protected function setBuffer($data) {
+	protected function replaceBuffer($data) {
+	protected function getBuffer() {
+	protected function setPageBuffer($page, $data, $append=false) {
+	protected function getPageBuffer($page) {
+	protected function setImageBuffer($image, $data) {
+	protected function setImageSubBuffer($image, $key, $data) {
+	protected function getImageBuffer($image) {
+	protected function setFontBuffer($font, $data) {
+	protected function setFontSubBuffer($font, $key, $data) {
+	protected function getFontBuffer($font) {
+	protected function hyphenateWord($word, $patterns, $dictionary=array(), $leftmin=1, $rightmin=2, $charmin=1, $charmax=8) {
+	protected function checkPageRegions($h, $x, $y) {
+	protected function convertSVGtMatrix($tm) {
+	protected function SVGTransform($tm) {
+	protected function setSVGStyles($svgstyle, $prevsvgstyle, $x=0, $y=0, $w=1, $h=1, $clip_function='', $clip_params=array()) {
+	protected function SVGPath($d, $style='') {
+	protected function removeTagNamespace($name) {
+	protected function startSVGElementHandler($parser, $name, $attribs, $ctm=array()) {
+	protected function endSVGElementHandler($parser, $name) {
+	protected function segSVGContentHandler($parser, $data) {
+    protected function getCachedFileContents($file)
+    protected function fileExists($file)
+	protected function _unlink($file)
