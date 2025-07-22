@@ -24,10 +24,17 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+// what is the file name to create:
+$outputFile = 'sample_001.pdf';
 // set the doc title & test text
 $pdfTitle = 'limePDF Sample 001A';
-$pdfLogo = realpath(__DIR__ . '/images/tcpdf_logo.jpg'); // returns false if not found
-$pdfText = 'Sample # 001<br><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p>';
+$pdfLogo = '../images/limePDF_logo.png';
+//$pdfLogo = __DIR__ . '/images/limePDF_logo.png'; // returns false if not found
+$pdfText = 'Sample # 001<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
+
+
+
+//-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
 
 // Change the $config array ars to be injected or used as necessary
 $cfgArray = $config->toArray();
@@ -40,10 +47,13 @@ $pdfConfig = [
         'mono' => $cfgArray['fontMonospaced'],
     ],
     'logo' => [
-        'file' => __DIR__ . '/images/limePDF_logo.png',
+		'file' => 'test.png',
+        //'file' => __DIR__ . '/images/limePDF_logo.png',
+		//'file' => $pdfLogo,
         'width' => $cfgArray['headerLogoWidth'],
     ],
     'headerString' => $cfgArray['headerString'],
+	'headerLogo' => $cfgArray['headerLogo'],
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
@@ -64,9 +74,6 @@ $pdfConfig = [
     ]
 ];
 
-
-//-------- do not edit below ------------------------------------------------
-
 // create new PDF document
 $pdf = new TCPDF(
     $pdfConfig['layout']['orientation'],
@@ -77,14 +84,6 @@ $pdf = new TCPDF(
     false
 );
 
-$pdf->setHeaderData(
-    $pdfConfig['logo']['file'],
-    $pdfConfig['logo']['width'],
-    $pdfTitle,
-    $pdfConfig['headerString']
-);
-
-
 // set document information
 $pdf->setCreator( $pdfConfig['creator']);
 $pdf->setAuthor($pdfConfig['author']);
@@ -92,23 +91,26 @@ $pdf->setTitle($pdfTitle);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
+
 // set default header data
+if (!file_exists($pdfConfig['headerString'])) {
+	//throw new Exception("Logo file not found: " . $pdfConfig['logo']['file']);
+}
+$wtf = "images/logo_example.jpg";
 $pdf->setHeaderData(
-	$pdfConfig['logo']['file'],
-	$pdfConfig['logo']['width'],
-	$pdfTitle,
-	$pdfConfig['headerString'],
+	$pdfLogo, 	//$pdfConfig['headerString'], 		//$pdfConfig['logo']['file'],								//<--- error here with logo
+	60,				//$pdfConfig['logo']['width'],
+	"test info",	//$pdfTitle,
+	"test"	,		//$pdfConfig['headerString'],
 	array(0,64,255),
 	array(0,64,128)
 );
-//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 001', PDF_HEADER_STRING, array(0,64,255), array(0,64,128));
 
 $pdf->setFooterData(array(0,64,0), array(0,64,128));
 
 // set header and footer fonts
-// set header and footer fonts
-$pdf->setHeaderFont(
-	[$pdfConfig['font']['main'][0],
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
 	'',
 	$pdfConfig['font']['main'][1]]
 );
@@ -172,7 +174,7 @@ $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
 // Close and output PDF document
 // This method has several options, check the source code documentation for more information.
-$pdf->Output('sample_001.pdf', 'I');
+$pdf->Output($outputFile, 'I');
 
 //============================================================+
 // END OF FILE

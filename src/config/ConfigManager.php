@@ -70,8 +70,7 @@ class ConfigManager
             'fontMonospaced' => 'courier',                     
 
             'headMagnification' => 1.1,
-            'headerLogo' => '$tcpdf_header_logo',
-            'headerLogoWidth' => 0,
+            'headerLogo' => 'limePDF_logo.png',
             'headerTitle' => 'limePDF Example',
             'headerString' => "limePDF.com",
             'headerLogoWidth' => 30,            
