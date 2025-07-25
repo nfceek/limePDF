@@ -25,6 +25,9 @@ namespace LimePDF\Config;
 class ConfigManager
 {
     protected array $config = [];
+    protected array $font_obj_ids = [];
+    protected array $page_obj_id = [];
+    protected array $form_obj_id = [];
 
     public function loadFromArray(array $settings): void
     {

@@ -1,0 +1,39 @@
+Function Grouping Analysis
+I can identify these logical groups:
+1. Core PDF Structure (25+ functions)
+
+Page management: setPageFormat, _beginpage, _endpage, checkPageBreak
+PDF output: _putpages, _putheader, _enddoc, _out
+Object management: _newobj, _getobj
+
+2. Content Rendering (20+ functions)
+
+Cell rendering: getCellCode, getCellBorder, adjustCellPadding
+Graphics: _outPoint, _outLine, _outRect, _outCurve*, Transform
+Text effects: _dounderline, _dolinethrough, _dooverline
+
+3. Resource Management (15+ functions)
+
+Fonts: _putfonts, _puttruetypeunicode, getFontsList, font buffer methods
+Images: _putimages, ImagePngAlpha, getGDgamma, image buffer methods
+Colors: _putspotcolors
+
+4. HTML Processing (15+ functions)
+
+HTML parsing: getHtmlDomArray, openHTMLTagHandler, closeHTMLTagHandler
+HTML rendering: addHTMLVertSpace, drawHTMLTagBorder, putHtmlListBullet
+CSS processing: getCSSBorderWidth, getCSSBorderStyle, getCSSFontSpacing
+
+5. SVG Processing (8+ functions)
+
+SVG handling: startSVGElementHandler, endSVGElementHandler, SVGPath, setSVGStyles
+
+6. Security & Encryption (10+ functions)
+
+Encryption: _putencryption, _Uvalue, _Ovalue, _generateencryptionkey
+
+7. Advanced Features (12+ functions)
+
+Bookmarks: _putbookmarks, sortBookmarks
+Forms: _addfield, _putsignature
+JavaScript: _putjavascript
