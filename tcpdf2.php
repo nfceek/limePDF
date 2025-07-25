@@ -1,146 +1,27 @@
 <?php
-//============================================================+
-// File name   : tcpdf.php
-// Version     : 6.10.0
-// Begin       : 2002-08-03
-// Last Update : 2025-05-27
-// Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
-// License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
-// -------------------------------------------------------------------
-// Copyright (C) 2002-2025 Nicola Asuni - Tecnick.com LTD
-//
-// This file is part of TCPDF software library.
-//
-// TCPDF is free software: you can redistribute it and/or modify it
-// under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// TCPDF is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the License
-// along with TCPDF. If not, see
-// <http://www.tecnick.com/pagefiles/tcpdf/LICENSE.TXT>.
-//
-// See LICENSE.TXT file for more information.
-// -------------------------------------------------------------------
-//
-// Description :
-//   This is a PHP class for generating PDF documents without requiring external extensions.
-//
-// NOTE:
-//   This class was originally derived in 2002 from the Public
-//   Domain FPDF class by Olivier Plathey (http://www.fpdf.org),
-//   but now is almost entirely rewritten and contains thousands of
-//   new lines of code and hundreds new features.
-//
-// Main features:
-//  * no external libraries are required for the basic functions;
-//  * all standard page formats, custom page formats, custom margins and units of measure;
-//  * UTF-8 Unicode and Right-To-Left languages;
-//  * TrueTypeUnicode, TrueType, Type1 and CID-0 fonts;
-//  * font subsetting;
-//  * methods to publish some XHTML + CSS code, Javascript and Forms;
-//  * images, graphic (geometric figures) and transformation methods;
-//  * supports JPEG, PNG and SVG images natively, all images supported by GD (GD, GD2, GD2PART, GIF, JPEG, PNG, BMP, XBM, XPM) and all images supported via ImageMagick (http://www.imagemagick.org/www/formats.html)
-//  * 1D and 2D barcodes: CODE 39, ANSI MH10.8M-1983, USD-3, 3 of 9, CODE 93, USS-93, Standard 2 of 5, Interleaved 2 of 5, CODE 128 A/B/C, 2 and 5 Digits UPC-Based Extension, EAN 8, EAN 13, UPC-A, UPC-E, MSI, POSTNET, PLANET, RMS4CC (Royal Mail 4-state Customer Code), CBC (Customer Bar Code), KIX (Klant index - Customer index), Intelligent Mail Barcode, Onecode, USPS-B-3200, CODABAR, CODE 11, PHARMACODE, PHARMACODE TWO-TRACKS, Datamatrix, QR-Code, PDF417;
-//  * JPEG and PNG ICC profiles, Grayscale, RGB, CMYK, Spot Colors and Transparencies;
-//  * automatic page header and footer management;
-//  * document encryption up to 256 bit and digital signature certifications;
-//  * transactions to UNDO commands;
-//  * PDF annotations, including links, text and file attachments;
-//  * text rendering modes (fill, stroke and clipping);
-//  * multiple columns mode;
-//  * no-write page regions;
-//  * bookmarks, named destinations and table of content;
-//  * text hyphenation;
-//  * text stretching and spacing (tracking);
-//  * automatic page break, line break and text alignments including justification;
-//  * automatic page numbering and page groups;
-//  * move and delete pages;
-//  * page compression (requires php-zlib extension);
-//  * XOBject Templates;
-//  * Layers and object visibility.
-//	* PDF/A-1b support
-//============================================================+
 
-/**
- * @file
- * This is a PHP class for generating PDF documents without requiring external extensions.<br>
- * TCPDF project (http://www.tcpdf.org) was originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
- * <h3>TCPDF main features are:</h3>
- * <ul>
- * <li>no external libraries are required for the basic functions;</li>
- * <li>all standard page formats, custom page formats, custom margins and units of measure;</li>
- * <li>UTF-8 Unicode and Right-To-Left languages;</li>
- * <li>TrueTypeUnicode, TrueType, Type1 and CID-0 fonts;</li>
- * <li>font subsetting;</li>
- * <li>methods to publish some XHTML + CSS code, Javascript and Forms;</li>
- * <li>images, graphic (geometric figures) and transformation methods;
- * <li>supports JPEG, PNG and SVG images natively, all images supported by GD (GD, GD2, GD2PART, GIF, JPEG, PNG, BMP, XBM, XPM) and all images supported via ImageMagick (http://www.imagemagick.org/www/formats.html)</li>
- * <li>1D and 2D barcodes: CODE 39, ANSI MH10.8M-1983, USD-3, 3 of 9, CODE 93, USS-93, Standard 2 of 5, Interleaved 2 of 5, CODE 128 A/B/C, 2 and 5 Digits UPC-Based Extension, EAN 8, EAN 13, UPC-A, UPC-E, MSI, POSTNET, PLANET, RMS4CC (Royal Mail 4-state Customer Code), CBC (Customer Bar Code), KIX (Klant index - Customer index), Intelligent Mail Barcode, Onecode, USPS-B-3200, CODABAR, CODE 11, PHARMACODE, PHARMACODE TWO-TRACKS, Datamatrix, QR-Code, PDF417;</li>
- * <li>JPEG and PNG ICC profiles, Grayscale, RGB, CMYK, Spot Colors and Transparencies;</li>
- * <li>automatic page header and footer management;</li>
- * <li>document encryption up to 256 bit and digital signature certifications;</li>
- * <li>transactions to UNDO commands;</li>
- * <li>PDF annotations, including links, text and file attachments;</li>
- * <li>text rendering modes (fill, stroke and clipping);</li>
- * <li>multiple columns mode;</li>
- * <li>no-write page regions;</li>
- * <li>bookmarks, named destinations and table of content;</li>
- * <li>text hyphenation;</li>
- * <li>text stretching and spacing (tracking);</li>
- * <li>automatic page break, line break and text alignments including justification;</li>
- * <li>automatic page numbering and page groups;</li>
- * <li>move and delete pages;</li>
- * <li>page compression (requires php-zlib extension);</li>
- * <li>XOBject Templates;</li>
- * <li>Layers and object visibility;</li>
- * <li>PDF/A-1b support.</li>
- * </ul>
- * Tools to encode your unicode fonts are on fonts/utils directory.</p>
- * @package com.tecnick.tcpdf
- * @author Nicola Asuni
- * @version 6.10.0
- */
 
 // TCPDF configuration
-require_once(dirname(__FILE__).'/tcpdf_autoconfig.php');
+require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
+require_once(dirname(__FILE__).'/include/limepdf_font_data.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
+require_once(dirname(__FILE__).'/include/limepdf_fonts.php');
 // TCPDF static color methods and data
-require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
+require_once(dirname(__FILE__).'/include/limepdf_colors.php');
 // TCPDF static image methods and data
-require_once(dirname(__FILE__).'/include/tcpdf_images.php');
+require_once(dirname(__FILE__).'/include/limepdf_images.php');
 // TCPDF static methods and data
-require_once(dirname(__FILE__).'/include/tcpdf_static.php');
+require_once(dirname(__FILE__).'/include/limepdf_static.php');
 // new
-require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
-// new
-require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
+require_once(dirname(__FILE__).'/include/limepdf_properties.php');
+//new
+require_once(dirname(__FILE__).'/include/limepdf_property_manager.php');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-/**
- * @class TCPDF
- * PHP class for generating PDF documents without requiring external extensions.
- * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
- * @package com.tecnick.tcpdf
- * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.10.0
- * @author Nicola Asuni - info@tecnick.com
- * @IgnoreAnnotation("protected")
- * @IgnoreAnnotation("public")
- * @IgnoreAnnotation("pre")
- */
-class TCPDF {
 
-
+class TCPDF2 {
 
 	//------------------------------------------------------------
 	// METHODS
@@ -7863,7 +7744,7 @@ class TCPDF {
 		$this->_putannotsobjs();
 		$this->_putjavascript();
 		$this->_putbookmarks();
-		$this->_putencryption();
+		$this->putEncryption();
 	}
 
 	/**
@@ -8631,7 +8512,7 @@ class TCPDF {
 		if ($n == 0) {
 			$n = $this->n;
 		}
-		$s = $this->_encrypt_data($n, $s);
+		$s = $this->_encryptData($n, $s);
 		return '('. TCPDF_STATIC::_escape($s).')';
 	}
 
@@ -8724,7 +8605,7 @@ class TCPDF {
 			// default to current object
 			$n = $this->n;
 		}
-		return $this->_encrypt_data($n, $s);
+		return $this->_encryptData($n, $s);
 	}
 
 	/**
@@ -8917,379 +8798,6 @@ class TCPDF {
 	}
 
 	/**
-	 * Encrypt the input string.
-	 * @param int $n object number
-	 * @param string $s data string to encrypt
-	 * @return string encrypted string
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 5.0.005 (2010-05-11)
-	 */
-	protected function _encrypt_data($n, $s) {
-		if (!$this->encrypted) {
-			return $s;
-		}
-		switch ($this->encryptdata['mode']) {
-			case 0:   // RC4-40
-			case 1: { // RC4-128
-				$s = TCPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
-				break;
-			}
-			case 2: { // AES-128
-				$s = TCPDF_STATIC::_AES($this->_objectkey($n), $s);
-				break;
-			}
-			case 3: { // AES-256
-				$s = TCPDF_STATIC::_AES($this->encryptdata['key'], $s);
-				break;
-			}
-		}
-		return $s;
-	}
-
-	/**
-	 * Put encryption on PDF document.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 2.0.000 (2008-01-02)
-	 *
-	 * protected function _putencryption() {
-		if (!$this->encrypted) {
-			return;
-		}
-		$this->encryptdata['objid'] = $this->_newobj();
-		$out = '<<';
-		if (!isset($this->encryptdata['Filter']) OR empty($this->encryptdata['Filter'])) {
-			$this->encryptdata['Filter'] = 'Standard';
-		}
-		$out .= ' /Filter /'.$this->encryptdata['Filter'];
-		if (isset($this->encryptdata['SubFilter']) AND !empty($this->encryptdata['SubFilter'])) {
-			$out .= ' /SubFilter /'.$this->encryptdata['SubFilter'];
-		}
-		if (!isset($this->encryptdata['V']) OR empty($this->encryptdata['V'])) {
-			$this->encryptdata['V'] = 1;
-		}
-		// V is a code specifying the algorithm to be used in encrypting and decrypting the document
-		$out .= ' /V '.$this->encryptdata['V'];
-		if (isset($this->encryptdata['Length']) AND !empty($this->encryptdata['Length'])) {
-			// The length of the encryption key, in bits. The value shall be a multiple of 8, in the range 40 to 256
-			$out .= ' /Length '.$this->encryptdata['Length'];
-		} else {
-			$out .= ' /Length 40';
-		}
-		if ($this->encryptdata['V'] >= 4) {
-			if (!isset($this->encryptdata['StmF']) OR empty($this->encryptdata['StmF'])) {
-				$this->encryptdata['StmF'] = 'Identity';
-			}
-			if (!isset($this->encryptdata['StrF']) OR empty($this->encryptdata['StrF'])) {
-				// The name of the crypt filter that shall be used when decrypting all strings in the document.
-				$this->encryptdata['StrF'] = 'Identity';
-			}
-			// A dictionary whose keys shall be crypt filter names and whose values shall be the corresponding crypt filter dictionaries.
-			if (isset($this->encryptdata['CF']) AND !empty($this->encryptdata['CF'])) {
-				$out .= ' /CF <<';
-				$out .= ' /'.$this->encryptdata['StmF'].' <<';
-				$out .= ' /Type /CryptFilter';
-				if (isset($this->encryptdata['CF']['CFM']) AND !empty($this->encryptdata['CF']['CFM'])) {
-					// The method used
-					$out .= ' /CFM /'.$this->encryptdata['CF']['CFM'];
-					if ($this->encryptdata['pubkey']) {
-						$out .= ' /Recipients [';
-						foreach ($this->encryptdata['Recipients'] as $rec) {
-							$out .= ' <'.$rec.'>';
-						}
-						$out .= ' ]';
-						if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) {
-							$out .= ' /EncryptMetadata false';
-						} else {
-							$out .= ' /EncryptMetadata true';
-						}
-					}
-				} else {
-					$out .= ' /CFM /None';
-				}
-				if (isset($this->encryptdata['CF']['AuthEvent']) AND !empty($this->encryptdata['CF']['AuthEvent'])) {
-					// The event to be used to trigger the authorization that is required to access encryption keys used by this filter.
-					$out .= ' /AuthEvent /'.$this->encryptdata['CF']['AuthEvent'];
-				} else {
-					$out .= ' /AuthEvent /DocOpen';
-				}
-				if (isset($this->encryptdata['CF']['Length']) AND !empty($this->encryptdata['CF']['Length'])) {
-					// The bit length of the encryption key.
-					$out .= ' /Length '.$this->encryptdata['CF']['Length'];
-				}
-				$out .= ' >> >>';
-			}
-			// The name of the crypt filter that shall be used by default when decrypting streams.
-			$out .= ' /StmF /'.$this->encryptdata['StmF'];
-			// The name of the crypt filter that shall be used when decrypting all strings in the document.
-			$out .= ' /StrF /'.$this->encryptdata['StrF'];
-			if (isset($this->encryptdata['EFF']) AND !empty($this->encryptdata['EFF'])) {
-				// The name of the crypt filter that shall be used when encrypting embedded file streams that do not have their own crypt filter specifier.
-				$out .= ' /EFF /'.$this->encryptdata[''];
-			}
-		}
-		// Additional encryption dictionary entries for the standard security handler
-		if ($this->encryptdata['pubkey']) {
-			if (($this->encryptdata['V'] < 4) AND isset($this->encryptdata['Recipients']) AND !empty($this->encryptdata['Recipients'])) {
-				$out .= ' /Recipients [';
-				foreach ($this->encryptdata['Recipients'] as $rec) {
-					$out .= ' <'.$rec.'>';
-				}
-				$out .= ' ]';
-			}
-		} else {
-			$out .= ' /R';
-			if ($this->encryptdata['V'] == 5) { // AES-256
-				$out .= ' 5';
-				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
-			} elseif ($this->encryptdata['V'] == 4) { // AES-128
-				$out .= ' 4';
-			} elseif ($this->encryptdata['V'] < 2) { // RC-40
-				$out .= ' 2';
-			} else { // RC-128
-				$out .= ' 3';
-			}
-			$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-			$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
-			$out .= ' /P '.$this->encryptdata['P'];
-			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
-				$out .= ' /EncryptMetadata false';
-			} else {
-				$out .= ' /EncryptMetadata true';
-			}
-		}
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	 * }
-	 */
-	
-	/**
-	 * Compute U value (used for encryption)
-	 * @return string U value
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _Uvalue() {
-		if ($this->encryptdata['mode'] == 0) { // RC4-40
-			return TCPDF_STATIC::_RC4($this->encryptdata['key'], TCPDF_STATIC::$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
-		} elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
-			$tmp = TCPDF_STATIC::_md5_16(TCPDF_STATIC::$enc_padding.$this->encryptdata['fileid']);
-			$enc = TCPDF_STATIC::_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
-			$len = strlen($tmp);
-			for ($i = 1; $i <= 19; ++$i) {
-				$ek = '';
-				for ($j = 0; $j < $len; ++$j) {
-					$ek .= chr(ord($this->encryptdata['key'][$j]) ^ $i);
-				}
-				$enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
-			}
-			$enc .= str_repeat("\x00", 16);
-			return substr($enc, 0, 32);
-		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
-			// User Validation Salt
-			$this->encryptdata['UVS'] = substr($seed, 0, 8);
-			// User Key Salt
-			$this->encryptdata['UKS'] = substr($seed, 8, 16);
-			return hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UVS'], true).$this->encryptdata['UVS'].$this->encryptdata['UKS'];
-		}
-	}
-
-	/**
-	 * Compute UE value (used for encryption)
-	 * @return string UE value
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _UEvalue() {
-		$hashkey = hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UKS'], true);
-		return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
-	}
-
-	/**
-	 * Compute O value (used for encryption)
-	 * @return string O value
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _Ovalue() {
-		if ($this->encryptdata['mode'] < 3) { // RC4-40, RC4-128, AES-128
-			$tmp = TCPDF_STATIC::_md5_16($this->encryptdata['owner_password']);
-			if ($this->encryptdata['mode'] > 0) {
-				for ($i = 0; $i < 50; ++$i) {
-					$tmp = TCPDF_STATIC::_md5_16($tmp);
-				}
-			}
-			$owner_key = substr($tmp, 0, ($this->encryptdata['Length'] / 8));
-			$enc = TCPDF_STATIC::_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
-			if ($this->encryptdata['mode'] > 0) {
-				$len = strlen($owner_key);
-				for ($i = 1; $i <= 19; ++$i) {
-					$ek = '';
-					for ($j = 0; $j < $len; ++$j) {
-						$ek .= chr(ord($owner_key[$j]) ^ $i);
-					}
-					$enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
-				}
-			}
-			return $enc;
-		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
-			// Owner Validation Salt
-			$this->encryptdata['OVS'] = substr($seed, 0, 8);
-			// Owner Key Salt
-			$this->encryptdata['OKS'] = substr($seed, 8, 16);
-			return hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OVS'].$this->encryptdata['U'], true).$this->encryptdata['OVS'].$this->encryptdata['OKS'];
-		}
-	}
-
-	/**
-	 * Compute OE value (used for encryption)
-	 * @return string OE value
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _OEvalue() {
-		$hashkey = hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OKS'].$this->encryptdata['U'], true);
-		return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
-	}
-
-	/**
-	 * Convert password for AES-256 encryption mode
-	 * @param string $password password
-	 * @return string password
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _fixAES256Password($password) {
-		$psw = ''; // password to be returned
-		$psw_array = TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
-		foreach ($psw_array as $c) {
-			$psw .= TCPDF_FONTS::unichr($c, $this->isunicode);
-		}
-		return substr($psw, 0, 127);
-	}
-
-	/**
-	 * Compute encryption key
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _generateencryptionkey() {
-		$keybytelen = ($this->encryptdata['Length'] / 8);
-		if (!$this->encryptdata['pubkey']) { // standard mode
-			if ($this->encryptdata['mode'] == 3) { // AES-256
-				// generate 256 bit random key
-				$this->encryptdata['key'] = substr(hash('sha256', TCPDF_STATIC::getRandomSeed(), true), 0, $keybytelen);
-				// truncate passwords
-				$this->encryptdata['user_password'] = $this->_fixAES256Password($this->encryptdata['user_password']);
-				$this->encryptdata['owner_password'] = $this->_fixAES256Password($this->encryptdata['owner_password']);
-				// Compute U value
-				$this->encryptdata['U'] = $this->_Uvalue();
-				// Compute UE value
-				$this->encryptdata['UE'] = $this->_UEvalue();
-				// Compute O value
-				$this->encryptdata['O'] = $this->_Ovalue();
-				// Compute OE value
-				$this->encryptdata['OE'] = $this->_OEvalue();
-				// Compute P value
-				$this->encryptdata['P'] = $this->encryptdata['protection'];
-				// Computing the encryption dictionary's Perms (permissions) value
-				$perms = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
-				$perms .= chr(255).chr(255).chr(255).chr(255); // bytes 4-7
-				if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) { // byte 8
-					$perms .= 'F';
-				} else {
-					$perms .= 'T';
-				}
-				$perms .= 'adb'; // bytes 9-11
-				$perms .= 'nick'; // bytes 12-15
-				$this->encryptdata['perms'] = TCPDF_STATIC::_AESnopad($this->encryptdata['key'], $perms);
-			} else { // RC4-40, RC4-128, AES-128
-				// Pad passwords
-				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].TCPDF_STATIC::$enc_padding, 0, 32);
-				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].TCPDF_STATIC::$enc_padding, 0, 32);
-				// Compute O value
-				$this->encryptdata['O'] = $this->_Ovalue();
-				// get default permissions (reverse byte order)
-				$permissions = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']);
-				// Compute encryption key
-				$tmp = TCPDF_STATIC::_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
-				if ($this->encryptdata['mode'] > 0) {
-					for ($i = 0; $i < 50; ++$i) {
-						$tmp = TCPDF_STATIC::_md5_16(substr($tmp, 0, $keybytelen));
-					}
-				}
-				$this->encryptdata['key'] = substr($tmp, 0, $keybytelen);
-				// Compute U value
-				$this->encryptdata['U'] = $this->_Uvalue();
-				// Compute P value
-				$this->encryptdata['P'] = $this->encryptdata['protection'];
-			}
-		} else { // Public-Key mode
-			// random 20-byte seed
-			$seed = sha1(TCPDF_STATIC::getRandomSeed(), true);
-			$recipient_bytes = '';
-			foreach ($this->encryptdata['pubkeys'] as $pubkey) {
-				// for each public certificate
-				if (isset($pubkey['p'])) {
-					$pkprotection = TCPDF_STATIC::getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
-				} else {
-					$pkprotection = $this->encryptdata['protection'];
-				}
-				// get default permissions (reverse byte order)
-				$pkpermissions = TCPDF_STATIC::getEncPermissionsString($pkprotection);
-				// envelope data
-				$envelope = $seed.$pkpermissions;
-				// write the envelope data to a temporary file
-				$tempkeyfile = TCPDF_STATIC::getObjFilename('key', $this->file_id);
-				$f = TCPDF_STATIC::fopenLocal($tempkeyfile, 'wb');
-				if (!$f) {
-					$this->Error('Unable to create temporary key file: '.$tempkeyfile);
-				}
-				$envelope_length = strlen($envelope);
-				fwrite($f, $envelope, $envelope_length);
-				fclose($f);
-				$tempencfile = TCPDF_STATIC::getObjFilename('enc', $this->file_id);
-				if (!openssl_pkcs7_encrypt($tempkeyfile, $tempencfile, $pubkey['c'], array(), PKCS7_BINARY | PKCS7_DETACHED)) {
-					$this->Error('Unable to encrypt the file: '.$tempkeyfile);
-				}
-				// read encryption signature
-				$signature = file_get_contents($tempencfile, false, null, $envelope_length);
-				// extract signature
-				$signature = substr($signature, strpos($signature, 'Content-Disposition'));
-				$tmparr = explode("\n\n", $signature);
-				$signature = trim($tmparr[1]);
-				unset($tmparr);
-				// decode signature
-				$signature = base64_decode($signature);
-				// convert signature to hex
-				$hexsignature = current(unpack('H*', $signature));
-				// store signature on recipients array
-				$this->encryptdata['Recipients'][] = $hexsignature;
-				// The bytes of each item in the Recipients array of PKCS#7 objects in the order in which they appear in the array
-				$recipient_bytes .= $signature;
-			}
-			// calculate encryption key
-			if ($this->encryptdata['mode'] == 3) { // AES-256
-				$this->encryptdata['key'] = substr(hash('sha256', $seed.$recipient_bytes, true), 0, $keybytelen);
-			} else { // RC4-40, RC4-128, AES-128
-				$this->encryptdata['key'] = substr(sha1($seed.$recipient_bytes, true), 0, $keybytelen);
-			}
-		}
-	}
-
-	/**
 	 * Set document protection
 	 * Remark: the protection against modification is for people who have the full Acrobat product.
 	 * If you don't set any password, the document will open as usual. If you set a user password, the PDF viewer will ask for it before displaying the document. The master password, if different from the user one, can be used to get full access.
@@ -9394,7 +8902,7 @@ class TCPDF {
 		}
 		$this->encrypted = true;
 		$this->encryptdata['fileid'] = TCPDF_STATIC::convertHexStringToString($this->file_id);
-		$this->_generateencryptionkey();
+		$this->generateEncryptionKey();
 	}
 
 	// END OF ENCRYPTION FUNCTIONS -------------------------
