@@ -31,9 +31,48 @@ class TCPDF {
 	protected array $txtshadow = [];
 	protected array $strokecolor = [];
 	protected array $CoreFonts = [];
+	protected array $fontdata = [];
+	protected array $CurrentFont = [];
+	protected array $re_space = [];
+	protected array $pageopen = [];
+	protected array	$FontFiles = [];
+	protected array $pageobjects = [];
+	protected array $pagelen = [];
+	protected array $footerpos = [];
+	protected array $emptypagemrk = [];
+	protected array $cntmrk = [];
+	protected array $listordered = [];
+	protected array $listcount = [];	
+	protected array $pages = [];
+	protected array $transfmrk = [];
+	protected array $intmrk = [];
+	protected array $bordermrk = [];
+	protected array $htmlLinkColorArray =[];
+	protected array $spot_colors =[];
+	protected array $bgcolor =[];
+	protected array $fgcolor = [];
+	protected array $alpha = [];
+	//protected array $ext = [];
+	protected array $extgstates = [];
+	protected array $imagekeys = [];
+	protected array $gdgammacache =[];
+	protected array $images = [];
 
 	protected bool $compress;
+	protected bool $inxobj = false;
 	protected bool $pdfa_mode = false;
+	protected bool $tocpage = false;
+	protected bool $booklet = false;
+	protected bool $rtl = false;
+	protected bool $tmprtl = false;
+	protected bool $InFooter = false;
+	protected bool $print_header = false;
+	protected bool $check_page_regions = false;
+	protected bool $newline = false;
+	protected bool $premode = false;
+	protected bool $isunicode = false;
+	protected bool $InHeader = false;
+	protected bool $allowLocalFiles = true;
 
 	protected float $fwPt = 0;
 	protected float $fhPt = 0;
@@ -44,14 +83,41 @@ class TCPDF {
 	protected float $tMargin = 0;
 	protected float $lMargin = 0;
 	protected float $rMargin = 0;
+	protected float $clMargin = 0;
+	protected float $crMargin = 0;
+	protected float $customlistindent = 0;
+	protected float $imgscale = 0;
+
 	protected float $original_lMargin = 0;
 	protected float $original_rMargin = 0;
+	protected float $FontAscent = 0;
+	protected float $FontDescent = 0;
+	protected float $LineWidth = 0;
+	protected float $font_spacing = 0;
+	protected float $PageBreakTrigger = 0;
+	protected float $img_rb_x = 0;
+	protected float $img_rb_y = 0;
 
 	protected int $n = 0;
 	protected int $page = 0;
+	protected int $numpages = 0;
 	protected int $k = 1;
 	protected int $feps = 0;
 	protected int $numfonts = 0;
+	protected int $current_column = 0;
+	protected int $num_columns = 1;
+	protected int $FontSize = 0;	
+	protected int $FontSizePt = 12;
+	protected int $textrendermode = 0;
+	protected int $textstrokewidth = 0;
+	protected int $state = 0;
+	protected int $textindent = 0;
+	protected int $cell_height_ratio = 0;
+	protected int $font_stretching = 0;
+	protected float $endlinex = 0;
+	protected int $dpi = 0;
+	protected int $numimages = 0;
+
 
 	protected string $CurOrientation;
 	protected string $ZoomMode;
@@ -59,9 +125,37 @@ class TCPDF {
 	protected string $PageMode;
 	protected string $PDFVersion;
 	protected string $font_subsetting = '';
+	protected string $FontFamily = '';
+	protected string $FontStyle = '';
+	protected string $re_spaces;
+	protected string $linestyleCap = '';
+	protected string $linestyleJoin = '';
+	protected string $linestyleDash = '';
+	protected string $linestyleWidth = '';
+	protected string $thead = '';
 
+	protected string $DrawColor = '';
+	protected string $FillColor = '';
+	protected string $TextColor = '';
+	protected string $ColorFlag = '';
+
+	protected string $htmlvspace = '';
+	protected string $listindent = '';
+	protected string $listindentlevel = '';
+	protected string $listnum = '';
+	protected string $lispacer = '';
+
+	protected string $isRTLString = '';
+	protected string $lasth = '';
+	protected string $bMargin = '';
+	protected string $AutoPageBreak = '';
+	protected float $x = 0;
+	protected float $y = 0;
+	protected string $file_id = '';
 
     // ... other props if needed
+
+
 	
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) 
 	{
@@ -76,8 +170,13 @@ class TCPDF {
 			$this->pdfa_mode = $pdfa !== false;
 			$this->pdfa_version = $this->pdfa_mode ? $pdfa : null;
 		} else
-			$pdfa_mode = false;
-			$pdfa_mode = false;
+			$this->pdfa_mode = false;
+			$this->pdfa_mode = false;
+
+		// fix dpi issue -- needs research
+		if (!isset($this->dpi) || $this->dpi <= 0) {
+		$this->dpi = 72;
+		}
 		
 		$force_srgb = false;
 		// set language direction
@@ -87,7 +186,7 @@ class TCPDF {
 		Environment::doChecks();
 		// initialization of properties
 		$isunicode = $unicode;
-		//$page = 0; -- declared above 		
+		$page = 0;
 		$transfmrk[0] = array();
 		$pagedim = array();
 		$n = 2;
@@ -102,9 +201,9 @@ class TCPDF {
 		$gradients = array();
 		$InFooter = false;
 		$lasth = 0;
-		$FontFamily = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
+		$this->FontFamily = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
 		$FontStyle = '';
-		$FontSizePt = 12;
+		$this->FontSizePt = 12;
 		$underline = false;
 		$overline = false;
 		$linethrough = false;
@@ -149,11 +248,11 @@ class TCPDF {
 		// cell margins
 		$this->setCellMargins(0, 0, 0, 0);
 		// line width (0.2 mm)
-		$LineWidth = 0.57 / $this->k;
-		$linestyleWidth = sprintf('%F w', ($LineWidth * $this->k));
-		$linestyleCap = '0 J';
-		$linestyleJoin = '0 j';
-		$linestyleDash = '[] 0 d';
+		$this->LineWidth = 0.57 / $this->k;
+		$linestyleWidth = sprintf('%F w', ($this->LineWidth * $this->k));
+		$this->linestyleCap = '0 J';
+		$this->linestyleJoin = '0 j';
+		$this->linestyleDash = '[] 0 d';
 		// automatic page break
 		$this->setAutoPageBreak(true, (2 * $margin));
 		// full width display mode
@@ -188,11 +287,11 @@ class TCPDF {
 		// set default JPEG quality
 		$jpeg_quality = 75;
 		// initialize some settings
-		TCPDF_FONTS::utf8Bidi(array(), '', false, $isunicode, $CurrentFont);
+		TCPDF_FONTS::utf8Bidi(array(), '', false, $isunicode, $this->CurrentFont);
 		// set default font
-		$this->setFont($FontFamily, $FontStyle, $FontSizePt);
-		$this->setHeaderFont(array($FontFamily, $FontStyle, $FontSizePt));
-		$this->setFooterFont(array($FontFamily, $FontStyle, $FontSizePt));
+		$this->setFont($this->FontFamily, $FontStyle, $this->FontSizePt);
+		$this->setHeaderFont(array($this->FontFamily, $FontStyle, $this->FontSizePt));
+		$this->setFooterFont(array($this->FontFamily, $FontStyle, $this->FontSizePt));
 		// check if PCRE Unicode support is enabled
 		if ($isunicode AND (@preg_match('/\pL/u', 'a') == 1)) {
 			// PCRE unicode support is turned ON
@@ -201,17 +300,17 @@ class TCPDF {
 			// \p{Lo} : Unicode letter or ideograph that does not have lowercase and uppercase variants. Is used to chunk chinese words.
 			// \xa0   : Unicode Character 'NO-BREAK SPACE' (U+00A0)
 			//$setSpacesRE('/(?!\xa0)[\s\p{Z}\p{Lo}]/u');
-			$setSpacesRE('/(?!\xa0)[\s\p{Z}]/u');
+			$this->setSpacesRE('/(?!\xa0)[\s\p{Z}]/u');
 		} else {
 			// PCRE unicode support is turned OFF
-			$setSpacesRE('/[^\S\xa0]/');
+			$this->setSpacesRE('/[^\S\xa0]/');
 		}
-		$default_form_prop = array('lineWidth'=>1, 'borderStyle'=>'solid', 'fillColor'=>array(255, 255, 255), 'strokeColor'=>array(128, 128, 128));
+		$default_form_prop = array('LineWidth'=>1, 'borderStyle'=>'solid', 'fillColor'=>array(255, 255, 255), 'strokeColor'=>array(128, 128, 128));
 		// set document creation and modification timestamp
 		$doc_creation_timestamp = time();
 		$doc_modification_timestamp = $doc_creation_timestamp;
 		// get default graphic vars
-		$default_graphic_vars = $getGraphicVars();
+		$default_graphic_vars = $this->getGraphicVars();
 		$header_xobj_autoreset = false;
 		$custom_xmp = '';
 		$custom_xmp_rdf = '';
@@ -635,8 +734,8 @@ class TCPDF {
 	 * @public
 	 * @return float
 	 */
-	public function getCellHeight($fontsize, $padding=TRUE) {
-		$height = ($fontsize * $this->cell_height_ratio);
+	public function getCellHeight($FontSize, $padding=TRUE) {
+		$height = ($this->FontSize * $this->cell_height_ratio);
 		if ($padding && !empty($this->cell_padding)) {
 			$height += ($this->cell_padding['T'] + $this->cell_padding['B']);
 		}
@@ -670,7 +769,7 @@ class TCPDF {
 	 * @since 1.5.2
 	 */
 	public function setImageScale($scale) {
-		//$this->imgscale = $scale;
+		$this->imgscale = $scale;
 	}
 
 	/**
@@ -2288,8 +2387,8 @@ class TCPDF {
 	 * @public
 	 * @since 1.2
 	 */
-	public function GetStringWidth($s, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
-		return $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
+	public function GetStringWidth($s, $fontname='', $fontstyle='', $FontSize=0, $getarray=false) {
+		return $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $FontSize, $getarray);
 	}
 
 	/**
@@ -2305,13 +2404,13 @@ class TCPDF {
 	 * @public
 	 * @since 2.4.000 (2008-03-06)
 	 */
-	public function GetArrStringWidth($sa, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
+	public function GetArrStringWidth($sa, $fontname='', $fontstyle='', $FontSize=0, $getarray=false) {
 		// store current values
 		if (!TCPDF_STATIC::empty_string($fontname)) {
 			$prev_FontFamily = $this->FontFamily;
 			$prev_FontStyle = $this->FontStyle;
 			$prev_FontSizePt = $this->FontSizePt;
-			$this->setFont($fontname, $fontstyle, $fontsize, '', 'default', false);
+			$this->setFont($fontname, $fontstyle, $this->FontSize, '', 'default', false);
 		}
 		// convert UTF-8 array to Latin1 if required
 		if ($this->isunicode AND (!$this->isUnicodeFont())) {
@@ -2496,15 +2595,15 @@ class TCPDF {
 		$bistyle = $style;
 		$fontkey = $family.$style;
 		$font_style = $style.($underline ? 'U' : '').($linethrough ? 'D' : '').($overline ? 'O' : '');
-		$fontdata = array('fontkey' => $fontkey, 'family' => $family, 'style' => $font_style);
+		$this->fontdata = array('fontkey' => $fontkey, 'family' => $family, 'style' => $font_style);
 		// check if the font has been already added
 		$fb = $this->getFontBuffer($fontkey);
 		if ($fb !== false) {
-			if ($inxobj) {
+			if ($this->inxobj) {
 				// we are inside an XObject template
 				$xobjects[$xobjid]['fonts'][$fontkey] = $fb['i'];
 			}
-			return $fontdata;
+			return $this->fontdata;
 		}
 		// get specified font directory (if any)
 		$fontdir = false;
@@ -2601,7 +2700,7 @@ class TCPDF {
 		} elseif ($type == 'TrueTypeUnicode') {
 			$enc = 'Identity-H';
 		} elseif ($type == 'cidfont0') {
-			if ($pdfa_mode) {
+			if ($this->pdfa_mode) {
 				$this->Error('All fonts must be embedded in PDF/A mode!');
 			}
 		} else {
@@ -2647,7 +2746,7 @@ class TCPDF {
 		// initialize subsetchars
 		$subsetchars = array_fill(0, 255, true);
 		$this->setFontBuffer($fontkey, array('fontkey' => $fontkey, 'i' => $this->numfonts, 'type' => $type, 'name' => $name, 'desc' => $desc, 'up' => $up, 'ut' => $ut, 'cw' => $cw, 'cbbox' => $cbbox, 'dw' => $dw, 'enc' => $enc, 'cidinfo' => $cidinfo, 'file' => $file, 'ctg' => $ctg, 'subset' => $subset, 'subsetchars' => $subsetchars));
-		if ($inxobj) {
+		if ($this->inxobj) {
 			// we are inside an XObject template
 			$xobjects[$this->xobjid]['fonts'][$fontkey] = $this->numfonts;
 		}
@@ -2682,7 +2781,7 @@ class TCPDF {
 				}
 			}
 		}
-		return $fontdata;
+		return $this->fontdata;
 	}
 
 	/**
@@ -2711,14 +2810,14 @@ class TCPDF {
 			$size = 0;
 		}
 		// try to add font (if not already added)
-		$fontdata = $this->AddFont($family, $style, $fontfile, $subset);
-		$this->FontFamily = $fontdata['family'];
-		$this->FontStyle = $fontdata['style'];
+		$this->fontdata = $this->AddFont($family, $style, $fontfile, $subset);
+		$this->FontFamily = $this->fontdata['family'];
+		$this->FontStyle = $this->fontdata['style'];
 		if (isset($this->CurrentFont['fontkey']) AND isset($this->CurrentFont['subsetchars'])) {
 			// save subset chars of the previous font
 			$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
 		}
-		$this->CurrentFont = $this->getFontBuffer($fontdata['fontkey']);
+		$this->CurrentFont = $this->getFontBuffer($this->fontdata['fontkey']);
 		$this->setFontSize($size, $out);
 	}
 
@@ -2733,7 +2832,7 @@ class TCPDF {
 	public function setFontSize($size, $out=true) {
 		$size = (float)$size;
 		// font size in points
-		$FontSizePt = $size;
+		$this->FontSizePt = $size;
 		// font size in user units
 		//$FontSize = $size / $k;
 		// calculate some font metrics
@@ -3086,7 +3185,7 @@ class TCPDF {
 			$this->PageAnnots[$page] = array();
 		}
 		$this->PageAnnots[$page][] = array('n' => ++$this->n, 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'txt' => $text, 'opt' => $opt, 'numspaces' => $spaces);
-		if (!$pdfa_mode || ($pdfa_mode && $pdfa_version == 3)) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $pdfa_version == 3)) {
 			if ((($opt['Subtype'] == 'FileAttachment') OR ($opt['Subtype'] == 'Sound')) AND (!TCPDF_STATIC::empty_string($opt['FS']))
 				AND (@TCPDF_STATIC::file_exists($opt['FS']) OR TCPDF_STATIC::isValidURL($opt['FS']))
 				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
@@ -3111,7 +3210,7 @@ class TCPDF {
 	 * @public
 	 */
 	public function EmbedFile($opt) {
-		if (!$pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
 			if ((($opt['Subtype'] == 'FileAttachment')) AND (!TCPDF_STATIC::empty_string($opt['FS']))
 				AND (@TCPDF_STATIC::file_exists($opt['FS']) OR TCPDF_STATIC::isValidURL($opt['FS']))
 				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
@@ -3126,7 +3225,7 @@ class TCPDF {
 	 * @public
 	 */
 	public function EmbedFileFromString($filename, $content) {
-		if (!$pdfa_mode || ($pdfa_mode && $this->pdfa_version == 3)) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
 			$this->embeddedfiles[$filename] = array('f' => ++$this->n, 'n' => ++$this->n, 'content' => $content );
 		}
 	}
@@ -3138,7 +3237,7 @@ class TCPDF {
 	 * @see Annotation()
 	 */
 	protected function _putEmbeddedFiles() {
-		if ($pdfa_mode && $this->pdfa_version != 3)  {
+		if ($this->pdfa_mode && $this->pdfa_version != 3)  {
 			// embedded files are not allowed in PDF/A mode version 1 and 2
 			return;
 		}
@@ -3335,7 +3434,7 @@ class TCPDF {
 			$this->setFillColorArray($this->txtshadow['color']);
 			$this->setTextColorArray($this->txtshadow['color']);
 			$this->setDrawColorArray($this->txtshadow['color']);
-			if ($this->txtshadow['opacity'] != $alpha['CA']) {
+			if ($this->txtshadow['opacity'] != ($alpha['CA'] ??1)) {
 				$this->setAlpha($this->txtshadow['opacity'], $this->txtshadow['blend_mode']);
 			}
 			if ($this->state == 2) {
@@ -3347,7 +3446,7 @@ class TCPDF {
 			$this->setFillColorArray($bc);
 			$this->setTextColorArray($fc);
 			$this->setDrawColorArray($sc);
-			if ($this->txtshadow['opacity'] != $alpha['CA']) {
+			if ($this->txtshadow['opacity'] != ($alpha['CA'] ??1)) {
 				$this->setAlpha($alpha['CA'], $alpha['BM'], $alpha['ca'], $alpha['AIS']);
 			}
 		}
@@ -6306,7 +6405,7 @@ class TCPDF {
 			}
 			$out .= ' /Contents '.($this->n + 1).' 0 R';
 			$out .= ' /Rotate '.$this->pagedim[$n]['Rotate'];
-			if (!$pdfa_mode || $this->pdfa_version >= 2) {
+			if (!$this->pdfa_mode || $this->pdfa_version >= 2) {
 				$out .= ' /Group << /Type /Group /S /Transparency /CS /DeviceRGB >>';
 			}
 			if (isset($this->pagedim[$n]['trans']) AND !empty($this->pagedim[$n]['trans'])) {
@@ -6538,7 +6637,7 @@ class TCPDF {
 					} else {
 						$fval = 4;
 					}
-					if ($pdfa_mode) {
+					if ($this->pdfa_mode) {
 						// force print flag for PDF/A mode
 						$fval |= 4;
 					}
@@ -6812,7 +6911,7 @@ class TCPDF {
 							break;
 						}
 						case 'fileattachment': {
-							if ($pdfa_mode && $this->pdfa_version != 3) {
+							if ($this->pdfa_mode && $this->pdfa_version != 3) {
 								// embedded files are not allowed in PDF/A mode version 1 and 2
 								break;
 							}
@@ -12773,15 +12872,15 @@ class TCPDF {
 		if (!isset($style['border'])) {
 			$style['border'] = false;
 		}
-		$fontsize = 0;
+		$this->FontSize = 0;
 		if (!isset($style['text'])) {
 			$style['text'] = false;
 		}
 		if ($style['text'] AND isset($style['font'])) {
 			if (isset($style['fontsize'])) {
-				$fontsize = $style['fontsize'];
+				$this->FontSize = $style['fontsize'];
 			}
-			$this->setFont($style['font'], '', $fontsize);
+			$this->setFont($style['font'], '', $this->FontSize);
 		}
 		if (!isset($style['stretchtext'])) {
 			$style['stretchtext'] = 4;
@@ -12876,7 +12975,7 @@ class TCPDF {
 				}
 			}
 		}
-		$text_height = $this->getCellHeight($fontsize / $this->k);
+		$text_height = $this->getCellHeight($this->FontSize / $this->k);
 		// height
 		if (TCPDF_STATIC::empty_string($h) OR ($h <= 0)) {
 			// set default height
@@ -12886,9 +12985,9 @@ class TCPDF {
 		if ($barh <=0) {
 			// try to reduce font or padding to fit barcode on available height
 			if ($text_height > $h) {
-				$fontsize = (($h * $this->k) / (4 * $this->cell_height_ratio));
-				$text_height = $this->getCellHeight($fontsize / $this->k);
-				$this->setFont($style['font'], '', $fontsize);
+				$this->FontSize = (($h * $this->k) / (4 * $this->cell_height_ratio));
+				$text_height = $this->getCellHeight($this->FontSize / $this->k);
+				$this->setFont($style['font'], '', $this->FontSize);
 			}
 			if ($vpadding > 0) {
 				$vpadding = (($h - $text_height) / 4);
@@ -14716,7 +14815,6 @@ class TCPDF {
 		$curfontdescent = $this->getFontDescent($curfontname, $curfontstyle, $curfontsize);
 		$curfontstretcing = $this->font_stretching;
 		$curfonttracking = $this->font_spacing;
-		$this->newline = true;
 		$newline = true;
 		$startlinepage = $this->page;
 		$minstartliney = $this->y;
@@ -14730,7 +14828,7 @@ class TCPDF {
 		$undo = false;
 		$fontaligned = false;
 		$reverse_dir = false; // true when the text direction is reversed
-		$this->premode = false;
+		$premode = false;
 		if ($this->inxobj) {
 			// we are inside an XObject template
 			$pask = count($this->xobjects[$this->xobjid]['annotations']);
@@ -14890,7 +14988,7 @@ class TCPDF {
 						$this->rollbackTransaction(true);
 						// restore previous values
 						foreach ($this_method_vars as $vkey => $vval) {
-							$$vkey = $vval;
+							$vkey = $vval;
 						}
 						// disable table header
 						$tmp_thead = $this->thead;
@@ -15017,18 +15115,18 @@ class TCPDF {
 					$pfontsize = $curfontsize;
 					$fontname = (isset($dom[$key]['fontname']) ? $dom[$key]['fontname'] : $curfontname);
 					$fontstyle = (isset($dom[$key]['fontstyle']) ? $dom[$key]['fontstyle'] : $curfontstyle);
-					$fontsize = (isset($dom[$key]['fontsize']) ? $dom[$key]['fontsize'] : $curfontsize);
-					$fontascent = $this->getFontAscent($fontname, $fontstyle, $fontsize);
-					$fontdescent = $this->getFontDescent($fontname, $fontstyle, $fontsize);
-					if (($fontname != $curfontname) OR ($fontstyle != $curfontstyle) OR ($fontsize != $curfontsize)
+					$this->FontSize = (isset($dom[$key]['fontsize']) ? $dom[$key]['fontsize'] : $curfontsize);
+					$fontascent = $this->getFontAscent($fontname, $fontstyle, $this->FontSize);
+					$fontdescent = $this->getFontDescent($fontname, $fontstyle, $this->FontSize);
+					if (($fontname != $curfontname) OR ($fontstyle != $curfontstyle) OR ($this->FontSize != $curfontsize)
 						OR ($this->cell_height_ratio != $dom[$key]['line-height'])
 						OR ($dom[$key]['tag'] AND $dom[$key]['opening'] AND ($dom[$key]['value'] == 'li')) ) {
 						if (($key < ($maxel - 1)) AND (
 								($dom[$key]['tag'] AND $dom[$key]['opening'] AND ($dom[$key]['value'] == 'li'))
 								OR ($this->cell_height_ratio != $dom[$key]['line-height'])
-								OR (!$this->newline AND is_numeric($fontsize) AND is_numeric($curfontsize)
-								AND ($fontsize >= 0) AND ($curfontsize >= 0)
-								AND (($fontsize != $curfontsize) OR ($fontstyle != $curfontstyle) OR ($fontname != $curfontname)))
+								OR (!$this->newline AND is_numeric($this->FontSize) AND is_numeric($curfontsize)
+								AND ($this->FontSize >= 0) AND ($curfontsize >= 0)
+								AND (($this->FontSize != $curfontsize) OR ($fontstyle != $curfontstyle) OR ($fontname != $curfontname)))
 							)) {
 							if ($this->page > $startlinepage) {
 								// fix lines splitted over two pages
@@ -15075,16 +15173,16 @@ class TCPDF {
 							}
 							if (!$dom[$key]['block']) {
 								if (!(isset($dom[($key + 1)]) AND $dom[($key + 1)]['tag'] AND (!$dom[($key + 1)]['opening']) AND ($dom[($key + 1)]['value'] != 'li') AND $dom[$key]['tag'] AND (!$dom[$key]['opening']))) {
-									$this->y += (((($curfontsize * $this->cell_height_ratio) - ($fontsize * $dom[$key]['line-height'])) / $this->k) + $curfontascent - $fontascent - $curfontdescent + $fontdescent) / 2;
+									$this->y += (((($curfontsize * $this->cell_height_ratio) - ($this->FontSize * $dom[$key]['line-height'])) / $this->k) + $curfontascent - $fontascent - $curfontdescent + $fontdescent) / 2;
 								}
 								if (($dom[$key]['value'] != 'sup') AND ($dom[$key]['value'] != 'sub')) {
 									$current_line_align_data = array($key, $minstartliney, $maxbottomliney);
 									if (isset($line_align_data) AND (($line_align_data[0] == ($key - 1)) OR (($line_align_data[0] == ($key - 2)) AND (isset($dom[($key - 1)])) AND (preg_match('/^([\s]+)$/', $dom[($key - 1)]['value']) > 0)))) {
 										$minstartliney = min($this->y, $line_align_data[1]);
-										$maxbottomliney = max(($this->y + $this->getCellHeight($fontsize / $this->k)), $line_align_data[2]);
+										$maxbottomliney = max(($this->y + $this->getCellHeight($this->FontSize / $this->k)), $line_align_data[2]);
 									} else {
 										$minstartliney = min($this->y, $minstartliney);
-										$maxbottomliney = max(($this->y + $this->getCellHeight($fontsize / $this->k)), $maxbottomliney);
+										$maxbottomliney = max(($this->y + $this->getCellHeight($this->FontSize / $this->k)), $maxbottomliney);
 									}
 									$line_align_data = $current_line_align_data;
 								}
@@ -15092,12 +15190,12 @@ class TCPDF {
 							$this->cell_height_ratio = $dom[$key]['line-height'];
 							$fontaligned = true;
 						}
-						$this->setFont($fontname, $fontstyle, $fontsize);
+						$this->setFont($fontname, $fontstyle, $this->FontSize);
 						// reset row height
 						$this->resetLastH();
 						$curfontname = $fontname;
 						$curfontstyle = $fontstyle;
-						$curfontsize = $fontsize;
+						$curfontsize = $this->FontSize;
 						$curfontascent = $fontascent;
 						$curfontdescent = $fontdescent;
 					}
@@ -15557,7 +15655,7 @@ class TCPDF {
 					$startliney -= (($this->FontSizePt / 0.7) / $this->k);
 				} else {
 					$minstartliney = $startliney;
-					$maxbottomliney = ($this->y + $this->getCellHeight($fontsize / $this->k));
+					$maxbottomliney = ($this->y + $this->getCellHeight($this->FontSize / $this->k));
 				}
 				$startlinepage = $this->page;
 				if (isset($endlinepos) AND (!$pbrk)) {
@@ -15587,7 +15685,7 @@ class TCPDF {
 				if (!($dom[$key]['tag'] AND !$dom[$key]['opening'] AND ($dom[$key]['value'] == 'table')
 					AND (isset($this->emptypagemrk[$this->page]))
 					AND ($this->emptypagemrk[$this->page] == $this->pagelen[$this->page]))) {
-					$this->setFont($fontname, $fontstyle, $fontsize);
+					$this->setFont($fontname, $fontstyle, $this->FontSize);
 					if ($wfill) {
 						$this->setFillColorArray($this->bgcolor);
 					}
@@ -15908,8 +16006,8 @@ class TCPDF {
 				}
 				// text
 				$this->htmlvspace = 0;
-				$isRTLString = preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
-				if ((!$this->premode) AND $this->isRTLTextDir() AND !$isRTLString) {
+				$this->isRTLString = preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
+				if ((!$newline) AND $this->isRTLTextDir() AND !$this->isRTLString) {
 					// reverse spaces order
 					$lsp = ''; // left spaces
 					$rsp = ''; // right spaces
@@ -15924,7 +16022,7 @@ class TCPDF {
 				if ($newline) {
 					if (!$this->premode) {
 						$prelen = strlen($dom[$key]['value']);
-						if ($this->isRTLTextDir() AND !$isRTLString) {
+						if ($this->isRTLTextDir() AND !$this->isRTLString) {
 							// right trim except non-breaking space
 							$dom[$key]['value'] = $this->stringRightTrim($dom[$key]['value']);
 						} else {
@@ -16076,7 +16174,7 @@ class TCPDF {
 					$this->rollbackTransaction(true);
 					// restore previous values
 					foreach ($this_method_vars as $vkey => $vval) {
-						$$vkey = $vval;
+						$vkey = $vval;
 					}
 					if (!empty($dom[$key]['thead'])) {
 						$this->inthead = true;
@@ -18963,7 +19061,7 @@ class TCPDF {
 	 * @see addTOCPage(), endTOCPage(), addHTMLTOC()
 	 */
 	public function addTOC($page=null, $numbersfont='', $filler='.', $toc_name='TOC', $style='', $color=array(0,0,0)) {
-		$fontsize = $this->FontSizePt;
+		$this->FontSize = $this->FontSizePt;
 		$fontfamily = $this->FontFamily;
 		$fontstyle = $this->FontStyle;
 		$w = $this->w - $this->lMargin - $this->rMargin;
@@ -18990,7 +19088,7 @@ class TCPDF {
 				$page = 1;
 			}
 		}
-		$this->setFont($numbersfont, $fontstyle, $fontsize);
+		$this->setFont($numbersfont, $fontstyle, $this->FontSize);
 		$numwidth = $this->GetStringWidth('00000');
 		$maxpage = 0; //used for pages on attached documents
 		foreach ($this->outlines as $key => $outline) {
@@ -19006,9 +19104,9 @@ class TCPDF {
 				$alignnum = 'R';
 			}
 			if ($outline['l'] == 0) {
-				$this->setFont($fontfamily, $outline['s'].'B', $fontsize);
+				$this->setFont($fontfamily, $outline['s'].'B', $this->FontSize);
 			} else {
-				$this->setFont($fontfamily, $outline['s'], $fontsize - $outline['l']);
+				$this->setFont($fontfamily, $outline['s'], $this->FontSize - $outline['l']);
 			}
 			$this->setTextColorArray($outline['c']);
 			// check for page break
@@ -19053,7 +19151,7 @@ class TCPDF {
 			} else {
 				$tw = $this->w - $this->rMargin - $this->x;
 			}
-			$this->setFont($numbersfont, $fontstyle, $fontsize);
+			$this->setFont($numbersfont, $fontstyle, $this->FontSize);
 			if (TCPDF_STATIC::empty_string($page)) {
 				$pagenum = $outline['p'];
 			} else {
@@ -19800,10 +19898,10 @@ class TCPDF {
 	 */
 	public function setFontSubsetting($enable=true) {
 		
-		if ($pdfa_mode) {
+		if ($this->pdfa_mode) {
 			$this->font_subsetting = false;
 		} else {
-			$font->font_subsetting = $enable ? true : false;
+			$this->font_subsetting = $enable ? true : false;
 		}
 			
 	}
