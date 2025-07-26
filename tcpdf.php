@@ -1,6 +1,4 @@
 <?php
-
-
 // TCPDF configuration
 require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 // TCPDF static font methods and data
@@ -18,57 +16,65 @@ require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
 //new
 require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
 
-
-use LimePDF\Fonts\FontManager;
-
-$fontManager = new FontManager();
-//$fontManager->setFontBuffer('helvetica', ['name' => 'Helvetica', 'style' => '', 'size' => 12]);
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+use LimePDF\Utils\Environment;
 
 class TCPDF {
+    protected array $font_obj_ids = [];
+    protected array $page_obj_id = [];
+    protected array $form_obj_id = [];
+    protected array $fonts = [];
+    protected array $fontkeys = [];
+	protected array $pagedim = [];
+	protected array $cell_padding = [];
+	protected array $cell_margin = [];
+	protected array $fontlist = [];
+	protected array $txtshadow = [];
+	protected array $strokecolor = [];
+	protected array $CoreFonts = [];
+
+	protected bool $compress;
+	protected bool $pdfa_mode = false;
+
+	protected float $fwPt = 0;
+	protected float $fhPt = 0;
+	protected float $wPt = 0;
+	protected float $hPt = 0;
+	protected float $w = 0;
+	protected float $h = 0;
+	protected float $tMargin = 0;
+	protected float $lMargin = 0;
+	protected float $rMargin = 0;
+	protected float $original_lMargin = 0;
+	protected float $original_rMargin = 0;
+
+	protected int $n = 0;
+	protected int $page = 0;
+	protected int $k = 1;
+	protected int $feps = 0;
+	protected int $numfonts = 0;
+
+	protected string $CurOrientation;
+	protected string $ZoomMode;
+	protected string $LayoutMode;
+	protected string $PageMode;
+	protected string $PDFVersion;
+	protected string $font_subsetting = '';
 
 
-
-	//------------------------------------------------------------
-	// METHODS
-	//------------------------------------------------------------
-
-	/**
-	 * This is the class constructor.
-	 * It allows to set up the page format, the orientation and the measure unit used in all the methods (except for the font sizes).
-	 *
-	 * @param string $orientation page orientation. Possible values are (case insensitive):<ul><li>P or Portrait (default)</li><li>L or Landscape</li><li>'' (empty string) for automatic orientation</li></ul>
-	 * @param string $unit User measure unit. Possible values are:<ul><li>pt: point</li><li>mm: millimeter (default)</li><li>cm: centimeter</li><li>in: inch</li></ul><br />A point equals 1/72 of inch, that is to say about 0.35 mm (an inch being 2.54 cm). This is a very common unit in typography; font sizes are expressed in that unit.
-	 * @param mixed $format The format used for pages. It can be either: one of the string values specified at getPageSizeFromFormat() or an array of parameters specified at setPageFormat().
-	 * @param boolean $unicode TRUE means that the input text is unicode (default = true)
-	 * @param string $encoding Charset encoding (used only when converting back html entities); default is UTF-8.
-	 * @param boolean $diskcache DEPRECATED FEATURE
-	 * @param false|integer $pdfa If not false, set the document to PDF/A mode and the good version (1 or 3).
-	 * @public
-	 * @see getPageSizeFromFormat(), setPageFormat()
-	 */
-	// start loading helper functions
-	use LimePDF\src\Utils\Environment;
+    // ... other props if needed
 	
-	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
-		Environment::doChecks();
-
+	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) 
+	{
 		$serformat = (is_array($format) ? json_encode($format) : $format);
 		$file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
-		$hash_key = hash_hmac('sha256', TCPDF_STATIC::getRandomSeed(file_id), TCPDF_STATIC::getRandomSeed('TCPDF'), false);
+		$hash_key = hash_hmac('sha256', TCPDF_STATIC::getRandomSeed($file_id), TCPDF_STATIC::getRandomSeed('TCPDF'), false);
 		$this->font_obj_ids = [];
 		$this->page_obj_id = [];
 		$this->form_obj_id = [];
-
-		
 		//set pdf/a mode
 		if ($pdfa != false) {
 			$this->pdfa_mode = $pdfa !== false;
-			$this->pdfa_version = $pdfa_mode ? $pdfa : null;
-
+			$this->pdfa_version = $this->pdfa_mode ? $pdfa : null;
 		} else
 			$pdfa_mode = false;
 			$pdfa_mode = false;
@@ -78,10 +84,10 @@ class TCPDF {
 		$rtl = false;
 		$tmprtl = false;
 		// some checks
-		_dochecks();
+		Environment::doChecks();
 		// initialization of properties
 		$isunicode = $unicode;
-		$page = 0;
+		//$page = 0; -- declared above 		
 		$transfmrk[0] = array();
 		$pagedim = array();
 		$n = 2;
@@ -111,7 +117,7 @@ class TCPDF {
 		$encrypted = false;
 		$last_enc_key = '';
 		// standard Unicode fonts
-		$CoreFonts = array(
+		$this->CoreFonts = array(
 			'courier'=>'Courier',
 			'courierB'=>'Courier-Bold',
 			'courierI'=>'Courier-Oblique',
@@ -128,42 +134,43 @@ class TCPDF {
 			'zapfdingbats'=>'ZapfDingbats'
 		);
 		// set scale factor
-		setPageUnit($unit);
+		$this->setPageUnit($unit);
 		// set page format and orientation
-		setPageFormat($format, $orientation);
+		$this->setPageFormat($format, $orientation);
 		// page margins (1 cm)
-		$margin = 28.35 / $k;
-		$setMargins($margin, $margin);
-		$clMargin = $lMargin;
-		$crMargin = $rMargin;
+		$margin = 28.35 / $this->k;
+		//$margin = 28.35;
+		$this->setMargins($margin, $margin);
+		$clMargin = $this->lMargin;
+		$crMargin = $this->rMargin;
 		// internal cell padding
 		$cpadding = $margin / 10;
-		$setCellPaddings($cpadding, 0, $cpadding, 0);
+		$this->setCellPaddings($cpadding, 0, $cpadding, 0);
 		// cell margins
-		$setCellMargins(0, 0, 0, 0);
+		$this->setCellMargins(0, 0, 0, 0);
 		// line width (0.2 mm)
-		$LineWidth = 0.57 / $k;
-		$linestyleWidth = sprintf('%F w', ($LineWidth * $k));
+		$LineWidth = 0.57 / $this->k;
+		$linestyleWidth = sprintf('%F w', ($LineWidth * $this->k));
 		$linestyleCap = '0 J';
 		$linestyleJoin = '0 j';
 		$linestyleDash = '[] 0 d';
 		// automatic page break
-		$setAutoPageBreak(true, (2 * $margin));
+		$this->setAutoPageBreak(true, (2 * $margin));
 		// full width display mode
-		$setDisplayMode('fullwidth');
+		$this->setDisplayMode('fullwidth');
 		// compression
-		$setCompression();
+		$this->setCompression();
 		// set default PDF version number
-		$setPDFVersion();
+		$this->setPDFVersion();
 		$tcpdflink = true;
 		$encoding = $encoding;
 		$HREF = array();
-		$getFontsList();
+		$this->getFontsList();
 		$fgcolor = array('R' => 0, 'G' => 0, 'B' => 0);
 		$strokecolor = array('R' => 0, 'G' => 0, 'B' => 0);
 		$bgcolor = array('R' => 255, 'G' => 255, 'B' => 255);
 		$extgstates = array();
-		$setTextShadow();
+		$this->setTextShadow();
 		// signature
 		$sign = false;
 		$tsa_timestamp = false;
@@ -183,9 +190,9 @@ class TCPDF {
 		// initialize some settings
 		TCPDF_FONTS::utf8Bidi(array(), '', false, $isunicode, $CurrentFont);
 		// set default font
-		$setFont($FontFamily, $FontStyle, $FontSizePt);
-		$setHeaderFont(array($FontFamily, $FontStyle, $FontSizePt));
-		$setFooterFont(array($FontFamily, $FontStyle, $FontSizePt));
+		$this->setFont($FontFamily, $FontStyle, $FontSizePt);
+		$this->setHeaderFont(array($FontFamily, $FontStyle, $FontSizePt));
+		$this->setFooterFont(array($FontFamily, $FontStyle, $FontSizePt));
 		// check if PCRE Unicode support is enabled
 		if ($isunicode AND (@preg_match('/\pL/u', 'a') == 1)) {
 			// PCRE unicode support is turned ON
@@ -384,6 +391,31 @@ class TCPDF {
 		$this->setPageOrientation($orientation);
 	}
 
+    public function setPageUnit(string $unit, float $dpi = 96): array {
+        $unit = strtolower($unit);
+        switch ($unit) {
+            case 'px':
+            case 'pt':
+                $k = 1;
+                break;
+            case 'mm':
+                $k = $dpi / 25.4;
+                break;
+            case 'cm':
+                $k = $dpi / 2.54;
+                break;
+            case 'in':
+                $k = $dpi;
+                break;
+            default:
+                throw new \RuntimeException('Incorrect unit: ' . $unit);
+        }
+
+        return [
+            'k' => $k,
+            'unit' => $unit,
+        ];
+    }
 	/**
 	 * Set page orientation.
 	 * @param string $orientation page orientation. Possible values are (case insensitive):<ul><li>P or Portrait (default)</li><li>L or Landscape</li><li>'' (empty string) for automatic orientation</li></ul>
@@ -447,8 +479,8 @@ class TCPDF {
 			// swap X and Y coordinates (change page orientation)
 			$this->pagedim = TCPDF_STATIC::swapPageBoxCoordinates($this->page, $this->pagedim);
 		}
-		$this->w = ($this->wPt / $this->k);
-		$this->h = ($this->hPt / $this->k);
+		//$this->w = ($this->wPt / $this->k);
+		//$this->h = ($this->hPt / $this->k);
 		if (TCPDF_STATIC::empty_string($autopagebreak)) {
 			if (isset($this->AutoPageBreak)) {
 				$autopagebreak = $this->AutoPageBreak;
@@ -1040,7 +1072,7 @@ class TCPDF {
 		$this->compress = false;
 		if (function_exists('gzcompress')) {
 			if ($compress) {
-				if ( !$pdfa_mode) {
+				if ( !$this->pdfa_mode) {
 					$this->compress = true;
 				}
 			}
@@ -2400,7 +2432,7 @@ class TCPDF {
 		if ($subset === 'default') {
 			$subset = $this->font_subsetting;
 		}
-		if ($pdfa_mode) {
+		if ($this->pdfa_mode) {
 			$subset = false;
 		}
 		if (TCPDF_STATIC::empty_string($family)) {
@@ -2428,7 +2460,7 @@ class TCPDF {
 		if (($family == 'symbol') OR ($family == 'zapfdingbats')) {
 			$style = '';
 		}
-		if ($pdfa_mode AND (isset($CoreFonts[$family]))) {
+		if ($this->pdfa_mode AND (isset($this->CoreFonts[$family]))) {
 			// all fonts must be embedded
 			$family = 'pdfa'.$family;
 		}
@@ -2554,13 +2586,13 @@ class TCPDF {
 			// set default width
 			if (isset($desc['MissingWidth']) AND ($desc['MissingWidth'] > 0)) {
 				$dw = $desc['MissingWidth'];
-			} elseif (isset($cw[32])) {
+			} elseif (isset($cw[32])) {				
 				$dw = $cw[32];
 			} else {
 				$dw = 600;
 			}
 		}
-		//++$numfonts;
+		++$this->numfonts;
 		if ($type == 'core') {
 			$name = $this->CoreFonts[$fontkey];
 			$subset = false;
@@ -2614,7 +2646,7 @@ class TCPDF {
 		}
 		// initialize subsetchars
 		$subsetchars = array_fill(0, 255, true);
-		$setFontBuffer($fontkey, array('fontkey' => $fontkey, 'i' => $numfonts, 'type' => $type, 'name' => $name, 'desc' => $desc, 'up' => $up, 'ut' => $ut, 'cw' => $cw, 'cbbox' => $cbbox, 'dw' => $dw, 'enc' => $enc, 'cidinfo' => $cidinfo, 'file' => $file, 'ctg' => $ctg, 'subset' => $subset, 'subsetchars' => $subsetchars));
+		$this->setFontBuffer($fontkey, array('fontkey' => $fontkey, 'i' => $this->numfonts, 'type' => $type, 'name' => $name, 'desc' => $desc, 'up' => $up, 'ut' => $ut, 'cw' => $cw, 'cbbox' => $cbbox, 'dw' => $dw, 'enc' => $enc, 'cidinfo' => $cidinfo, 'file' => $file, 'ctg' => $ctg, 'subset' => $subset, 'subsetchars' => $subsetchars));
 		if ($inxobj) {
 			// we are inside an XObject template
 			$xobjects[$this->xobjid]['fonts'][$fontkey] = $this->numfonts;
@@ -18427,17 +18459,17 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2009-01-02)
 	 */
-	protected function setFontBuffer($font, $data, $value) {
-/*		
+	//protected function setFontBuffer($font, $data, $value) {
+	protected function setFontBuffer($font, $data) {
 		$fonts[$font] = $data;
-		if (!in_array($font, $fontkeys)) {
-			$fontkeys[] = $font;
+		if (!in_array($font, $this->fontkeys)) {
+			$this->fontkeys[] = $font;
 			// store object ID for current font
-			++$n;
-			$font_obj_ids[$font] = $n;
-			$setFontSubBuffer($font, 'n', $n);
+			++$this->n;
+			$font_obj_ids[$font] = $this->n;
+			$this->setFontSubBuffer($font, 'n', $this->n);
 		}
-*/
+
     // assuming these are class properties
     $this->fonts[$font] = $data;
 
@@ -18465,7 +18497,7 @@ class TCPDF {
 	 */
 	protected function setFontSubBuffer($font, $key, $data) {
 		if (!isset($this->fonts[$font])) {
-			$setFontBuffer($font, array());
+			$this->setFontBuffer($font, array());
 		}
 		$this->fonts[$font][$key] = $data;
 	}
@@ -19769,9 +19801,9 @@ class TCPDF {
 	public function setFontSubsetting($enable=true) {
 		
 		if ($pdfa_mode) {
-			$font_subsetting = false;
+			$this->font_subsetting = false;
 		} else {
-			$font_subsetting = $enable ? true : false;
+			$font->font_subsetting = $enable ? true : false;
 		}
 			
 	}

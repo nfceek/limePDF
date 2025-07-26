@@ -24,22 +24,24 @@ namespace LimePDF\Config;
 
 class ConfigManager
 {
-    protected array $config = [];
-    protected array $font_obj_ids = [];
-    protected array $page_obj_id = [];
-    protected array $form_obj_id = [];
+    protected array $config;
+
+    public function __construct(array $overrides = [])
+    {
+        $this->config = array_merge($this->getDefaults(), $overrides);
+    }
 
     public function loadFromArray(array $settings): void
     {
-        $this->config = array_merge($this->getDefaults(), $settings);
+        $this->config = array_merge($this->config, $settings);
     }
 
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         return $this->config[$key] ?? $default;
     }
 
-    public function set(string $key, $value): void
+    public function set(string $key, mixed $value): void
     {
         $this->config[$key] = $value;
     }
@@ -49,66 +51,63 @@ class ConfigManager
         return $this->config;
     }
 
-    public function toArray(): array {
-    return $this->config;
+    public function toArray(): array
+    {
+        return $this->config;
     }
 
     protected function getDefaults(): array
     {
         return [
-
-            'allowedTcpdfTags' => '',            
+            'allowedTcpdfTags' => '',           
             'author' => 'limePdf',
-
             'blankimage' => '_blank.png',
 
-            'cellHeightRatio' => 1.25,            
+            'cellHeightRatio' => 1.25,
             'creator' => 'limePDF',
-            'curlOpts' => 'array()',
+            'curlOpts' => [],
 
             'fontNameMain' => 'helvetica',
             'fontSizeMain' => 10,
             'fontNameData' => 'helvetica',
             'fontSizeData' => 8,
-            'fontMonospaced' => 'courier',                     
+            'fontMonospaced' => 'courier',
 
             'headMagnification' => 1.1,
             'headerLogo' => 'limePDF_logo.png',
             'headerTitle' => 'limePDF Example',
-            'headerString' => "limePDF.com",
-            'headerLogoWidth' => 30,            
- 
-            'imageScaleRatio' => 1.25,
+            'headerString' => 'limePDF.com',
+            'headerLogoWidth' => 30,
 
-            'keywords' => 'limePDF,TCPDF, PDF, example, test, guide',  
+            'imageScaleRatio' => 1.25,
+            'keywords' => 'limePDF,TCPDF, PDF, example, test, guide',
 
             'marginHeader' => 5,
             'marginFooter' => 10,
             'marginTop' => 27,
             'marginBottom' => 25,
             'marginLeft' => 15,
-            'marginRight' => 15,            
+            'marginRight' => 15,
 
             'pageFormat' => 'A4',
             'pageOrientation' => 'P',
-            'pathMain' => 'dirname(__FILE__)/',
-            'pathFonts' => '$k_path_main/fonts/',
-            'pathUrl' => '$k_path_url',
-            'pathImages' => '$tcpdf_images_path',
-            'pathCache' => '$K_PATH_CACHE',
+
+            'pathMain' => dirname(__FILE__) . '/',
+            'pathFonts' => dirname(__FILE__) . '/fonts/',
+            'pathUrl' => '',
+            'pathImages' => '',
+            'pathCache' => '',
 
             'subject' => 'limePDF Tutorial',
-            'smallRatio' => '2/3',
+            'smallRatio' => 2 / 3,
 
-            'titleMagnification' => 1.3,       
+            'titleMagnification' => 1.3,
             'thaiTopChars' => true,
             'tcpdfcAllsinhtml' => false,
             'tcpdfThrowExceptionerror' => false,
-            'timeZone' => '@date_default_timezone_get()',
+            'timeZone' => date_default_timezone_get(),
 
             'unit' => 'mm',
-
-
         ];
     }
 }

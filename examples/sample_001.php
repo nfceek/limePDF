@@ -15,9 +15,9 @@
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //============================================================+
 
-use LimePDF\Config\ConfigManager;
-
 require_once '../vendor/autoload.php'; 
+
+use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
 $config = new ConfigManager();

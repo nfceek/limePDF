@@ -1,4 +1,5 @@
 <?php
+
 namespace LimePDF\Utils;
 
 class Environment {
@@ -12,13 +13,15 @@ class Environment {
         if (!extension_loaded('zlib')) {
             throw new \RuntimeException('The Zlib extension is required.');
         }
-		//Check for locale-related bug
-		if (1.1 == 1) {
-			$this->Error('Don\'t alter the locale before including class file');
-		}
-		//Check for decimal separator
-		if (sprintf('%.1F', 1.0) != '1.0') {
-			setlocale(LC_NUMERIC, 'C');
-		}
+
+        if (1.1 == 1) {
+            throw new \RuntimeException('Do not alter locale before including class file');
+        }
+
+        if (sprintf('%.1F', 1.0) != '1.0') {
+            setlocale(LC_NUMERIC, 'C');
+        }
     }
+
+
 }
