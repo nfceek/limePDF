@@ -306,27 +306,7 @@ class SecurityManager
 		}
 	}
 
-	protected function encryptData($n, $s) {
-		if (!$this->encrypted) {
-			return $s;
-		}
-		switch ($this->encryptdata['mode']) {
-			case 0:   // RC4-40
-			case 1: { // RC4-128
-				$s = TCPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
-				break;
-			}
-			case 2: { // AES-128
-				$s = TCPDF_STATIC::_AES($this->_objectkey($n), $s);
-				break;
-			}
-			case 3: { // AES-256
-				$s = TCPDF_STATIC::_AES($this->encryptdata['key'], $s);
-				break;
-			}
-		}
-		return $s;
-	}
+
 
 
 }

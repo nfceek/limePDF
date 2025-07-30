@@ -298,8 +298,7 @@ class TCPDF_STATIC {
 	 * @public static
 	 */
 	public static function _escape($s) {
-		// the chr(13) substitution fixes the Bugs item #1421290.
-		return strtr($s, array(')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r'));
+		return strtr((string)$s, array(')' => '\\)', '(' => '\\(', '\\' => '\\\\', chr(13) => '\r'));
 	}
 
 	/**
@@ -511,7 +510,7 @@ class TCPDF_STATIC {
 				$rc4[$j] = $t;
 			}
 			$last_enc_key = $key;
-			$last_enc_key_c = $rc4;
+			$last_enc_key_c = implode('', array_map('chr', $rc4));
 		} else {
 			$rc4 = $last_enc_key_c;
 		}

@@ -53,24 +53,24 @@ class AdvancedFeaturesManager
 		return $this->dests;
 	}
 
-    /**
-     * Put destinations for internal links
-     * MOVED FROM: protected function _putdests()
-     */
-    public function putDestinations()
-    {
-		if (empty($this->dests)) {
-			return;
-		}
-		$this->n_dests = $this->_newobj();
-		$out = ' <<';
-		foreach($this->dests as $name => $o) {
-			$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
-		}
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-    }
+    // /**
+    //  * Put destinations for internal links
+    //  * MOVED FROM: protected function _putdests()
+    //  */
+    // public function putDestinations()
+    // {
+	// 	if (empty($this->dests)) {
+	// 		return;
+	// 	}
+	// 	$this->n_dests = $this->_newobj();
+	// 	$out = ' <<';
+	// 	foreach($this->dests as $name => $o) {
+	// 		$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
+	// 	}
+	// 	$out .= ' >>';
+	// 	$out .= "\n".'endobj';
+	// 	$this->_out($out);
+    // }
 
 
     
@@ -105,55 +105,6 @@ class AdvancedFeaturesManager
 	}
 
 
-    /**
-     * Put JavaScript code in PDF
-     * MOVED FROM: protected function _putjavascript()
-     */
-    public function putJavaScript()
-    {
-		if ($this->pdfa_mode OR (empty($this->javascript) AND empty($this->js_objects))) {
-			return;
-		}
-		if (strpos($this->javascript, 'this.addField') > 0) {
-			if (!$this->ur['enabled']) {
-				//$this->setUserRights();
-			}
-			// the following two lines are used to avoid form fields duplication after saving
-			// The addField method only works when releasing user rights (UR3)
-			$jsa = sprintf("ftcpdfdocsaved=this.addField('%s','%s',%d,[%F,%F,%F,%F]);", 'tcpdfdocsaved', 'text', 0, 0, 1, 0, 1);
-			$jsb = "getField('tcpdfdocsaved').value='saved';";
-			$this->javascript = $jsa."\n".$this->javascript."\n".$jsb;
-		}
-		// name tree for javascript
-		$this->n_js = '<< /Names [';
-		if (!empty($this->javascript)) {
-			$this->n_js .= ' (EmbeddedJS) '.($this->n + 1).' 0 R';
-		}
-		if (!empty($this->js_objects)) {
-			foreach ($this->js_objects as $key => $val) {
-				if ($val['onload']) {
-					$this->n_js .= ' (JS'.$key.') '.$key.' 0 R';
-				}
-			}
-		}
-		$this->n_js .= ' ] >>';
-		// default Javascript object
-		if (!empty($this->javascript)) {
-			$obj_id = $this->_newobj();
-			$out = '<< /S /JavaScript';
-			$out .= ' /JS '.$this->_textstring($this->javascript, $obj_id);
-			$out .= ' >>';
-			$out .= "\n".'endobj';
-			$this->_out($out);
-		}
-		// additional Javascript objects
-		if (!empty($this->js_objects)) {
-			foreach ($this->js_objects as $key => $val) {
-				$out = $this->_getobj($key)."\n".' << /S /JavaScript /JS '.$this->_textstring($val['js'], $key).' >>'."\n".'endobj';
-				$this->_out($out);
-			}
-		}
-    }
 
     /**
      * Add form field to PDF
@@ -407,29 +358,6 @@ class AdvancedFeaturesManager
 		return $signature;
     }
 
-    /**
-     * Put Optional Content Groups (layers)
-     * MOVED FROM: protected function _putocg()
-     */
-    public function putOptionalContentGroups()
-    {
-		if (empty($this->pdflayers)) {
-			return;
-		}
-		foreach ($this->pdflayers as $key => $layer) {
-			 $this->pdflayers[$key]['objid'] = $this->_newobj();
-			 $out = '<< /Type /OCG';
-			 $out .= ' /Name '.$this->_textstring($layer['name'], $this->pdflayers[$key]['objid']);
-			 $out .= ' /Usage <<';
-			 if (isset($layer['print']) AND ($layer['print'] !== NULL)) {
-				$out .= ' /Print <</PrintState /'.($layer['print']?'ON':'OFF').'>>';
-			 }
-			 $out .= ' /View <</ViewState /'.($layer['view']?'ON':'OFF').'>>';
-			 $out .= ' >> >>';
-			 $out .= "\n".'endobj';
-			 $this->_out($out);
-		}
-    }
 
     /**
      * Add bookmark to collection

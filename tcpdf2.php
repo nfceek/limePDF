@@ -1,1951 +1,270 @@
 <?php
-//============================================================+
-// File name   : tcpdf.php
-// Version     : 6.10.0
-// Begin       : 2002-08-03
-// Last Update : 2025-05-27
-// Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
-// License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
-// -------------------------------------------------------------------
-// Copyright (C) 2002-2025 Nicola Asuni - Tecnick.com LTD
-//
-// This file is part of TCPDF software library.
-//
-// TCPDF is free software: you can redistribute it and/or modify it
-// under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// TCPDF is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the License
-// along with TCPDF. If not, see
-// <http://www.tecnick.com/pagefiles/tcpdf/LICENSE.TXT>.
-//
-// See LICENSE.TXT file for more information.
-// -------------------------------------------------------------------
-//
-// Description :
-//   This is a PHP class for generating PDF documents without requiring external extensions.
-//
-// NOTE:
-//   This class was originally derived in 2002 from the Public
-//   Domain FPDF class by Olivier Plathey (http://www.fpdf.org),
-//   but now is almost entirely rewritten and contains thousands of
-//   new lines of code and hundreds new features.
-//
-// Main features:
-//  * no external libraries are required for the basic functions;
-//  * all standard page formats, custom page formats, custom margins and units of measure;
-//  * UTF-8 Unicode and Right-To-Left languages;
-//  * TrueTypeUnicode, TrueType, Type1 and CID-0 fonts;
-//  * font subsetting;
-//  * methods to publish some XHTML + CSS code, Javascript and Forms;
-//  * images, graphic (geometric figures) and transformation methods;
-//  * supports JPEG, PNG and SVG images natively, all images supported by GD (GD, GD2, GD2PART, GIF, JPEG, PNG, BMP, XBM, XPM) and all images supported via ImageMagick (http://www.imagemagick.org/www/formats.html)
-//  * 1D and 2D barcodes: CODE 39, ANSI MH10.8M-1983, USD-3, 3 of 9, CODE 93, USS-93, Standard 2 of 5, Interleaved 2 of 5, CODE 128 A/B/C, 2 and 5 Digits UPC-Based Extension, EAN 8, EAN 13, UPC-A, UPC-E, MSI, POSTNET, PLANET, RMS4CC (Royal Mail 4-state Customer Code), CBC (Customer Bar Code), KIX (Klant index - Customer index), Intelligent Mail Barcode, Onecode, USPS-B-3200, CODABAR, CODE 11, PHARMACODE, PHARMACODE TWO-TRACKS, Datamatrix, QR-Code, PDF417;
-//  * JPEG and PNG ICC profiles, Grayscale, RGB, CMYK, Spot Colors and Transparencies;
-//  * automatic page header and footer management;
-//  * document encryption up to 256 bit and digital signature certifications;
-//  * transactions to UNDO commands;
-//  * PDF annotations, including links, text and file attachments;
-//  * text rendering modes (fill, stroke and clipping);
-//  * multiple columns mode;
-//  * no-write page regions;
-//  * bookmarks, named destinations and table of content;
-//  * text hyphenation;
-//  * text stretching and spacing (tracking);
-//  * automatic page break, line break and text alignments including justification;
-//  * automatic page numbering and page groups;
-//  * move and delete pages;
-//  * page compression (requires php-zlib extension);
-//  * XOBject Templates;
-//  * Layers and object visibility.
-//	* PDF/A-1b support
-//============================================================+
-
-/**
- * @file
- * This is a PHP class for generating PDF documents without requiring external extensions.<br>
- * TCPDF project (http://www.tcpdf.org) was originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
- * <h3>TCPDF main features are:</h3>
- * <ul>
- * <li>no external libraries are required for the basic functions;</li>
- * <li>all standard page formats, custom page formats, custom margins and units of measure;</li>
- * <li>UTF-8 Unicode and Right-To-Left languages;</li>
- * <li>TrueTypeUnicode, TrueType, Type1 and CID-0 fonts;</li>
- * <li>font subsetting;</li>
- * <li>methods to publish some XHTML + CSS code, Javascript and Forms;</li>
- * <li>images, graphic (geometric figures) and transformation methods;
- * <li>supports JPEG, PNG and SVG images natively, all images supported by GD (GD, GD2, GD2PART, GIF, JPEG, PNG, BMP, XBM, XPM) and all images supported via ImageMagick (http://www.imagemagick.org/www/formats.html)</li>
- * <li>1D and 2D barcodes: CODE 39, ANSI MH10.8M-1983, USD-3, 3 of 9, CODE 93, USS-93, Standard 2 of 5, Interleaved 2 of 5, CODE 128 A/B/C, 2 and 5 Digits UPC-Based Extension, EAN 8, EAN 13, UPC-A, UPC-E, MSI, POSTNET, PLANET, RMS4CC (Royal Mail 4-state Customer Code), CBC (Customer Bar Code), KIX (Klant index - Customer index), Intelligent Mail Barcode, Onecode, USPS-B-3200, CODABAR, CODE 11, PHARMACODE, PHARMACODE TWO-TRACKS, Datamatrix, QR-Code, PDF417;</li>
- * <li>JPEG and PNG ICC profiles, Grayscale, RGB, CMYK, Spot Colors and Transparencies;</li>
- * <li>automatic page header and footer management;</li>
- * <li>document encryption up to 256 bit and digital signature certifications;</li>
- * <li>transactions to UNDO commands;</li>
- * <li>PDF annotations, including links, text and file attachments;</li>
- * <li>text rendering modes (fill, stroke and clipping);</li>
- * <li>multiple columns mode;</li>
- * <li>no-write page regions;</li>
- * <li>bookmarks, named destinations and table of content;</li>
- * <li>text hyphenation;</li>
- * <li>text stretching and spacing (tracking);</li>
- * <li>automatic page break, line break and text alignments including justification;</li>
- * <li>automatic page numbering and page groups;</li>
- * <li>move and delete pages;</li>
- * <li>page compression (requires php-zlib extension);</li>
- * <li>XOBject Templates;</li>
- * <li>Layers and object visibility;</li>
- * <li>PDF/A-1b support.</li>
- * </ul>
- * Tools to encode your unicode fonts are on fonts/utils directory.</p>
- * @package com.tecnick.tcpdf
- * @author Nicola Asuni
- * @version 6.10.0
- */
-
 // TCPDF configuration
 require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/include/limepdf_font_data.php');
+require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/include/limepdf_fonts.php');
+require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
 // TCPDF static color methods and data
-require_once(dirname(__FILE__).'/include/limepdf_colors.php');
+require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
 // TCPDF static image methods and data
-require_once(dirname(__FILE__).'/include/limepdf_images.php');
+require_once(dirname(__FILE__).'/include/tcpdf_images.php');
 // TCPDF static methods and data
-require_once(dirname(__FILE__).'/include/limepdf_static.php');
+require_once(dirname(__FILE__).'/include/tcpdf_static.php');
 // new
-require_once(dirname(__FILE__).'/include/limepdf_properties.php');
+require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
 //new
-require_once(dirname(__FILE__).'/include/limepdf_property_manager.php');
+require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+use LimePDF\Utils\Environment;
+use LimePDF\Advanced\AdvancedFeaturesManager;
 
-/**
- * @class TCPDF
- * PHP class for generating PDF documents without requiring external extensions.
- * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
- * @package com.tecnick.tcpdf
- * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.10.0
- * @author Nicola Asuni - info@tecnick.com
- * @IgnoreAnnotation("protected")
- * @IgnoreAnnotation("public")
- * @IgnoreAnnotation("pre")
- */
 class TCPDF {
-
-	// Protected properties
-
-	/**
-	 * Current page number.
-	 * @protected
-	 */
-	protected $page;
-
-	/**
-	 * Current object number.
-	 * @protected
-	 */
-	protected $n;
-
-	/**
-	 * Array of object offsets.
-	 * @protected
-	 */
-	protected $offsets = array();
-
-	/**
-	 * Array of object IDs for each page.
-	 * @protected
-	 */
-	protected $pageobjects = array();
-
-	/**
-	 * Buffer holding in-memory PDF.
-	 * @protected
-	 */
-	protected $buffer;
-
-	/**
-	 * Array containing pages.
-	 * @protected
-	 */
-	protected $pages = array();
-
-	/**
-	 * Current document state.
-	 * @protected
-	 */
-	protected $state;
-
-	/**
-	 * Compression flag.
-	 * @protected
-	 */
-	protected $compress;
-
-	/**
-	 * Current page orientation (P = Portrait, L = Landscape).
-	 * @protected
-	 */
-	protected $CurOrientation;
-
-	/**
-	 * Page dimensions.
-	 * @protected
-	 */
-	protected $pagedim = array();
-
-	/**
-	 * Scale factor (number of points in user unit).
-	 * @protected
-	 */
-	protected $k;
-
-	/**
-	 * Width of page format in points.
-	 * @protected
-	 */
-	protected $fwPt;
-
-	/**
-	 * Height of page format in points.
-	 * @protected
-	 */
-	protected $fhPt;
-
-	/**
-	 * Current width of page in points.
-	 * @protected
-	 */
-	protected $wPt;
-
-	/**
-	 * Current height of page in points.
-	 * @protected
-	 */
-	protected $hPt;
-
-	/**
-	 * Current width of page in user unit.
-	 * @protected
-	 */
-	protected $w;
-
-	/**
-	 * Current height of page in user unit.
-	 * @protected
-	 */
-	protected $h;
-
-	/**
-	 * Left margin.
-	 * @protected
-	 */
-	protected $lMargin;
-
-	/**
-	 * Right margin.
-	 * @protected
-	 */
-	protected $rMargin;
-
-	/**
-	 * Cell left margin (used by regions).
-	 * @protected
-	 */
-	protected $clMargin;
-
-	/**
-	 * Cell right margin (used by regions).
-	 * @protected
-	 */
-	protected $crMargin;
-
-	/**
-	 * Top margin.
-	 * @protected
-	 */
-	protected $tMargin;
-
-	/**
-	 * Page break margin.
-	 * @protected
-	 */
-	protected $bMargin;
-
-	/**
-	 * Array of cell internal paddings ('T' => top, 'R' => right, 'B' => bottom, 'L' => left).
-	 * @since 5.9.000 (2010-10-03)
-	 * @protected
-	 */
-	protected $cell_padding = array('T' => 0, 'R' => 0, 'B' => 0, 'L' => 0);
-
-	/**
-	 * Array of cell margins ('T' => top, 'R' => right, 'B' => bottom, 'L' => left).
-	 * @since 5.9.000 (2010-10-04)
-	 * @protected
-	 */
-	protected $cell_margin = array('T' => 0, 'R' => 0, 'B' => 0, 'L' => 0);
-
-	/**
-	 * Current horizontal position in user unit for cell positioning.
-	 * @protected
-	 */
-	protected $x;
-
-	/**
-	 * Current vertical position in user unit for cell positioning.
-	 * @protected
-	 */
-	protected $y;
-
-	/**
-	 * Height of last cell printed.
-	 * @protected
-	 */
-	protected $lasth;
-
-	/**
-	 * Line width in user unit.
-	 * @protected
-	 */
-	protected $LineWidth;
-
-	/**
-	 * Array of standard font names.
-	 * @protected
-	 */
-	protected $CoreFonts;
-
-	/**
-	 * Array of used fonts.
-	 * @protected
-	 */
-	protected $fonts = array();
-
-	/**
-	 * Array of font files.
-	 * @protected
-	 */
-	protected $FontFiles = array();
-
-	/**
-	 * Array of encoding differences.
-	 * @protected
-	 */
-	protected $diffs = array();
-
-	/**
-	 * Array of used images.
-	 * @protected
-	 */
-	protected $images = array();
-
-	/**
-	 * Depth of the svg tag, to keep track if the svg tag is a subtag or the root tag.
-	 * @protected
-	 */
-	protected $svg_tag_depth = 0;
-
-	/**
-	 * Array of Annotations in pages.
-	 * @protected
-	 */
-	protected $PageAnnots = array();
-
-	/**
-	 * Array of internal links.
-	 * @protected
-	 */
-	protected $links = array();
-
-	/**
-	 * Current font family.
-	 * @protected
-	 */
-	protected $FontFamily;
-
-	/**
-	 * Current font style.
-	 * @protected
-	 */
-	protected $FontStyle;
-
-	/**
-	 * Current font ascent (distance between font top and baseline).
-	 * @protected
-	 * @since 2.8.000 (2007-03-29)
-	 */
-	protected $FontAscent;
-
-	/**
-	 * Current font descent (distance between font bottom and baseline).
-	 * @protected
-	 * @since 2.8.000 (2007-03-29)
-	 */
-	protected $FontDescent;
-
-	/**
-	 * Underlining flag.
-	 * @protected
-	 */
-	protected $underline;
-
-	/**
-	 * Overlining flag.
-	 * @protected
-	 */
-	protected $overline;
-
-	/**
-	 * Current font info.
-	 * @protected
-	 */
-	protected $CurrentFont;
-
-	/**
-	 * Current font size in points.
-	 * @protected
-	 */
-	protected $FontSizePt;
-
-	/**
-	 * Current font size in user unit.
-	 * @protected
-	 */
-	protected $FontSize;
-
-	/**
-	 * Commands for drawing color.
-	 * @protected
-	 */
-	protected $DrawColor;
-
-	/**
-	 * Commands for filling color.
-	 * @protected
-	 */
-	protected $FillColor;
-
-	/**
-	 * Commands for text color.
-	 * @protected
-	 */
-	protected $TextColor;
-
-	/**
-	 * Indicates whether fill and text colors are different.
-	 * @protected
-	 */
-	protected $ColorFlag;
-
-	/**
-	 * Automatic page breaking.
-	 * @protected
-	 */
-	protected $AutoPageBreak;
-
-	/**
-	 * Threshold used to trigger page breaks.
-	 * @protected
-	 */
-	protected $PageBreakTrigger;
-
-	/**
-	 * Flag set when processing page header.
-	 * @protected
-	 */
-	protected $InHeader = false;
-
-	/**
-	 * Flag set when processing page footer.
-	 * @protected
-	 */
-	protected $InFooter = false;
-
-	/**
-	 * Zoom display mode.
-	 * @protected
-	 */
-	protected $ZoomMode;
-
-	/**
-	 * Layout display mode.
-	 * @protected
-	 */
-	protected $LayoutMode;
-
-	/**
-	 * If true set the document information dictionary in Unicode.
-	 * @protected
-	 */
-	protected $docinfounicode = true;
-
-	/**
-	 * Document title.
-	 * @protected
-	 */
-	protected $title = '';
-
-	/**
-	 * Document subject.
-	 * @protected
-	 */
-	protected $subject = '';
-
-	/**
-	 * Document author.
-	 * @protected
-	 */
-	protected $author = '';
-
-	/**
-	 * Document keywords.
-	 * @protected
-	 */
-	protected $keywords = '';
-
-	/**
-	 * Document creator.
-	 * @protected
-	 */
-	protected $creator = '';
-
-	/**
-	 * Starting page number.
-	 * @protected
-	 */
-	protected $starting_page_number = 1;
-
-	/**
-	 * The right-bottom (or left-bottom for RTL) corner X coordinate of last inserted image.
-	 * @since 2002-07-31
-	 * @author Nicola Asuni
-	 * @protected
-	 */
-	protected $img_rb_x;
-
-	/**
-	 * The right-bottom corner Y coordinate of last inserted image.
-	 * @since 2002-07-31
-	 * @author Nicola Asuni
-	 * @protected
-	 */
-	protected $img_rb_y;
-
-	/**
-	 * Adjusting factor to convert pixels to user units.
-	 * @since 2004-06-14
-	 * @author Nicola Asuni
-	 * @protected
-	 */
-	protected $imgscale = 1;
-
-	/**
-	 * Boolean flag set to true when the input text is unicode (require unicode fonts).
-	 * @since 2005-01-02
-	 * @author Nicola Asuni
-	 * @protected
-	 */
-	protected $isunicode = false;
-
-	/**
-	 * PDF version.
-	 * @since 1.5.3
-	 * @protected
-	 */
-	protected $PDFVersion = '1.7';
-
-	/**
-	 * ID of the stored default header template (-1 = not set).
-	 * @protected
-	 */
-	protected $header_xobjid = false;
-
-	/**
-	 * If true reset the Header Xobject template at each page
-	 * @protected
-	 */
-	protected $header_xobj_autoreset = false;
-
-	/**
-	 * Minimum distance between header and top page margin.
-	 * @protected
-	 * @var float
-	 */
-	protected $header_margin;
-
-	/**
-	 * Minimum distance between footer and bottom page margin.
-	 * @protected
-	 * @var float
-	 */
-	protected $footer_margin;
-
-	/**
-	 * Original left margin value.
-	 * @protected
-	 * @since 1.53.0.TC013
-	 */
-	protected $original_lMargin;
-
-	/**
-	 * Original right margin value.
-	 * @protected
-	 * @since 1.53.0.TC013
-	 */
-	protected $original_rMargin;
-
-	/**
-	 * Default font used on page header.
-	 * @protected
-	 * @var array<int,string|float|null>
-	 * @phpstan-var array{0: string, 1: string, 2: float|null}
-	 */
-	protected $header_font;
-
-	/**
-	 * Default font used on page footer.
-	 * @protected
-	 * @var array<int,string|float|null>
-	 * @phpstan-var array{0: string, 1: string, 2: float|null}
-	 */
-	protected $footer_font;
-
-	/**
-	 * Language templates.
-	 * @protected
-	 */
-	protected $l;
-
-	/**
-	 * Barcode to print on page footer (only if set).
-	 * @protected
-	 */
-	protected $barcode = false;
-
-	/**
-	 * Boolean flag to print/hide page header.
-	 * @protected
-	 */
-	protected $print_header = true;
-
-	/**
-	 * Boolean flag to print/hide page footer.
-	 * @protected
-	 */
-	protected $print_footer = true;
-
-	/**
-	 * Header image logo.
-	 * @protected
-	 */
-	protected $header_logo = '';
-
-	/**
-	 * Width of header image logo in user units.
-	 * @protected
-	 */
-	protected $header_logo_width = 30;
-
-	/**
-	 * Title to be printed on default page header.
-	 * @protected
-	 */
-	protected $header_title = '';
-
-	/**
-	 * String to print on page header after title.
-	 * @protected
-	 */
-	protected $header_string = '';
-
-	/**
-	 * Color for header text (RGB array).
-	 * @since 5.9.174 (2012-07-25)
-	 * @protected
-	 * @var int[]
-	 * @phpstan-var array{0: int, 1: int, 2: int}
-	 */
-	protected $header_text_color = array(0,0,0);
-
-	/**
-	 * Color for header line (RGB array).
-	 * @since 5.9.174 (2012-07-25)
-	 * @protected
-	 * @var int[]
-	 * @phpstan-var array{0: int, 1: int, 2: int}
-	 */
-	protected $header_line_color = array(0,0,0);
-
-	/**
-	 * Color for footer text (RGB array).
-	 * @since 5.9.174 (2012-07-25)
-	 * @protected
-	 * @var int[]
-	 * @phpstan-var array{0: int, 1: int, 2: int}
-	 */
-	protected $footer_text_color = array(0,0,0);
-
-	/**
-	 * Color for footer line (RGB array).
-	 * @since 5.9.174 (2012-07-25)
-	 * @protected
-	 * @var int[]
-	 * @phpstan-var array{0: int, 1: int, 2: int}
-	 */
-	protected $footer_line_color = array(0,0,0);
-
-	/**
-	 * Text shadow data array.
-	 * @since 5.9.174 (2012-07-25)
-	 * @protected
-	 */
-	protected $txtshadow = array('enabled'=>false, 'depth_w'=>0, 'depth_h'=>0, 'color'=>false, 'opacity'=>1, 'blend_mode'=>'Normal');
-
-	/**
-	 * Default number of columns for html table.
-	 * @protected
-	 */
-	protected $default_table_columns = 4;
-
-	// variables for html parser
-
-	/**
-	 * HTML PARSER: array to store current link and rendering styles.
-	 * @protected
-	 */
-	protected $HREF = array();
-
-	/**
-	 * List of available fonts on filesystem.
-	 * @protected
-	 */
-	protected $fontlist = array();
-
-	/**
-	 * Current foreground color.
-	 * @protected
-	 */
-	protected $fgcolor;
-
-	/**
-	 * HTML PARSER: array of boolean values, true in case of ordered list (OL), false otherwise.
-	 * @protected
-	 */
-	protected $listordered = array();
-
-	/**
-	 * HTML PARSER: array count list items on nested lists.
-	 * @protected
-	 */
-	protected $listcount = array();
-
-	/**
-	 * HTML PARSER: current list nesting level.
-	 * @protected
-	 */
-	protected $listnum = 0;
-
-	/**
-	 * HTML PARSER: indent amount for lists.
-	 * @protected
-	 */
-	protected $listindent = 0;
-
-	/**
-	 * HTML PARSER: current list indententation level.
-	 * @protected
-	 */
-	protected $listindentlevel = 0;
-
-	/**
-	 * Current background color.
-	 * @protected
-	 */
-	protected $bgcolor;
-
-	/**
-	 * Temporary font size in points.
-	 * @protected
-	 */
-	protected $tempfontsize = 10;
-
-	/**
-	 * Spacer string for LI tags.
-	 * @protected
-	 */
-	protected $lispacer = '';
-
-	/**
-	 * Default encoding.
-	 * @protected
-	 * @since 1.53.0.TC010
-	 */
-	protected $encoding = 'UTF-8';
-
-	/**
-	 * Boolean flag to indicate if the document language is Right-To-Left.
-	 * @protected
-	 * @since 2.0.000
-	 */
-	protected $rtl = false;
-
-	/**
-	 * Boolean flag used to force RTL or LTR string direction.
-	 * @protected
-	 * @since 2.0.000
-	 */
-	protected $tmprtl = false;
-
-	// --- Variables used for document encryption:
-
-	/**
-	 * IBoolean flag indicating whether document is protected.
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 */
-	protected $encrypted;
-
-	/**
-	 * Array containing encryption settings.
-	 * @protected
-	 * @since 5.0.005 (2010-05-11)
-	 */
-	protected $encryptdata = array();
-
-	/**
-	 * Last RC4 key encrypted (cached for optimisation).
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 */
-	protected $last_enc_key;
-
-	/**
-	 * Last RC4 computed key.
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 */
-	protected $last_enc_key_c;
-
-	/**
-	 * File ID (used on document trailer).
-	 * @protected
-	 * @since 5.0.005 (2010-05-12)
-	 */
-	protected $file_id;
-
-	/**
-	 * Internal secret used to encrypt data.
-	 * @protected
-	 * @since 6.7.5 (2024-03-21)
-	 */
-	protected $hash_key;
-
-	// --- bookmark ---
-
-	/**
-	 * Outlines for bookmark.
-	 * @protected
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected $outlines = array();
-
-	/**
-	 * Outline root for bookmark.
-	 * @protected
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected $OutlineRoot;
-
-	// --- javascript and form ---
-
-	/**
-	 * Javascript code.
-	 * @protected
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected $javascript = '';
-
-	/**
-	 * Javascript counter.
-	 * @protected
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected $n_js;
-
-	/**
-	 * line through state
-	 * @protected
-	 * @since 2.8.000 (2008-03-19)
-	 */
-	protected $linethrough;
-
-	/**
-	 * Array with additional document-wide usage rights for the document.
-	 * @protected
-	 * @since 5.8.014 (2010-08-23)
-	 */
-	protected $ur = array();
-
-	/**
-	 * DPI (Dot Per Inch) Document Resolution (do not change).
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $dpi = 72;
-
-	/**
-	 * Array of page numbers were a new page group was started (the page numbers are the keys of the array).
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $newpagegroup = array();
-
-	/**
-	 * Array that contains the number of pages in each page group.
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $pagegroups = array();
-
-	/**
-	 * Current page group number.
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $currpagegroup = 0;
-
-	/**
-	 * Array of transparency objects and parameters.
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $extgstates;
-
-	/**
-	 * Set the default JPEG compression quality (1-100).
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected $jpeg_quality;
-
-	/**
-	 * Default cell height ratio.
-	 * @protected
-	 * @since 3.0.014 (2008-05-23)
-	 * @var float
-	 */
-	protected $cell_height_ratio = K_CELL_HEIGHT_RATIO;
-
-	/**
-	 * PDF viewer preferences.
-	 * @protected
-	 * @since 3.1.000 (2008-06-09)
-	 */
-	protected $viewer_preferences;
-
-	/**
-	 * A name object specifying how the document should be displayed when opened.
-	 * @protected
-	 * @since 3.1.000 (2008-06-09)
-	 */
-	protected $PageMode;
-
-	/**
-	 * Array for storing gradient information.
-	 * @protected
-	 * @since 3.1.000 (2008-06-09)
-	 */
-	protected $gradients = array();
-
-	/**
-	 * Array used to store positions inside the pages buffer (keys are the page numbers).
-	 * @protected
-	 * @since 3.2.000 (2008-06-26)
-	 */
-	protected $intmrk = array();
-
-	/**
-	 * Array used to store positions inside the pages buffer (keys are the page numbers).
-	 * @protected
-	 * @since 5.7.000 (2010-08-03)
-	 */
-	protected $bordermrk = array();
-
-	/**
-	 * Array used to store page positions to track empty pages (keys are the page numbers).
-	 * @protected
-	 * @since 5.8.007 (2010-08-18)
-	 */
-	protected $emptypagemrk = array();
-
-	/**
-	 * Array used to store content positions inside the pages buffer (keys are the page numbers).
-	 * @protected
-	 * @since 4.6.021 (2009-07-20)
-	 */
-	protected $cntmrk = array();
-
-	/**
-	 * Array used to store footer positions of each page.
-	 * @protected
-	 * @since 3.2.000 (2008-07-01)
-	 */
-	protected $footerpos = array();
-
-	/**
-	 * Array used to store footer length of each page.
-	 * @protected
-	 * @since 4.0.014 (2008-07-29)
-	 */
-	protected $footerlen = array();
-
-	/**
-	 * Boolean flag to indicate if a new line is created.
-	 * @protected
-	 * @since 3.2.000 (2008-07-01)
-	 */
-	protected $newline = true;
-
-	/**
-	 * End position of the latest inserted line.
-	 * @protected
-	 * @since 3.2.000 (2008-07-01)
-	 */
-	protected $endlinex = 0;
-
-	/**
-	 * PDF string for width value of the last line.
-	 * @protected
-	 * @since 4.0.006 (2008-07-16)
-	 */
-	protected $linestyleWidth = '';
-
-	/**
-	 * PDF string for CAP value of the last line.
-	 * @protected
-	 * @since 4.0.006 (2008-07-16)
-	 */
-	protected $linestyleCap = '0 J';
-
-	/**
-	 * PDF string for join value of the last line.
-	 * @protected
-	 * @since 4.0.006 (2008-07-16)
-	 */
-	protected $linestyleJoin = '0 j';
-
-	/**
-	 * PDF string for dash value of the last line.
-	 * @protected
-	 * @since 4.0.006 (2008-07-16)
-	 */
-	protected $linestyleDash = '[] 0 d';
-
-	/**
-	 * Boolean flag to indicate if marked-content sequence is open.
-	 * @protected
-	 * @since 4.0.013 (2008-07-28)
-	 */
-	protected $openMarkedContent = false;
-
-	/**
-	 * Count the latest inserted vertical spaces on HTML.
-	 * @protected
-	 * @since 4.0.021 (2008-08-24)
-	 */
-	protected $htmlvspace = 0;
-
-	/**
-	 * Array of Spot colors.
-	 * @protected
-	 * @since 4.0.024 (2008-09-12)
-	 */
-	protected $spot_colors = array();
-
-	/**
-	 * Symbol used for HTML unordered list items.
-	 * @protected
-	 * @since 4.0.028 (2008-09-26)
-	 */
-	protected $lisymbol = '';
-
-	/**
-	 * String used to mark the beginning and end of EPS image blocks.
-	 * @protected
-	 * @since 4.1.000 (2008-10-18)
-	 */
-	protected $epsmarker = 'x#!#EPS#!#x';
-
-	/**
-	 * Array of transformation matrix.
-	 * @protected
-	 * @since 4.2.000 (2008-10-29)
-	 */
-	protected $transfmatrix = array();
-
-	/**
-	 * Current key for transformation matrix.
-	 * @protected
-	 * @since 4.8.005 (2009-09-17)
-	 */
-	protected $transfmatrix_key = 0;
-
-	/**
-	 * Booklet mode for double-sided pages.
-	 * @protected
-	 * @since 4.2.000 (2008-10-29)
-	 */
-	protected $booklet = false;
-
-	/**
-	 * Epsilon value used for float calculations.
-	 * @protected
-	 * @since 4.2.000 (2008-10-29)
-	 */
-	protected $feps = 0.005;
-
-	/**
-	 * Array used for custom vertical spaces for HTML tags.
-	 * @protected
-	 * @since 4.2.001 (2008-10-30)
-	 */
-	protected $tagvspaces = array();
-
-	/**
-	 * HTML PARSER: custom indent amount for lists. Negative value means disabled.
-	 * @protected
-	 * @since 4.2.007 (2008-11-12)
-	 */
-	protected $customlistindent = -1;
-
-	/**
-	 * Boolean flag to indicate if the border of the cell sides that cross the page should be removed.
-	 * @protected
-	 * @since 4.2.010 (2008-11-14)
-	 */
-	protected $opencell = true;
-
-	/**
-	 * Array of files to embedd.
-	 * @protected
-	 * @since 4.4.000 (2008-12-07)
-	 */
-	protected $embeddedfiles = array();
-
-	/**
-	 * Boolean flag to indicate if we are inside a PRE tag.
-	 * @protected
-	 * @since 4.4.001 (2008-12-08)
-	 */
-	protected $premode = false;
-
-	/**
-	 * Array used to store positions of graphics transformation blocks inside the page buffer.
-	 * keys are the page numbers
-	 * @protected
-	 * @since 4.4.002 (2008-12-09)
-	 */
-	protected $transfmrk = array();
-
-	/**
-	 * Default color for html links.
-	 * @protected
-	 * @since 4.4.003 (2008-12-09)
-	 */
-	protected $htmlLinkColorArray = array(0, 0, 255);
-
-	/**
-	 * Default font style to add to html links.
-	 * @protected
-	 * @since 4.4.003 (2008-12-09)
-	 */
-	protected $htmlLinkFontStyle = 'U';
-
-	/**
-	 * Counts the number of pages.
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected $numpages = 0;
-
-	/**
-	 * Array containing page lengths in bytes.
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected $pagelen = array();
-
-	/**
-	 * Counts the number of pages.
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected $numimages = 0;
-
-	/**
-	 * Store the image keys.
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected $imagekeys = array();
-
-	/**
-	 * Length of the buffer in bytes.
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected $bufferlen = 0;
-
-	/**
-	 * Counts the number of fonts.
-	 * @protected
-	 * @since 4.5.000 (2009-01-02)
-	 */
-	protected $numfonts = 0;
-
-	/**
-	 * Store the font keys.
-	 * @protected
-	 * @since 4.5.000 (2009-01-02)
-	 */
-	protected $fontkeys = array();
-
-	/**
-	 * Store the font object IDs.
-	 * @protected
-	 * @since 4.8.001 (2009-09-09)
-	 */
-	protected $font_obj_ids = array();
-
-	/**
-	 * Store the fage status (true when opened, false when closed).
-	 * @protected
-	 * @since 4.5.000 (2009-01-02)
-	 */
-	protected $pageopen = array();
-
-	/**
-	 * Default monospace font.
-	 * @protected
-	 * @since 4.5.025 (2009-03-10)
-	 */
-	protected $default_monospaced_font = 'courier';
-
-	/**
-	 * Cloned copy of the current class object.
-	 * @protected
-	 * @since 4.5.029 (2009-03-19)
-	 */
-	protected $objcopy;
-
-	/**
-	 * Array used to store the lengths of cache files.
-	 * @protected
-	 * @since 4.5.029 (2009-03-19)
-	 */
-	protected $cache_file_length = array();
-
-	/**
-	 * Table header content to be repeated on each new page.
-	 * @protected
-	 * @since 4.5.030 (2009-03-20)
-	 */
-	protected $thead = '';
-
-	/**
-	 * Margins used for table header.
-	 * @protected
-	 * @since 4.5.030 (2009-03-20)
-	 */
-	protected $theadMargins = array();
-
-	/**
-	 * Boolean flag to enable document digital signature.
-	 * @protected
-	 * @since 4.6.005 (2009-04-24)
-	 */
-	protected $sign = false;
-
-	/**
-	 * Digital signature data.
-	 * @protected
-	 * @since 4.6.005 (2009-04-24)
-	 */
-	protected $signature_data = array();
-
-	/**
-	 * Digital signature max length.
-	 * @protected
-	 * @since 4.6.005 (2009-04-24)
-	 */
-	protected $signature_max_length = 11742;
-
-	/**
-	 * Data for digital signature appearance.
-	 * @protected
-	 * @since 5.3.011 (2010-06-16)
-	 */
-	protected $signature_appearance = array('page' => 1, 'rect' => '0 0 0 0');
-
-	/**
-	 * Array of empty digital signature appearances.
-	 * @protected
-	 * @since 5.9.101 (2011-07-06)
-	 */
-	protected $empty_signature_appearance = array();
-
-	/**
-	 * Boolean flag to enable document timestamping with TSA.
-	 * @protected
-	 * @since 6.0.085 (2014-06-19)
-	 */
-	protected $tsa_timestamp = false;
-
-	/**
-	 * Timestamping data.
-	 * @protected
-	 * @since 6.0.085 (2014-06-19)
-	 */
-	protected $tsa_data = array();
-
-	/**
-	 * Regular expression used to find blank characters (required for word-wrapping).
-	 * @protected
-	 * @since 4.6.006 (2009-04-28)
-	 */
-	protected $re_spaces = '/[^\S\xa0]/';
-
-	/**
-	 * Array of $re_spaces parts.
-	 * @protected
-	 * @since 5.5.011 (2010-07-09)
-	 */
-	protected $re_space = array('p' => '[^\S\xa0]', 'm' => '');
-
-	/**
-	 * Digital signature object ID.
-	 * @protected
-	 * @since 4.6.022 (2009-06-23)
-	 */
-	protected $sig_obj_id = 0;
-
-	/**
-	 * ID of page objects.
-	 * @protected
-	 * @since 4.7.000 (2009-08-29)
-	 */
-	protected $page_obj_id = array();
-
-	/**
-	 * List of form annotations IDs.
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $form_obj_id = array();
-
-	/**
-	 * Deafult Javascript field properties. Possible values are described on official Javascript for Acrobat API reference. Annotation options can be directly specified using the 'aopt' entry.
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $default_form_prop = array('lineWidth'=>1, 'borderStyle'=>'solid', 'fillColor'=>array(255, 255, 255), 'strokeColor'=>array(128, 128, 128));
-
-	/**
-	 * Javascript objects array.
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $js_objects = array();
-
-	/**
-	 * Current form action (used during XHTML rendering).
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $form_action = '';
-
-	/**
-	 * Current form encryption type (used during XHTML rendering).
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $form_enctype = 'application/x-www-form-urlencoded';
-
-	/**
-	 * Current method to submit forms.
-	 * @protected
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	protected $form_mode = 'post';
-
-	/**
-	 * List of fonts used on form fields (fontname => fontkey).
-	 * @protected
-	 * @since 4.8.001 (2009-09-09)
-	 */
-	protected $annotation_fonts = array();
-
-	/**
-	 * List of radio buttons parent objects.
-	 * @protected
-	 * @since 4.8.001 (2009-09-09)
-	 */
-	protected $radiobutton_groups = array();
-
-	/**
-	 * List of radio group objects IDs.
-	 * @protected
-	 * @since 4.8.001 (2009-09-09)
-	 */
-	protected $radio_groups = array();
-
-	/**
-	 * Text indentation value (used for text-indent CSS attribute).
-	 * @protected
-	 * @since 4.8.006 (2009-09-23)
-	 */
-	protected $textindent = 0;
-
-	/**
-	 * Store page number when startTransaction() is called.
-	 * @protected
-	 * @since 4.8.006 (2009-09-23)
-	 */
-	protected $start_transaction_page = 0;
-
-	/**
-	 * Store Y position when startTransaction() is called.
-	 * @protected
-	 * @since 4.9.001 (2010-03-28)
-	 */
-	protected $start_transaction_y = 0;
-
-	/**
-	 * True when we are printing the thead section on a new page.
-	 * @protected
-	 * @since 4.8.027 (2010-01-25)
-	 */
-	protected $inthead = false;
-
-	/**
-	 * Array of column measures (width, space, starting Y position).
-	 * @protected
-	 * @since 4.9.001 (2010-03-28)
-	 */
-	protected $columns = array();
-
-	/**
-	 * Number of colums.
-	 * @protected
-	 * @since 4.9.001 (2010-03-28)
-	 */
-	protected $num_columns = 1;
-
-	/**
-	 * Current column number.
-	 * @protected
-	 * @since 4.9.001 (2010-03-28)
-	 */
-	protected $current_column = 0;
-
-	/**
-	 * Starting page for columns.
-	 * @protected
-	 * @since 4.9.001 (2010-03-28)
-	 */
-	protected $column_start_page = 0;
-
-	/**
-	 * Maximum page and column selected.
-	 * @protected
-	 * @since 5.8.000 (2010-08-11)
-	 */
-	protected $maxselcol = array('page' => 0, 'column' => 0);
-
-	/**
-	 * Array of: X difference between table cell x start and starting page margin, cellspacing, cellpadding.
-	 * @protected
-	 * @since 5.8.000 (2010-08-11)
-	 */
-	protected $colxshift = array('x' => 0, 's' => array('H' => 0, 'V' => 0), 'p' => array('L' => 0, 'T' => 0, 'R' => 0, 'B' => 0));
-
-	/**
-	 * Text rendering mode: 0 = Fill text; 1 = Stroke text; 2 = Fill, then stroke text; 3 = Neither fill nor stroke text (invisible); 4 = Fill text and add to path for clipping; 5 = Stroke text and add to path for clipping; 6 = Fill, then stroke text and add to path for clipping; 7 = Add text to path for clipping.
-	 * @protected
-	 * @since 4.9.008 (2010-04-03)
-	 */
-	protected $textrendermode = 0;
-
-	/**
-	 * Text stroke width in doc units.
-	 * @protected
-	 * @since 4.9.008 (2010-04-03)
-	 */
-	protected $textstrokewidth = 0;
-
-	/**
-	 * Current stroke color.
-	 * @protected
-	 * @since 4.9.008 (2010-04-03)
-	 */
-	protected $strokecolor;
-
-	/**
-	 * Default unit of measure for document.
-	 * @protected
-	 * @since 5.0.000 (2010-04-22)
-	 */
-	protected $pdfunit = 'mm';
-
-	/**
-	 * Boolean flag true when we are on TOC (Table Of Content) page.
-	 * @protected
-	 */
-	protected $tocpage = false;
-
-	/**
-	 * Boolean flag: if true convert vector images (SVG, EPS) to raster image using GD or ImageMagick library.
-	 * @protected
-	 * @since 5.0.000 (2010-04-26)
-	 */
-	protected $rasterize_vector_images = false;
-
-	/**
-	 * Boolean flag: if true enables font subsetting by default.
-	 * @protected
-	 * @since 5.3.002 (2010-06-07)
-	 */
-	protected $font_subsetting = true;
-
-	/**
-	 * Array of default graphic settings.
-	 * @protected
-	 * @since 5.5.008 (2010-07-02)
-	 */
-	protected $default_graphic_vars = array();
-
-	/**
-	 * Array of XObjects.
-	 * @protected
-	 * @since 5.8.014 (2010-08-23)
-	 */
-	protected $xobjects = array();
-
-	/**
-	 * Boolean value true when we are inside an XObject.
-	 * @protected
-	 * @since 5.8.017 (2010-08-24)
-	 */
-	protected $inxobj = false;
-
-	/**
-	 * Current XObject ID.
-	 * @protected
-	 * @since 5.8.017 (2010-08-24)
-	 */
-	protected $xobjid = '';
-
-	/**
-	 * Percentage of character stretching.
-	 * @protected
-	 * @since 5.9.000 (2010-09-29)
-	 */
-	protected $font_stretching = 100;
-
-	/**
-	 * Increases or decreases the space between characters in a text by the specified amount (tracking).
-	 * @protected
-	 * @since 5.9.000 (2010-09-29)
-	 */
-	protected $font_spacing = 0;
-
-	/**
-	 * Array of no-write regions.
-	 * ('page' => page number or empy for current page, 'xt' => X top, 'yt' => Y top, 'xb' => X bottom, 'yb' => Y bottom, 'side' => page side 'L' = left or 'R' = right)
-	 * @protected
-	 * @since 5.9.003 (2010-10-14)
-	 */
-	protected $page_regions = array();
-
-	/**
-	 * Boolean value true when page region check is active.
-	 * @protected
-	 */
-	protected $check_page_regions = true;
-
-	/**
-	 * Array of PDF layers data.
-	 * @protected
-	 * @since 5.9.102 (2011-07-13)
-	 */
-	protected $pdflayers = array();
-
-	/**
-	 * A dictionary of names and corresponding destinations (Dests key on document Catalog).
-	 * @protected
-	 * @since 5.9.097 (2011-06-23)
-	 */
-	protected $dests = array();
-
-	/**
-	 * Object ID for Named Destinations
-	 * @protected
-	 * @since 5.9.097 (2011-06-23)
-	 */
-	protected $n_dests;
-
-	/**
-	 * Embedded Files Names
-	 * @protected
-	 * @since 5.9.204 (2013-01-23)
-	 */
-	protected $efnames = array();
-
-	/**
-	 * Directory used for the last SVG image.
-	 * @protected
-	 * @since 5.0.000 (2010-05-05)
-	 */
-	protected $svgdir = '';
-
-	/**
-	 *  Deafult unit of measure for SVG.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgunit = 'px';
-
-	/**
-	 * Array of SVG gradients.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svggradients = array();
-
-	/**
-	 * ID of last SVG gradient.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svggradientid = 0;
-
-	/**
-	 * Boolean value true when in SVG defs group.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgdefsmode = false;
-
-	/**
-	 * Array of SVG defs.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgdefs = array();
-
-	/**
-	 * Boolean value true when in SVG clipPath tag.
-	 * @protected
-	 * @since 5.0.000 (2010-04-26)
-	 */
-	protected $svgclipmode = false;
-
-	/**
-	 * Array of SVG clipPath commands.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgclippaths = array();
-
-	/**
-	 * Array of SVG clipPath tranformation matrix.
-	 * @protected
-	 * @since 5.8.022 (2010-08-31)
-	 */
-	protected $svgcliptm = array();
-
-	/**
-	 * ID of last SVG clipPath.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgclipid = 0;
-
-	/**
-	 * SVG text.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgtext = '';
-
-	/**
-	 * SVG text properties.
-	 * @protected
-	 * @since 5.8.013 (2010-08-23)
-	 */
-	protected $svgtextmode = array();
-
-	/**
-	 * Array of SVG properties.
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected $svgstyles = array(array(
-		'alignment-baseline' => 'auto',
-		'baseline-shift' => 'baseline',
-		'clip' => 'auto',
-		'clip-path' => 'none',
-		'clip-rule' => 'nonzero',
-		'color' => 'black',
-		'color-interpolation' => 'sRGB',
-		'color-interpolation-filters' => 'linearRGB',
-		'color-profile' => 'auto',
-		'color-rendering' => 'auto',
-		'cursor' => 'auto',
-		'direction' => 'ltr',
-		'display' => 'inline',
-		'dominant-baseline' => 'auto',
-		'enable-background' => 'accumulate',
-		'fill' => 'black',
-		'fill-opacity' => 1,
-		'fill-rule' => 'nonzero',
-		'filter' => 'none',
-		'flood-color' => 'black',
-		'flood-opacity' => 1,
-		'font' => '',
-		'font-family' => 'helvetica',
-		'font-size' => 'medium',
-		'font-size-adjust' => 'none',
-		'font-stretch' => 'normal',
-		'font-style' => 'normal',
-		'font-variant' => 'normal',
-		'font-weight' => 'normal',
-		'glyph-orientation-horizontal' => '0deg',
-		'glyph-orientation-vertical' => 'auto',
-		'image-rendering' => 'auto',
-		'kerning' => 'auto',
-		'letter-spacing' => 'normal',
-		'lighting-color' => 'white',
-		'marker' => '',
-		'marker-end' => 'none',
-		'marker-mid' => 'none',
-		'marker-start' => 'none',
-		'mask' => 'none',
-		'opacity' => 1,
-		'overflow' => 'auto',
-		'pointer-events' => 'visiblePainted',
-		'shape-rendering' => 'auto',
-		'stop-color' => 'black',
-		'stop-opacity' => 1,
-		'stroke' => 'none',
-		'stroke-dasharray' => 'none',
-		'stroke-dashoffset' => 0,
-		'stroke-linecap' => 'butt',
-		'stroke-linejoin' => 'miter',
-		'stroke-miterlimit' => 4,
-		'stroke-opacity' => 1,
-		'stroke-width' => 1,
-		'text-anchor' => 'start',
-		'text-decoration' => 'none',
-		'text-rendering' => 'auto',
-		'unicode-bidi' => 'normal',
-		'visibility' => 'visible',
-		'word-spacing' => 'normal',
-		'writing-mode' => 'lr-tb',
-		'text-color' => 'black',
-		'transfmatrix' => array(1, 0, 0, 1, 0, 0)
-		));
-
-	/**
-	 * If true force sRGB color profile for all document.
-	 * @protected
-	 * @since 5.9.121 (2011-09-28)
-	 */
-	protected $force_srgb = false;
-
-	/**
-	 * If true set the document to PDF/A mode.
-	 * @protected
-	 * @since 5.9.121 (2011-09-27)
-	 */
-	protected $pdfa_mode = false;
-
-	/**
-	 * version of PDF/A mode (1 - 3).
-	 * @protected
-	 * @since 6.2.26 (2019-03-12)
-	 */
-	protected $pdfa_version = 1;
-
-	/**
-	 * Document creation date-time
-	 * @protected
-	 * @since 5.9.152 (2012-03-22)
-	 */
-	protected $doc_creation_timestamp;
-
-	/**
-	 * Document modification date-time
-	 * @protected
-	 * @since 5.9.152 (2012-03-22)
-	 */
-	protected $doc_modification_timestamp;
-
-	/**
-	 * Custom XMP data.
-	 * @protected
-	 * @since 5.9.128 (2011-10-06)
-	 */
-	protected $custom_xmp = '';
-
-	/**
-	 * Custom XMP RDF data.
-	 * @protected
-	 * @since 6.3.0 (2019-09-19)
-	 */
-	protected $custom_xmp_rdf = '';
-
-	/**
-	 * Custom XMP RDF pdfaextension data.
-	 * @protected
-	 * @since 6.9.0 (2025-02-11)
-	 */
-	protected $custom_xmp_rdf_pdfaExtension = '';
-
-	/**
-	 * Overprint mode array.
-	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
-	 * @protected
-	 * @since 5.9.152 (2012-03-23)
-	 * @var array<string,bool|int>
-	 */
-	protected $overprint = array('OP' => false, 'op' => false, 'OPM' => 0);
-
-	/**
-	 * Alpha mode array.
-	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
-	 * @protected
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	protected $alpha = array('CA' => 1, 'ca' => 1, 'BM' => '/Normal', 'AIS' => false);
-
-	/**
-	 * Define the page boundaries boxes to be set on document.
-	 * @protected
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	protected $page_boxes = array('MediaBox', 'CropBox', 'BleedBox', 'TrimBox', 'ArtBox');
-
-	/**
-	 * If true print TCPDF meta link.
-	 * @protected
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	protected $tcpdflink = true;
-
-	/**
-	 * Cache array for computed GD gamma values.
-	 * @protected
-	 * @since 5.9.1632 (2012-06-05)
-	 */
-	protected $gdgammacache = array();
-
-    /**
-     * Cache array for file content
-     * @protected
-     * @var array
-     * @since 6.3.5 (2020-09-28)
-     */
-	protected $fileContentCache = array();
-
-	/**
-	 * Whether to allow local file path in image html tags, when prefixed with file://
-	 *
-	 * @var bool
-	 * @protected
-	 * @since 6.4 (2020-07-23)
-	 */
-	protected $allowLocalFiles = false;
-
-	//------------------------------------------------------------
-	// METHODS
-	//------------------------------------------------------------
-
-	/**
-	 * This is the class constructor.
-	 * It allows to set up the page format, the orientation and the measure unit used in all the methods (except for the font sizes).
-	 *
-	 * @param string $orientation page orientation. Possible values are (case insensitive):<ul><li>P or Portrait (default)</li><li>L or Landscape</li><li>'' (empty string) for automatic orientation</li></ul>
-	 * @param string $unit User measure unit. Possible values are:<ul><li>pt: point</li><li>mm: millimeter (default)</li><li>cm: centimeter</li><li>in: inch</li></ul><br />A point equals 1/72 of inch, that is to say about 0.35 mm (an inch being 2.54 cm). This is a very common unit in typography; font sizes are expressed in that unit.
-	 * @param mixed $format The format used for pages. It can be either: one of the string values specified at getPageSizeFromFormat() or an array of parameters specified at setPageFormat().
-	 * @param boolean $unicode TRUE means that the input text is unicode (default = true)
-	 * @param string $encoding Charset encoding (used only when converting back html entities); default is UTF-8.
-	 * @param boolean $diskcache DEPRECATED FEATURE
-	 * @param false|integer $pdfa If not false, set the document to PDF/A mode and the good version (1 or 3).
-	 * @public
-	 * @see getPageSizeFromFormat(), setPageFormat()
-	 */
-	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
-		// set file ID for trailer
+    protected array $font_obj_ids = [];
+    protected array $page_obj_id = [];
+    protected array $form_obj_id = [];
+    protected array $fonts = [];
+    protected array $fontkeys = [];
+	protected array $pagedim = [];
+	protected array $cell_padding = [];
+	protected array $cell_margin = [];
+	protected array $fontlist = [];
+	protected array $txtshadow = [];
+	protected array $strokecolor = [];
+	protected array $CoreFonts = [];
+	protected array $fontdata = [];
+	protected array $CurrentFont = [];
+	protected array $re_space = [];
+	protected array $pageopen = [];
+	protected array	$FontFiles = [];
+	protected array $pageobjects = [];
+	protected array $pagelen = [];
+	protected array $footerpos = [];
+	protected array $emptypagemrk = [];
+	protected array $cntmrk = [];
+	protected array $listordered = [];
+	protected array $listcount = [];	
+	protected array $pages = [];
+	protected array $transfmrk = [];
+	protected array $intmrk = [];
+	protected array $bordermrk = [];
+	protected array $htmlLinkColorArray =[];
+	protected array $spot_colors =[];
+	protected array $bgcolor =[];
+	protected array $fgcolor = [];
+	protected array $alpha = [];
+	protected array $HREF = [];
+	protected array $extgstates = [];
+	protected array $imagekeys = [];
+	protected array $gdgammacache =[];
+	protected array $images = [];
+	protected array $columns = [];
+	protected array $PageAnnots = [];
+	protected array $footerlen = [];
+	protected array $offsets = [];
+	protected array $page_boxes = [];
+	protected array $encryptdata = [];
+	protected array $radio_groups =[];
+	protected array $gradients = [];
+	protected array $diffs = [];
+	protected array $annotation_fonts =[];
+	protected array $xobjects = [];
+	protected array $embeddedfiles =[];
+	protected array $outlines = [];
+
+	protected bool $compress;
+	protected bool $inxobj = false;
+	protected bool $pdfa_mode = false;
+	protected bool $force_srgb = false;	
+	protected bool $tocpage = false;
+	protected bool $booklet = false;
+	protected bool $rtl = false;
+	protected bool $tmprtl = false;
+	protected bool $InFooter = false;
+	protected bool $print_header = false;
+	protected bool $check_page_regions = false;
+	protected bool $newline = false;
+	protected bool $premode = false;
+	protected bool $isunicode = false;
+	protected bool $InHeader = false;
+	protected bool $allowLocalFiles = true;
+	protected bool $opencell = true;
+	protected bool $openMarkedContent = true;
+	protected bool $tcpdflink = true;
+	protected bool $print_footer = false;
+	protected bool $underline = false;
+	protected bool $linethrough = false;
+	protected bool $overline = false;
+	protected bool $encrypted = true;
+	protected bool $sign = false;
+	protected bool $docinfounicode = false;
+
+	protected float $fwPt = 0;
+	protected float $fhPt = 0;
+	protected float $wPt = 0;
+	protected float $hPt = 0;
+	protected float $w = 0;
+	protected float $h = 0;
+	protected float $tMargin = 0;
+	protected float $lMargin = 0;
+	protected float $rMargin = 0;
+	protected float $clMargin = 0;
+	protected float $crMargin = 0;
+	protected float $customlistindent = 0;
+	protected float $imgscale = 0;
+	protected float $original_lMargin = 0;
+	protected float $original_rMargin = 0;
+	protected float $FontAscent = 0;
+	protected float $FontDescent = 0;
+	protected float $LineWidth = 0;
+	protected float $font_spacing = 0;
+	protected float $PageBreakTrigger = 0;
+	protected float $img_rb_x = 0;
+	protected float $img_rb_y = 0;
+
+	protected int $n = 0;
+	protected int $page = 0;
+	protected int $numpages = 0;
+	protected int $k = 1;
+	protected int $feps = 0;
+	protected int $numfonts = 0;
+	protected int $current_column = 0;
+	protected int $num_columns = 1;
+	protected int $FontSize = 0;	
+	protected int $FontSizePt = 12;
+	protected int $textrendermode = 0;
+	protected int $textstrokewidth = 0;
+	protected int $state = 0;
+	protected int $textindent = 0;
+	protected int $cell_height_ratio = 0;
+	protected int $font_stretching = 0;
+	protected float $endlinex = 0;
+	protected int $dpi = 0;
+	protected int $numimages = 0;
+	protected int $column_start_page = 0;
+	protected int $starting_page_number = 0;
+	protected int $bufferlen = 0;
+	protected int $doc_modification_timestamp = 0;
+	protected int $doc_creation_timestamp = 0;
+
+	protected string $buffer = '';
+	protected string $CurOrientation;
+	protected string $ZoomMode;
+	protected string $LayoutMode;
+	protected string $PageMode;
+	protected string $PDFVersion;
+	protected string $font_subsetting = '';
+	protected string $FontFamily = '';
+	protected string $FontStyle = '';
+	protected string $re_spaces;
+	protected string $linestyleCap = '';
+	protected string $linestyleJoin = '';
+	protected string $linestyleDash = '';
+	protected string $linestyleWidth = '';
+	protected string $thead = '';
+	protected string $epsmarker = '';
+	protected string $DrawColor = '';
+	protected string $FillColor = '';
+	protected string $TextColor = '';
+	protected string $ColorFlag = '';
+	protected string $last_enc_key = '';
+	protected string $last_enc_key_c = '';
+	protected string $out = '';
+	protected string $htmlvspace = '';
+	protected string $listindent = '';
+	protected string $listindentlevel = '';
+	protected string $listnum = '';
+	protected string $lispacer = '';
+
+	protected string $isRTLString = '';
+	protected string $lasth = '';
+	protected string $bMargin = '';
+	protected string $AutoPageBreak = '';
+	protected float $x = 0;
+	protected float $y = 0;
+	protected string $file_id = '';
+	protected string $encoding = 'UTF-8';
+	protected string $custom_xmp_rdf_pdfaExtension = '';
+	protected string $custom_xmp_rdf = '';
+	protected string $custom_xmp = '';
+	protected string $viewer_preferences = '';
+	protected string $title = '';
+	protected string $author = '';
+	protected string $subject = '';
+	protected string $keywords = '';
+	protected string $creator = '';
+
+    // ... other props if needed
+
+
+	
+	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) 
+	{
 		$serformat = (is_array($format) ? json_encode($format) : $format);
-		$this->file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
-		$this->hash_key = hash_hmac('sha256', TCPDF_STATIC::getRandomSeed($this->file_id), TCPDF_STATIC::getRandomSeed('TCPDF'), false);
-		$this->font_obj_ids = array();
-		$this->page_obj_id = array();
-		$this->form_obj_id = array();
-		// set pdf/a mode
+		$file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
+		$hash_key = hash_hmac('sha256', TCPDF_STATIC::getRandomSeed($file_id), TCPDF_STATIC::getRandomSeed('TCPDF'), false);
+		$this->font_obj_ids = [];
+		$this->page_obj_id = [];
+		$this->form_obj_id = [];
+		//set pdf/a mode
 		if ($pdfa != false) {
-			$this->pdfa_mode = true;
-			$this->pdfa_version = $pdfa;  // 1 or 3
+			$this->pdfa_mode = $pdfa !== false;
+			$this->pdfa_version = $this->pdfa_mode ? $pdfa : null;
 		} else
 			$this->pdfa_mode = false;
+			$this->pdfa_mode = false;
 
-		$this->force_srgb = false;
+		// fix dpi issue -- needs research
+		if (!isset($this->dpi) || $this->dpi <= 0) {
+		$this->dpi = 72;
+		}
+		
+		$this->encryptdata = [
+			'key' => 'asdfn8sdv9803e4', //TCPDF_STATIC::getRandomSeed(16),
+			'mode' => 2,
+			'Length' => 128,
+		];
+
+
+
+		$force_srgb = false;
 		// set language direction
-		$this->rtl = false;
-		$this->tmprtl = false;
+		$rtl = false;
+		$tmprtl = false;
 		// some checks
-		$this->_dochecks();
+		//Environment::doChecks();
+		$this->_doChecks();
 		// initialization of properties
-		$this->isunicode = $unicode;
-		$this->page = 0;
-		$this->transfmrk[0] = array();
-		$this->pagedim = array();
-		$this->n = 2;
-		$this->buffer = '';
-		$this->pages = array();
-		$this->state = 0;
-		$this->fonts = array();
-		$this->FontFiles = array();
-		$this->diffs = array();
-		$this->images = array();
-		$this->links = array();
-		$this->gradients = array();
-		$this->InFooter = false;
-		$this->lasth = 0;
+		$isunicode = $unicode;
+		$page = 0;
+		$transfmrk[0] = array();
+		$pagedim = array();
+		$n = 2;
+		$buffer = '';
+		$pages = array();
+		$state = 0;
+		$fonts = array();
+		$FontFiles = array();
+		$diffs = array();
+		$images = array();
+		$links = array();
+		$gradients = array();
+		$InFooter = false;
+		$lasth = 0;
 		$this->FontFamily = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
-		$this->FontStyle = '';
+		$FontStyle = '';
 		$this->FontSizePt = 12;
-		$this->underline = false;
-		$this->overline = false;
-		$this->linethrough = false;
-		$this->DrawColor = '0 G';
-		$this->FillColor = '0 g';
-		$this->TextColor = '0 g';
-		$this->ColorFlag = false;
-		$this->pdflayers = array();
+		$underline = false;
+		$overline = false;
+		$linethrough = false;
+		$DrawColor = '0 G';
+		$FillColor = '0 g';
+		$TextColor = '0 g';
+		$ColorFlag = false;
+		$pdflayers = array();
 		// encryption values
-		$this->encrypted = false;
-		$this->last_enc_key = '';
+		$encrypted = false;
+		$last_enc_key = '';
 		// standard Unicode fonts
 		$this->CoreFonts = array(
 			'courier'=>'Courier',
@@ -1969,9 +288,10 @@ class TCPDF {
 		$this->setPageFormat($format, $orientation);
 		// page margins (1 cm)
 		$margin = 28.35 / $this->k;
+		//$margin = 28.35;
 		$this->setMargins($margin, $margin);
-		$this->clMargin = $this->lMargin;
-		$this->crMargin = $this->rMargin;
+		$clMargin = $this->lMargin;
+		$crMargin = $this->rMargin;
 		// internal cell padding
 		$cpadding = $margin / 10;
 		$this->setCellPaddings($cpadding, 0, $cpadding, 0);
@@ -1979,7 +299,7 @@ class TCPDF {
 		$this->setCellMargins(0, 0, 0, 0);
 		// line width (0.2 mm)
 		$this->LineWidth = 0.57 / $this->k;
-		$this->linestyleWidth = sprintf('%F w', ($this->LineWidth * $this->k));
+		$linestyleWidth = sprintf('%F w', ($this->LineWidth * $this->k));
 		$this->linestyleCap = '0 J';
 		$this->linestyleJoin = '0 j';
 		$this->linestyleDash = '[] 0 d';
@@ -1991,59 +311,60 @@ class TCPDF {
 		$this->setCompression();
 		// set default PDF version number
 		$this->setPDFVersion();
-		$this->tcpdflink = true;
-		$this->encoding = $encoding;
-		$this->HREF = array();
+		$tcpdflink = true;
+		$encoding = $encoding;
+		$HREF = array();
 		$this->getFontsList();
-		$this->fgcolor = array('R' => 0, 'G' => 0, 'B' => 0);
-		$this->strokecolor = array('R' => 0, 'G' => 0, 'B' => 0);
-		$this->bgcolor = array('R' => 255, 'G' => 255, 'B' => 255);
-		$this->extgstates = array();
+		$fgcolor = array('R' => 0, 'G' => 0, 'B' => 0);
+		$strokecolor = array('R' => 0, 'G' => 0, 'B' => 0);
+		$bgcolor = array('R' => 255, 'G' => 255, 'B' => 255);
+		$extgstates = array();
 		$this->setTextShadow();
 		// signature
-		$this->sign = false;
-		$this->tsa_timestamp = false;
-		$this->tsa_data = array();
-		$this->signature_appearance = array('page' => 1, 'rect' => '0 0 0 0', 'name' => 'Signature');
-		$this->empty_signature_appearance = array();
+		$sign = false;
+		$tsa_timestamp = false;
+		$tsa_data = array();
+		$signature_appearance = array('page' => 1, 'rect' => '0 0 0 0', 'name' => 'Signature');
+		$empty_signature_appearance = array();
 		// user's rights
-		$this->ur['enabled'] = false;
-		$this->ur['document'] = '/FullSave';
-		$this->ur['annots'] = '/Create/Delete/Modify/Copy/Import/Export';
-		$this->ur['form'] = '/Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate';
-		$this->ur['signature'] = '/Modify';
-		$this->ur['ef'] = '/Create/Delete/Modify/Import';
-		$this->ur['formex'] = '';
+		$ur['enabled'] = false;
+		$ur['document'] = '/FullSave';
+		$ur['annots'] = '/Create/Delete/Modify/Copy/Import/Export';
+		$ur['form'] = '/Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate';
+		$ur['signature'] = '/Modify';
+		$ur['ef'] = '/Create/Delete/Modify/Import';
+		$ur['formex'] = '';
 		// set default JPEG quality
-		$this->jpeg_quality = 75;
+		$jpeg_quality = 75;
 		// initialize some settings
-		TCPDF_FONTS::utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
+		TCPDF_FONTS::utf8Bidi(array(), '', false, $isunicode, $this->CurrentFont);
 		// set default font
-		$this->setFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
-		$this->setHeaderFont(array($this->FontFamily, $this->FontStyle, $this->FontSizePt));
-		$this->setFooterFont(array($this->FontFamily, $this->FontStyle, $this->FontSizePt));
+		$this->setFont($this->FontFamily, $FontStyle, $this->FontSizePt);
+		$this->setHeaderFont(array($this->FontFamily, $FontStyle, $this->FontSizePt));
+		$this->setFooterFont(array($this->FontFamily, $FontStyle, $this->FontSizePt));
 		// check if PCRE Unicode support is enabled
-		if ($this->isunicode AND (@preg_match('/\pL/u', 'a') == 1)) {
+		if ($isunicode AND (@preg_match('/\pL/u', 'a') == 1)) {
 			// PCRE unicode support is turned ON
 			// \s     : any whitespace character
 			// \p{Z}  : any separator
 			// \p{Lo} : Unicode letter or ideograph that does not have lowercase and uppercase variants. Is used to chunk chinese words.
 			// \xa0   : Unicode Character 'NO-BREAK SPACE' (U+00A0)
-			//$this->setSpacesRE('/(?!\xa0)[\s\p{Z}\p{Lo}]/u');
+			//$setSpacesRE('/(?!\xa0)[\s\p{Z}\p{Lo}]/u');
 			$this->setSpacesRE('/(?!\xa0)[\s\p{Z}]/u');
 		} else {
 			// PCRE unicode support is turned OFF
 			$this->setSpacesRE('/[^\S\xa0]/');
 		}
-		$this->default_form_prop = array('lineWidth'=>1, 'borderStyle'=>'solid', 'fillColor'=>array(255, 255, 255), 'strokeColor'=>array(128, 128, 128));
+		$default_form_prop = array('LineWidth'=>1, 'borderStyle'=>'solid', 'fillColor'=>array(255, 255, 255), 'strokeColor'=>array(128, 128, 128));
 		// set document creation and modification timestamp
-		$this->doc_creation_timestamp = time();
-		$this->doc_modification_timestamp = $this->doc_creation_timestamp;
+		$doc_creation_timestamp = time();
+		$doc_modification_timestamp = $doc_creation_timestamp;
 		// get default graphic vars
-		$this->default_graphic_vars = $this->getGraphicVars();
-		$this->header_xobj_autoreset = false;
-		$this->custom_xmp = '';
-		$this->custom_xmp_rdf = '';
+		$default_graphic_vars = $this->getGraphicVars();
+		$header_xobj_autoreset = false;
+		$custom_xmp = '';
+		$custom_xmp_rdf = '';
+		
 	}
 
 	/**
@@ -2056,48 +377,7 @@ class TCPDF {
 		$this->_destroy(true);
 	}
 
-	/**
-	 * Set the units of measure for the document.
-	 * @param string $unit User measure unit. Possible values are:<ul><li>pt: point</li><li>mm: millimeter (default)</li><li>cm: centimeter</li><li>in: inch</li></ul><br />A point equals 1/72 of inch, that is to say about 0.35 mm (an inch being 2.54 cm). This is a very common unit in typography; font sizes are expressed in that unit.
-	 * @public
-	 * @since 3.0.015 (2008-06-06)
-	 */
-	public function setPageUnit($unit) {
-		$unit = strtolower($unit);
-		//Set scale factor
-		switch ($unit) {
-			// points
-			case 'px':
-			case 'pt': {
-				$this->k = 1;
-				break;
-			}
-			// millimeters
-			case 'mm': {
-				$this->k = $this->dpi / 25.4;
-				break;
-			}
-			// centimeters
-			case 'cm': {
-				$this->k = $this->dpi / 2.54;
-				break;
-			}
-			// inches
-			case 'in': {
-				$this->k = $this->dpi;
-				break;
-			}
-			// unsupported unit
-			default : {
-				$this->Error('Incorrect unit: '.$unit);
-				break;
-			}
-		}
-		$this->pdfunit = $unit;
-		if (isset($this->CurOrientation)) {
-			$this->setPageOrientation($this->CurOrientation);
-		}
-	}
+
 
 	/**
 	 * Change the format of the current page
@@ -2260,6 +540,31 @@ class TCPDF {
 		$this->setPageOrientation($orientation);
 	}
 
+    public function setPageUnit(string $unit, float $dpi = 96): array {
+        $unit = strtolower($unit);
+        switch ($unit) {
+            case 'px':
+            case 'pt':
+                $k = 1;
+                break;
+            case 'mm':
+                $k = $dpi / 25.4;
+                break;
+            case 'cm':
+                $k = $dpi / 2.54;
+                break;
+            case 'in':
+                $k = $dpi;
+                break;
+            default:
+                throw new \RuntimeException('Incorrect unit: ' . $unit);
+        }
+
+        return [
+            'k' => $k,
+            'unit' => $unit,
+        ];
+    }
 	/**
 	 * Set page orientation.
 	 * @param string $orientation page orientation. Possible values are (case insensitive):<ul><li>P or Portrait (default)</li><li>L or Landscape</li><li>'' (empty string) for automatic orientation</li></ul>
@@ -2323,8 +628,8 @@ class TCPDF {
 			// swap X and Y coordinates (change page orientation)
 			$this->pagedim = TCPDF_STATIC::swapPageBoxCoordinates($this->page, $this->pagedim);
 		}
-		$this->w = ($this->wPt / $this->k);
-		$this->h = ($this->hPt / $this->k);
+		//$this->w = ($this->wPt / $this->k);
+		//$this->h = ($this->hPt / $this->k);
 		if (TCPDF_STATIC::empty_string($autopagebreak)) {
 			if (isset($this->AutoPageBreak)) {
 				$autopagebreak = $this->AutoPageBreak;
@@ -2479,8 +784,8 @@ class TCPDF {
 	 * @public
 	 * @return float
 	 */
-	public function getCellHeight($fontsize, $padding=TRUE) {
-		$height = ($fontsize * $this->cell_height_ratio);
+	public function getCellHeight($FontSize, $padding=TRUE) {
+		$height = ($this->FontSize * $this->cell_height_ratio);
 		if ($padding && !empty($this->cell_padding)) {
 			$height += ($this->cell_padding['T'] + $this->cell_padding['B']);
 		}
@@ -2615,16 +920,16 @@ class TCPDF {
 	 */
 	public function setMargins($left, $top, $right=null, $keepmargins=false) {
 		//Set left, top and right margins
-		$this->lMargin = $left;
-		$this->tMargin = $top;
+		//$this->lMargin = $left;
+		//$this->tMargin = $top;
 		if ($right == -1 OR $right === null) {
 			$right = $left;
 		}
-		$this->rMargin = $right;
+		//$this->rMargin = $right;
 		if ($keepmargins) {
 			// overwrite original values
-			$this->original_lMargin = $this->lMargin;
-			$this->original_rMargin = $this->rMargin;
+			//$this->original_lMargin = $this->lMargin;
+			//$this->original_rMargin = $this->rMargin;
 		}
 	}
 
@@ -2870,9 +1175,11 @@ class TCPDF {
 	 * @see Cell(), MultiCell(), AcceptPageBreak()
 	 */
 	public function setAutoPageBreak($auto, $margin=0) {
+		/* deprecated
 		$this->AutoPageBreak = $auto ? true : false;
 		$this->bMargin = $margin;
 		$this->PageBreakTrigger = $this->h - $margin;
+		*/
 	}
 
 	/**
@@ -2950,7 +1257,7 @@ class TCPDF {
 	 * @see SetAuthor(), SetCreator(), SetKeywords(), SetSubject()
 	 */
 	public function setTitle($title) {
-		$this->title = $title;
+		//$this->title = $title;
 	}
 
 	/**
@@ -2961,7 +1268,7 @@ class TCPDF {
 	 * @see SetAuthor(), SetCreator(), SetKeywords(), SetTitle()
 	 */
 	public function setSubject($subject) {
-		$this->subject = $subject;
+		//$this->subject = $subject;
 	}
 
 	/**
@@ -2972,7 +1279,7 @@ class TCPDF {
 	 * @see SetCreator(), SetKeywords(), SetSubject(), SetTitle()
 	 */
 	public function setAuthor($author) {
-		$this->author = $author;
+		//$this->author = $author;
 	}
 
 	/**
@@ -2983,7 +1290,7 @@ class TCPDF {
 	 * @see SetAuthor(), SetCreator(), SetSubject(), SetTitle()
 	 */
 	public function setKeywords($keywords) {
-		$this->keywords = $keywords;
+		//$this->keywords = $keywords;
 	}
 
 	/**
@@ -2994,7 +1301,7 @@ class TCPDF {
 	 * @see SetAuthor(), SetKeywords(), SetSubject(), SetTitle()
 	 */
 	public function setCreator($creator) {
-		$this->creator = $creator;
+		//$this->creator = $creator;
 	}
 
 	/**
@@ -3064,7 +1371,8 @@ class TCPDF {
 			$this->y = $this->h - (1 / $this->k);
 			$this->lMargin = 0;
 			$this->_outSaveGraphicsState();
-			$font = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
+			//$font = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
+			$font = 'helvetica';
 			$this->setFont($font, '', 1);
 			$this->setTextRenderingMode(0, false, false);
 			$msg = "\x50\x6f\x77\x65\x72\x65\x64\x20\x62\x79\x20\x54\x43\x50\x44\x46\x20\x28\x77\x77\x77\x2e\x74\x63\x70\x64\x66\x2e\x6f\x72\x67\x29";
@@ -3353,12 +1661,14 @@ class TCPDF {
 	 * @public
 	 */
 	public function setHeaderData($ln='', $lw=0, $ht='', $hs='', $tc=array(0,0,0), $lc=array(0,0,0)) {
+		/* deprecated 
 		$this->header_logo = $ln;
 		$this->header_logo_width = $lw;
 		$this->header_title = $ht;
 		$this->header_string = $hs;
 		$this->header_text_color = $tc;
 		$this->header_line_color = $lc;
+		*/
 	}
 
 	/**
@@ -3368,8 +1678,8 @@ class TCPDF {
 	 * @public
 	 */
 	public function setFooterData($tc=array(0,0,0), $lc=array(0,0,0)) {
-		$this->footer_text_color = $tc;
-		$this->footer_line_color = $lc;
+		//$this->footer_text_color = $tc;
+		//$this->footer_line_color = $lc;
 	}
 
 	/**
@@ -3397,7 +1707,7 @@ class TCPDF {
 	 * @public
 	 */
 	public function setHeaderMargin($hm=10) {
-		$this->header_margin = $hm;
+		//$this->header_margin = $hm;
 	}
 
 	/**
@@ -3417,7 +1727,7 @@ class TCPDF {
 	 * @public
 	 */
 	public function setFooterMargin($fm=10) {
-		$this->footer_margin = $fm;
+		//$this->footer_margin = $fm;
 	}
 
 	/**
@@ -4128,8 +2438,8 @@ class TCPDF {
 	 * @public
 	 * @since 1.2
 	 */
-	public function GetStringWidth($s, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
-		return $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
+	public function GetStringWidth($s, $fontname='', $fontstyle='', $FontSize=0, $getarray=false) {
+		return $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $FontSize, $getarray);
 	}
 
 	/**
@@ -4145,13 +2455,13 @@ class TCPDF {
 	 * @public
 	 * @since 2.4.000 (2008-03-06)
 	 */
-	public function GetArrStringWidth($sa, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
+	public function GetArrStringWidth($sa, $fontname='', $fontstyle='', $FontSize=0, $getarray=false) {
 		// store current values
 		if (!TCPDF_STATIC::empty_string($fontname)) {
 			$prev_FontFamily = $this->FontFamily;
 			$prev_FontStyle = $this->FontStyle;
 			$prev_FontSizePt = $this->FontSizePt;
-			$this->setFont($fontname, $fontstyle, $fontsize, '', 'default', false);
+			$this->setFont($fontname, $fontstyle, $this->FontSize, '', 'default', false);
 		}
 		// convert UTF-8 array to Latin1 if required
 		if ($this->isunicode AND (!$this->isUnicodeFont())) {
@@ -4292,8 +2602,9 @@ class TCPDF {
 			$family = substr($family, 0, -1);
 		}
 		// normalize family name
+		$isunicode = '';
 		$family = strtolower($family);
-		if ((!$this->isunicode) AND ($family == 'arial')) {
+		if ((!$isunicode) AND ($family == 'arial')) {
 			$family = 'helvetica';
 		}
 		if (($family == 'symbol') OR ($family == 'zapfdingbats')) {
@@ -4305,23 +2616,24 @@ class TCPDF {
 		}
 		$tempstyle = strtoupper($style === null ? '' : $style);
 		$style = '';
+		$underline = '';
 		// underline
 		if (strpos($tempstyle, 'U') !== false) {
 			$this->underline = true;
 		} else {
-			$this->underline = false;
+			$underline = false;
 		}
 		// line-through (deleted)
 		if (strpos($tempstyle, 'D') !== false) {
-			$this->linethrough = true;
+			$linethrough = true;
 		} else {
-			$this->linethrough = false;
+			$linethrough = false;
 		}
 		// overline
 		if (strpos($tempstyle, 'O') !== false) {
-			$this->overline = true;
+			$overline = true;
 		} else {
-			$this->overline = false;
+			$overline = false;
 		}
 		// bold
 		if (strpos($tempstyle, 'B') !== false) {
@@ -4333,16 +2645,16 @@ class TCPDF {
 		}
 		$bistyle = $style;
 		$fontkey = $family.$style;
-		$font_style = $style.($this->underline ? 'U' : '').($this->linethrough ? 'D' : '').($this->overline ? 'O' : '');
-		$fontdata = array('fontkey' => $fontkey, 'family' => $family, 'style' => $font_style);
+		$font_style = $style.($underline ? 'U' : '').($linethrough ? 'D' : '').($overline ? 'O' : '');
+		$this->fontdata = array('fontkey' => $fontkey, 'family' => $family, 'style' => $font_style);
 		// check if the font has been already added
 		$fb = $this->getFontBuffer($fontkey);
 		if ($fb !== false) {
 			if ($this->inxobj) {
 				// we are inside an XObject template
-				$this->xobjects[$this->xobjid]['fonts'][$fontkey] = $fb['i'];
+				$xobjects[$xobjid]['fonts'][$fontkey] = $fb['i'];
 			}
-			return $fontdata;
+			return $this->fontdata;
 		}
 		// get specified font directory (if any)
 		$fontdir = false;
@@ -4424,7 +2736,7 @@ class TCPDF {
 			// set default width
 			if (isset($desc['MissingWidth']) AND ($desc['MissingWidth'] > 0)) {
 				$dw = $desc['MissingWidth'];
-			} elseif (isset($cw[32])) {
+			} elseif (isset($cw[32])) {				
 				$dw = $cw[32];
 			} else {
 				$dw = 600;
@@ -4487,7 +2799,7 @@ class TCPDF {
 		$this->setFontBuffer($fontkey, array('fontkey' => $fontkey, 'i' => $this->numfonts, 'type' => $type, 'name' => $name, 'desc' => $desc, 'up' => $up, 'ut' => $ut, 'cw' => $cw, 'cbbox' => $cbbox, 'dw' => $dw, 'enc' => $enc, 'cidinfo' => $cidinfo, 'file' => $file, 'ctg' => $ctg, 'subset' => $subset, 'subsetchars' => $subsetchars));
 		if ($this->inxobj) {
 			// we are inside an XObject template
-			$this->xobjects[$this->xobjid]['fonts'][$fontkey] = $this->numfonts;
+			$xobjects[$this->xobjid]['fonts'][$fontkey] = $this->numfonts;
 		}
 		if (!empty($diff)) {
 			//Search existing encodings
@@ -4520,7 +2832,7 @@ class TCPDF {
 				}
 			}
 		}
-		return $fontdata;
+		return $this->fontdata;
 	}
 
 	/**
@@ -4549,14 +2861,14 @@ class TCPDF {
 			$size = 0;
 		}
 		// try to add font (if not already added)
-		$fontdata = $this->AddFont($family, $style, $fontfile, $subset);
-		$this->FontFamily = $fontdata['family'];
-		$this->FontStyle = $fontdata['style'];
+		$this->fontdata = $this->AddFont($family, $style, $fontfile, $subset);
+		$this->FontFamily = $this->fontdata['family'];
+		$this->FontStyle = $this->fontdata['style'];
 		if (isset($this->CurrentFont['fontkey']) AND isset($this->CurrentFont['subsetchars'])) {
 			// save subset chars of the previous font
 			$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
 		}
-		$this->CurrentFont = $this->getFontBuffer($fontdata['fontkey']);
+		$this->CurrentFont = $this->getFontBuffer($this->fontdata['fontkey']);
 		$this->setFontSize($size, $out);
 	}
 
@@ -4573,7 +2885,7 @@ class TCPDF {
 		// font size in points
 		$this->FontSizePt = $size;
 		// font size in user units
-		$this->FontSize = $size / $this->k;
+		//$FontSize = $size / $k;
 		// calculate some font metrics
 		if (isset($this->CurrentFont['desc']['FontBBox'])) {
 			$bbox = explode(' ', substr($this->CurrentFont['desc']['FontBBox'], 1, -1));
@@ -4787,7 +3099,7 @@ class TCPDF {
 	 * @since 4.5.025
 	 */
 	public function setDefaultMonospacedFont($font) {
-		$this->default_monospaced_font = $font;
+		//$this->default_monospaced_font = $font;
 	}
 
 	/**
@@ -4924,7 +3236,7 @@ class TCPDF {
 			$this->PageAnnots[$page] = array();
 		}
 		$this->PageAnnots[$page][] = array('n' => ++$this->n, 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'txt' => $text, 'opt' => $opt, 'numspaces' => $spaces);
-		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $pdfa_version == 3)) {
 			if ((($opt['Subtype'] == 'FileAttachment') OR ($opt['Subtype'] == 'Sound')) AND (!TCPDF_STATIC::empty_string($opt['FS']))
 				AND (@TCPDF_STATIC::file_exists($opt['FS']) OR TCPDF_STATIC::isValidURL($opt['FS']))
 				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
@@ -5173,7 +3485,7 @@ class TCPDF {
 			$this->setFillColorArray($this->txtshadow['color']);
 			$this->setTextColorArray($this->txtshadow['color']);
 			$this->setDrawColorArray($this->txtshadow['color']);
-			if ($this->txtshadow['opacity'] != $alpha['CA']) {
+			if ($this->txtshadow['opacity'] != ($alpha['CA'] ??1)) {
 				$this->setAlpha($this->txtshadow['opacity'], $this->txtshadow['blend_mode']);
 			}
 			if ($this->state == 2) {
@@ -5185,7 +3497,7 @@ class TCPDF {
 			$this->setFillColorArray($bc);
 			$this->setTextColorArray($fc);
 			$this->setDrawColorArray($sc);
-			if ($this->txtshadow['opacity'] != $alpha['CA']) {
+			if ($this->txtshadow['opacity'] != ($alpha['CA'] ??1)) {
 				$this->setAlpha($alpha['CA'], $alpha['BM'], $alpha['ca'], $alpha['AIS']);
 			}
 		}
@@ -7749,7 +6061,7 @@ class TCPDF {
 			// decode signature
 			$signature = base64_decode(trim($signature));
 			// add TSA timestamp to signature
-			$signature = $this->applyTSA($signature);
+			$signature = $this->applyTimeStampAuthority($signature);
 			// convert signature to hex
 			$signature = current(unpack('H*', $signature));
 			$signature = str_pad($signature, $this->signature_max_length, '0');
@@ -7937,11 +6249,7 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Check for locale-related bug
-	 * @protected
-	 */
-	protected function _dochecks() {
+	protected function _doChecks() {
 		//Check for locale-related bug
 		if (1.1 == 1) {
 			$this->Error('Don\'t alter the locale before including class file');
@@ -7951,6 +6259,22 @@ class TCPDF {
 			setlocale(LC_NUMERIC, 'C');
 		}
 	}
+
+
+	/**
+	 * Check for locale-related bug
+	 * @protected
+	 */
+	// protected function _dochecks() {
+	// 	//Check for locale-related bug
+	// 	if (1.1 == 1) {
+	// 		$this->Error('Don\'t alter the locale before including class file');
+	// 	}
+	// 	//Check for decimal separator
+	// 	if (sprintf('%.1F', 1.0) != '1.0') {
+	// 		setlocale(LC_NUMERIC, 'C');
+	// 	}
+	// }
 
 	/**
 	 * Return an array containing variations for the basic page number alias.
@@ -8926,6 +7250,31 @@ class TCPDF {
 		return $this->n;
 	}
 
+	
+    /**
+     * Put Optional Content Groups (layers)
+     * MOVED FROM: protected function _putocg()
+     */
+    public function _putOptionalContentGroups()
+    {
+		if (empty($this->pdflayers)) {
+			return;
+		}
+		foreach ($this->pdflayers as $key => $layer) {
+			 $this->pdflayers[$key]['objid'] = $this->_newobj();
+			 $out = '<< /Type /OCG';
+			 $out .= ' /Name '.$this->_textstring($layer['name'], $this->pdflayers[$key]['objid']);
+			 $out .= ' /Usage <<';
+			 if (isset($layer['print']) AND ($layer['print'] !== NULL)) {
+				$out .= ' /Print <</PrintState /'.($layer['print']?'ON':'OFF').'>>';
+			 }
+			 $out .= ' /View <</ViewState /'.($layer['view']?'ON':'OFF').'>>';
+			 $out .= ' >> >>';
+			 $out .= "\n".'endobj';
+			 $this->_out($out);
+		}
+    }
+	
 	/**
 	 * Output fonts.
 	 * @author Nicola Asuni
@@ -8998,7 +7347,10 @@ class TCPDF {
 			$name = $font['name'];
 			if ($type == 'core') {
 				// standard core font
-				$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+				//$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+				if (isset($this->font_obj_ids[$k])) {
+					$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+				}
 				$out .= '<</Type /Font';
 				$out .= ' /Subtype /Type1';
 				$out .= ' /BaseFont /'.$name;
@@ -9091,17 +7443,23 @@ class TCPDF {
 		$fontname .= $font['name'];
 		// Type0 Font
 		// A composite font composed of other fonts, organized hierarchically
-		$out = $this->_getobj($this->font_obj_ids[$font['fontkey']])."\n";
-		$out .= '<< /Type /Font';
-		$out .= ' /Subtype /Type0';
-		$out .= ' /BaseFont /'.$fontname;
-		$out .= ' /Name /F'.$font['i'];
-		$out .= ' /Encoding /'.$font['enc'];
-		$out .= ' /ToUnicode '.($this->n + 1).' 0 R';
-		$out .= ' /DescendantFonts ['.($this->n + 2).' 0 R]';
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
+		//$out = $this->_getobj($this->font_obj_ids[$font['fontkey']])."\n";
+		if (isset($this->font_obj_ids[$font['fontkey']])) {
+			$this->out = $this->_getobj($this->font_obj_ids[$font['fontkey']])."\n";
+		} else {
+			$this->out = '';
+		}
+
+		$this->out .= '<< /Type /Font';
+		$this->out .= ' /Subtype /Type0';
+		$this->out .= ' /BaseFont /'.$fontname;
+		$this->out .= ' /Name /F'.$font['i'];
+		$this->out .= ' /Encoding /'.$font['enc'];
+		$this->out .= ' /ToUnicode '.($this->n + 1).' 0 R';
+		$this->out .= ' /DescendantFonts ['.($this->n + 2).' 0 R]';
+		$this->out .= ' >>';
+		$this->out .= "\n".'endobj';
+		$this->_out($this->out);
 		// ToUnicode map for Identity-H
 		$stream = TCPDF_FONT_DATA::$uni_identity_h;
 		// ToUnicode Object
@@ -9144,7 +7502,9 @@ class TCPDF {
 		$fontdir = false;
 		if (!TCPDF_STATIC::empty_string($font['file'])) {
 			// A stream containing a TrueType font
-			$out .= ' /FontFile2 '.$this->FontFiles[$font['file']]['n'].' 0 R';
+			if (isset($this->FontFiles[$font['file']]['n'])){
+				$out .= ' /FontFile2 '.$this->FontFiles[$font['file']]['n'].' 0 R';				
+			}		
 			$fontdir = $this->FontFiles[$font['file']]['fontdir'];
 		}
 		$out .= ' >>';
@@ -9525,7 +7885,7 @@ class TCPDF {
 		$out .= ' /Font <<';
 		foreach ($this->fontkeys as $fontkey) {
 			$font = $this->getFontBuffer($fontkey);
-			$out .= ' /F'.$font['i'].' '.$font['n'].' 0 R';
+			$out .= ' /F'.$font['i'].' '.$font['name'].' 0 R';
 		}
 		$out .= ' >>';
 		$out .= ' /XObject <<';
@@ -9585,20 +7945,214 @@ class TCPDF {
 	 */
 	protected function _putresources() {
 		$this->_putextgstates();
-		$this->_putocg();
+		$this->_putOptionalContentGroups();
 		$this->_putfonts();
 		$this->_putimages();
 		$this->_putspotcolors();
 		$this->_putshaders();
 		$this->_putxobjects();
 		$this->_putresourcedict();
-		$this->_putdests();
+		$this->_putDestinations();
 		$this->_putEmbeddedFiles();
 		$this->_putannotsobjs();
 		$this->_putjavascript();
 		$this->_putbookmarks();
-		$this->_putencryption();
+		$this->_putEncryption();
 	}
+
+	       /**
+     * Put encryption dictionary and related objects
+     * MOVED FROM: protected function _putencryption()
+     */
+    public function _putEncryption() {
+		if (!$this->encrypted) {
+			return;
+		}
+		$this->encryptdata['objid'] = $this->_newobj();
+		$out = '<<';
+		if (!isset($this->encryptdata['Filter']) OR empty($this->encryptdata['Filter'])) {
+			$this->encryptdata['Filter'] = 'Standard';
+		}
+		$out .= ' /Filter /'.$this->encryptdata['Filter'];
+		if (isset($this->encryptdata['SubFilter']) AND !empty($this->encryptdata['SubFilter'])) {
+			$out .= ' /SubFilter /'.$this->encryptdata['SubFilter'];
+		}
+		if (!isset($this->encryptdata['V']) OR empty($this->encryptdata['V'])) {
+			$this->encryptdata['V'] = 1;
+		}
+		// V is a code specifying the algorithm to be used in encrypting and decrypting the document
+		$out .= ' /V '.$this->encryptdata['V'];
+		if (isset($this->encryptdata['Length']) AND !empty($this->encryptdata['Length'])) {
+			// The length of the encryption key, in bits. The value shall be a multiple of 8, in the range 40 to 256
+			$out .= ' /Length '.$this->encryptdata['Length'];
+		} else {
+			$out .= ' /Length 40';
+		}
+		if ($this->encryptdata['V'] >= 4) {
+			if (!isset($this->encryptdata['StmF']) OR empty($this->encryptdata['StmF'])) {
+				$this->encryptdata['StmF'] = 'Identity';
+			}
+			if (!isset($this->encryptdata['StrF']) OR empty($this->encryptdata['StrF'])) {
+				// The name of the crypt filter that shall be used when decrypting all strings in the document.
+				$this->encryptdata['StrF'] = 'Identity';
+			}
+			// A dictionary whose keys shall be crypt filter names and whose values shall be the corresponding crypt filter dictionaries.
+			if (isset($this->encryptdata['CF']) AND !empty($this->encryptdata['CF'])) {
+				$out .= ' /CF <<';
+				$out .= ' /'.$this->encryptdata['StmF'].' <<';
+				$out .= ' /Type /CryptFilter';
+				if (isset($this->encryptdata['CF']['CFM']) AND !empty($this->encryptdata['CF']['CFM'])) {
+					// The method used
+					$out .= ' /CFM /'.$this->encryptdata['CF']['CFM'];
+					if ($this->encryptdata['pubkey']) {
+						$out .= ' /Recipients [';
+						foreach ($this->encryptdata['Recipients'] as $rec) {
+							$out .= ' <'.$rec.'>';
+						}
+						$out .= ' ]';
+						if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) {
+							$out .= ' /EncryptMetadata false';
+						} else {
+							$out .= ' /EncryptMetadata true';
+						}
+					}
+				} else {
+					$out .= ' /CFM /None';
+				}
+				if (isset($this->encryptdata['CF']['AuthEvent']) AND !empty($this->encryptdata['CF']['AuthEvent'])) {
+					// The event to be used to trigger the authorization that is required to access encryption keys used by this filter.
+					$out .= ' /AuthEvent /'.$this->encryptdata['CF']['AuthEvent'];
+				} else {
+					$out .= ' /AuthEvent /DocOpen';
+				}
+				if (isset($this->encryptdata['CF']['Length']) AND !empty($this->encryptdata['CF']['Length'])) {
+					// The bit length of the encryption key.
+					$out .= ' /Length '.$this->encryptdata['CF']['Length'];
+				}
+				$out .= ' >> >>';
+			}
+			// The name of the crypt filter that shall be used by default when decrypting streams.
+			$out .= ' /StmF /'.$this->encryptdata['StmF'];
+			// The name of the crypt filter that shall be used when decrypting all strings in the document.
+			$out .= ' /StrF /'.$this->encryptdata['StrF'];
+			if (isset($this->encryptdata['EFF']) AND !empty($this->encryptdata['EFF'])) {
+				// The name of the crypt filter that shall be used when encrypting embedded file streams that do not have their own crypt filter specifier.
+				$out .= ' /EFF /'.$this->encryptdata[''];
+			}
+		}
+		// Additional encryption dictionary entries for the standard security handler
+		//if ($this->encryptdata['pubkey']) {
+		if (isset($this->encryptdata['pubkey']) && $this->encryptdata['pubkey']) {
+
+			if (($this->encryptdata['V'] < 4) AND isset($this->encryptdata['Recipients']) AND !empty($this->encryptdata['Recipients'])) {
+				$out .= ' /Recipients [';
+				foreach ($this->encryptdata['Recipients'] as $rec) {
+					$out .= ' <'.$rec.'>';
+				}
+				$out .= ' ]';
+			}
+		} else {
+			$out .= ' /R';
+			if ($this->encryptdata['V'] == 5) { // AES-256
+				$out .= ' 5';
+				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
+				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
+				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
+			} elseif ($this->encryptdata['V'] == 4) { // AES-128
+				$out .= ' 4';
+			} elseif ($this->encryptdata['V'] < 2) { // RC-40
+				$out .= ' 2';
+			} else { // RC-128
+				$out .= ' 3';
+			}
+				if (isset($this->encryptdata['O'])) {
+					$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
+				}
+				if (isset($this->encryptdata['U'])) {
+					$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
+				}
+				if (isset($this->encryptdata['P'])) {
+					$out .= ' /P '.$this->encryptdata['P'];
+				}
+
+			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
+				$out .= ' /EncryptMetadata false';
+			} else {
+				$out .= ' /EncryptMetadata true';
+			}
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$this->_out($out);
+    }
+    /**
+     * Put JavaScript code in PDF
+     * MOVED FROM: protected function _putjavascript()
+     */
+    public function _putJavaScript()
+    {
+		if ($this->pdfa_mode OR (empty($this->javascript) AND empty($this->js_objects))) {
+			return;
+		}
+		if (strpos($this->javascript, 'this.addField') > 0) {
+			if (!$this->ur['enabled']) {
+				//$this->setUserRights();
+			}
+			// the following two lines are used to avoid form fields duplication after saving
+			// The addField method only works when releasing user rights (UR3)
+			$jsa = sprintf("ftcpdfdocsaved=this.addField('%s','%s',%d,[%F,%F,%F,%F]);", 'tcpdfdocsaved', 'text', 0, 0, 1, 0, 1);
+			$jsb = "getField('tcpdfdocsaved').value='saved';";
+			$this->javascript = $jsa."\n".$this->javascript."\n".$jsb;
+		}
+		// name tree for javascript
+		$this->n_js = '<< /Names [';
+		if (!empty($this->javascript)) {
+			$this->n_js .= ' (EmbeddedJS) '.($this->n + 1).' 0 R';
+		}
+		if (!empty($this->js_objects)) {
+			foreach ($this->js_objects as $key => $val) {
+				if ($val['onload']) {
+					$this->n_js .= ' (JS'.$key.') '.$key.' 0 R';
+				}
+			}
+		}
+		$this->n_js .= ' ] >>';
+		// default Javascript object
+		if (!empty($this->javascript)) {
+			$obj_id = $this->_newobj();
+			$out = '<< /S /JavaScript';
+			$out .= ' /JS '.$this->_textstring($this->javascript, $obj_id);
+			$out .= ' >>';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+		}
+		// additional Javascript objects
+		if (!empty($this->js_objects)) {
+			foreach ($this->js_objects as $key => $val) {
+				$out = $this->_getobj($key)."\n".' << /S /JavaScript /JS '.$this->_textstring($val['js'], $key).' >>'."\n".'endobj';
+				$this->_out($out);
+			}
+		}
+    }
+	    /**
+     * Put destinations for internal links
+     * MOVED FROM: protected function _putdests()
+     */
+    public function _putDestinations()
+    {
+		if (empty($this->dests)) {
+			return;
+		}
+		$this->n_dests = $this->_newobj();
+		$out = ' <<';
+		foreach($this->dests as $name => $o) {
+			$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$this->_out($out);
+    }
+
 
 	/**
 	 * Adds some Metadata information (Document Information Dictionary)
@@ -10156,7 +8710,7 @@ class TCPDF {
 			$out .= "\n".'endobj';
 			$this->_out($out);
 			// signature
-			$this->_putsignature();
+			$this->putDigitalSignature();
 		}
 		// Info
 		$objid_info = $this->_putinfo();
@@ -10365,7 +8919,7 @@ class TCPDF {
 		if ($n == 0) {
 			$n = $this->n;
 		}
-		$s = $this->_encrypt_data($n, $s);
+		$s = $this->returnEncryptData($n, $s);
 		return '('. TCPDF_STATIC::_escape($s).')';
 	}
 
@@ -10458,7 +9012,7 @@ class TCPDF {
 			// default to current object
 			$n = $this->n;
 		}
-		return $this->_encrypt_data($n, $s);
+		return $this->returnEncryptData($n, $s);
 	}
 
 	/**
@@ -10497,7 +9051,7 @@ class TCPDF {
 	 * @since 1.1
 	 */
 	public function setHeaderFont($font) {
-		$this->header_font = $font;
+		//$this->header_font = $font;
 	}
 
 	/**
@@ -10519,7 +9073,7 @@ class TCPDF {
 	 * @since 1.1
 	 */
 	public function setFooterFont($font) {
-		$this->footer_font = $font;
+		//$this->footer_font = $font;
 	}
 
 	/**
@@ -10540,11 +9094,11 @@ class TCPDF {
 	 * @since 1.1
 	 */
 	public function setLanguageArray($language) {
-		$this->l = $language;
+		//$this->l = $language;
 		if (isset($this->l['a_meta_dir'])) {
 			$this->rtl = $this->l['a_meta_dir']=='rtl' ? true : false;
 		} else {
-			$this->rtl = false;
+			//$this->rtl = false;
 		}
 	}
 
@@ -10554,7 +9108,7 @@ class TCPDF {
 	 */
 	public function getPDFData() {
 		if ($this->state < 3) {
-			$this->Close();
+			//$this->Close();
 		}
 		return $this->buffer;
 	}
@@ -10639,388 +9193,36 @@ class TCPDF {
 	 * @author Nicola Asuni
 	 * @since 2.0.000 (2008-01-02)
 	 */
+	// protected function _objectkey($n) {
+	// 	$objkey = $this->encryptdata['key'].pack('VXxx', $n);
+	// 	if ($this->encryptdata['mode'] == 2) { // AES-128
+	// 		// AES padding
+	// 		$objkey .= "\x73\x41\x6C\x54"; // sAlT
+	// 	}
+	// 	$objkey = substr(TCPDF_STATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
+	// 	$objkey = substr($objkey, 0, 16);
+	// 	return $objkey;
+	// }
+
 	protected function _objectkey($n) {
-		$objkey = $this->encryptdata['key'].pack('VXxx', $n);
-		if ($this->encryptdata['mode'] == 2) { // AES-128
-			// AES padding
-			$objkey .= "\x73\x41\x6C\x54"; // sAlT
-		}
-		$objkey = substr(TCPDF_STATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
-		$objkey = substr($objkey, 0, 16);
-		return $objkey;
-	}
+    if (empty($this->encryptdata['key'])) {
+        throw new \RuntimeException('Encryption key is not set.');
+    }
+    if (!isset($this->encryptdata['mode'])) {
+        $this->encryptdata['mode'] = 0; // Default to non-AES mode
+    }
 
-	/**
-	 * Encrypt the input string.
-	 * @param int $n object number
-	 * @param string $s data string to encrypt
-	 * @return string encrypted string
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 5.0.005 (2010-05-11)
-	 */
-	protected function _encrypt_data($n, $s) {
-		if (!$this->encrypted) {
-			return $s;
-		}
-		switch ($this->encryptdata['mode']) {
-			case 0:   // RC4-40
-			case 1: { // RC4-128
-				$s = TCPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
-				break;
-			}
-			case 2: { // AES-128
-				$s = TCPDF_STATIC::_AES($this->_objectkey($n), $s);
-				break;
-			}
-			case 3: { // AES-256
-				$s = TCPDF_STATIC::_AES($this->encryptdata['key'], $s);
-				break;
-			}
-		}
-		return $s;
-	}
+    $objkey = $this->encryptdata['key'] . pack('VXxx', $n);
 
-	/**
-	 * Put encryption on PDF document.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 2.0.000 (2008-01-02)
-	 */
-	protected function _putencryption() {
-		if (!$this->encrypted) {
-			return;
-		}
-		$this->encryptdata['objid'] = $this->_newobj();
-		$out = '<<';
-		if (!isset($this->encryptdata['Filter']) OR empty($this->encryptdata['Filter'])) {
-			$this->encryptdata['Filter'] = 'Standard';
-		}
-		$out .= ' /Filter /'.$this->encryptdata['Filter'];
-		if (isset($this->encryptdata['SubFilter']) AND !empty($this->encryptdata['SubFilter'])) {
-			$out .= ' /SubFilter /'.$this->encryptdata['SubFilter'];
-		}
-		if (!isset($this->encryptdata['V']) OR empty($this->encryptdata['V'])) {
-			$this->encryptdata['V'] = 1;
-		}
-		// V is a code specifying the algorithm to be used in encrypting and decrypting the document
-		$out .= ' /V '.$this->encryptdata['V'];
-		if (isset($this->encryptdata['Length']) AND !empty($this->encryptdata['Length'])) {
-			// The length of the encryption key, in bits. The value shall be a multiple of 8, in the range 40 to 256
-			$out .= ' /Length '.$this->encryptdata['Length'];
-		} else {
-			$out .= ' /Length 40';
-		}
-		if ($this->encryptdata['V'] >= 4) {
-			if (!isset($this->encryptdata['StmF']) OR empty($this->encryptdata['StmF'])) {
-				$this->encryptdata['StmF'] = 'Identity';
-			}
-			if (!isset($this->encryptdata['StrF']) OR empty($this->encryptdata['StrF'])) {
-				// The name of the crypt filter that shall be used when decrypting all strings in the document.
-				$this->encryptdata['StrF'] = 'Identity';
-			}
-			// A dictionary whose keys shall be crypt filter names and whose values shall be the corresponding crypt filter dictionaries.
-			if (isset($this->encryptdata['CF']) AND !empty($this->encryptdata['CF'])) {
-				$out .= ' /CF <<';
-				$out .= ' /'.$this->encryptdata['StmF'].' <<';
-				$out .= ' /Type /CryptFilter';
-				if (isset($this->encryptdata['CF']['CFM']) AND !empty($this->encryptdata['CF']['CFM'])) {
-					// The method used
-					$out .= ' /CFM /'.$this->encryptdata['CF']['CFM'];
-					if ($this->encryptdata['pubkey']) {
-						$out .= ' /Recipients [';
-						foreach ($this->encryptdata['Recipients'] as $rec) {
-							$out .= ' <'.$rec.'>';
-						}
-						$out .= ' ]';
-						if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) {
-							$out .= ' /EncryptMetadata false';
-						} else {
-							$out .= ' /EncryptMetadata true';
-						}
-					}
-				} else {
-					$out .= ' /CFM /None';
-				}
-				if (isset($this->encryptdata['CF']['AuthEvent']) AND !empty($this->encryptdata['CF']['AuthEvent'])) {
-					// The event to be used to trigger the authorization that is required to access encryption keys used by this filter.
-					$out .= ' /AuthEvent /'.$this->encryptdata['CF']['AuthEvent'];
-				} else {
-					$out .= ' /AuthEvent /DocOpen';
-				}
-				if (isset($this->encryptdata['CF']['Length']) AND !empty($this->encryptdata['CF']['Length'])) {
-					// The bit length of the encryption key.
-					$out .= ' /Length '.$this->encryptdata['CF']['Length'];
-				}
-				$out .= ' >> >>';
-			}
-			// The name of the crypt filter that shall be used by default when decrypting streams.
-			$out .= ' /StmF /'.$this->encryptdata['StmF'];
-			// The name of the crypt filter that shall be used when decrypting all strings in the document.
-			$out .= ' /StrF /'.$this->encryptdata['StrF'];
-			if (isset($this->encryptdata['EFF']) AND !empty($this->encryptdata['EFF'])) {
-				// The name of the crypt filter that shall be used when encrypting embedded file streams that do not have their own crypt filter specifier.
-				$out .= ' /EFF /'.$this->encryptdata[''];
-			}
-		}
-		// Additional encryption dictionary entries for the standard security handler
-		if ($this->encryptdata['pubkey']) {
-			if (($this->encryptdata['V'] < 4) AND isset($this->encryptdata['Recipients']) AND !empty($this->encryptdata['Recipients'])) {
-				$out .= ' /Recipients [';
-				foreach ($this->encryptdata['Recipients'] as $rec) {
-					$out .= ' <'.$rec.'>';
-				}
-				$out .= ' ]';
-			}
-		} else {
-			$out .= ' /R';
-			if ($this->encryptdata['V'] == 5) { // AES-256
-				$out .= ' 5';
-				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
-			} elseif ($this->encryptdata['V'] == 4) { // AES-128
-				$out .= ' 4';
-			} elseif ($this->encryptdata['V'] < 2) { // RC-40
-				$out .= ' 2';
-			} else { // RC-128
-				$out .= ' 3';
-			}
-			$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-			$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
-			$out .= ' /P '.$this->encryptdata['P'];
-			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
-				$out .= ' /EncryptMetadata false';
-			} else {
-				$out .= ' /EncryptMetadata true';
-			}
-		}
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	}
+    if ($this->encryptdata['mode'] == 2) {
+        $objkey .= "\x73\x41\x6C\x54"; // sAlT for AES-128
+    }
 
-	/**
-	 * Compute U value (used for encryption)
-	 * @return string U value
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _Uvalue() {
-		if ($this->encryptdata['mode'] == 0) { // RC4-40
-			return TCPDF_STATIC::_RC4($this->encryptdata['key'], TCPDF_STATIC::$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
-		} elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
-			$tmp = TCPDF_STATIC::_md5_16(TCPDF_STATIC::$enc_padding.$this->encryptdata['fileid']);
-			$enc = TCPDF_STATIC::_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
-			$len = strlen($tmp);
-			for ($i = 1; $i <= 19; ++$i) {
-				$ek = '';
-				for ($j = 0; $j < $len; ++$j) {
-					$ek .= chr(ord($this->encryptdata['key'][$j]) ^ $i);
-				}
-				$enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
-			}
-			$enc .= str_repeat("\x00", 16);
-			return substr($enc, 0, 32);
-		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
-			// User Validation Salt
-			$this->encryptdata['UVS'] = substr($seed, 0, 8);
-			// User Key Salt
-			$this->encryptdata['UKS'] = substr($seed, 8, 16);
-			return hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UVS'], true).$this->encryptdata['UVS'].$this->encryptdata['UKS'];
-		}
-	}
+    $objkey = substr(TCPDF_STATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
+    $objkey = substr($objkey, 0, 16);
+    return $objkey;
+}
 
-	/**
-	 * Compute UE value (used for encryption)
-	 * @return string UE value
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _UEvalue() {
-		$hashkey = hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UKS'], true);
-		return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
-	}
-
-	/**
-	 * Compute O value (used for encryption)
-	 * @return string O value
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _Ovalue() {
-		if ($this->encryptdata['mode'] < 3) { // RC4-40, RC4-128, AES-128
-			$tmp = TCPDF_STATIC::_md5_16($this->encryptdata['owner_password']);
-			if ($this->encryptdata['mode'] > 0) {
-				for ($i = 0; $i < 50; ++$i) {
-					$tmp = TCPDF_STATIC::_md5_16($tmp);
-				}
-			}
-			$owner_key = substr($tmp, 0, ($this->encryptdata['Length'] / 8));
-			$enc = TCPDF_STATIC::_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
-			if ($this->encryptdata['mode'] > 0) {
-				$len = strlen($owner_key);
-				for ($i = 1; $i <= 19; ++$i) {
-					$ek = '';
-					for ($j = 0; $j < $len; ++$j) {
-						$ek .= chr(ord($owner_key[$j]) ^ $i);
-					}
-					$enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
-				}
-			}
-			return $enc;
-		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
-			// Owner Validation Salt
-			$this->encryptdata['OVS'] = substr($seed, 0, 8);
-			// Owner Key Salt
-			$this->encryptdata['OKS'] = substr($seed, 8, 16);
-			return hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OVS'].$this->encryptdata['U'], true).$this->encryptdata['OVS'].$this->encryptdata['OKS'];
-		}
-	}
-
-	/**
-	 * Compute OE value (used for encryption)
-	 * @return string OE value
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _OEvalue() {
-		$hashkey = hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OKS'].$this->encryptdata['U'], true);
-		return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
-	}
-
-	/**
-	 * Convert password for AES-256 encryption mode
-	 * @param string $password password
-	 * @return string password
-	 * @protected
-	 * @since 5.9.006 (2010-10-19)
-	 * @author Nicola Asuni
-	 */
-	protected function _fixAES256Password($password) {
-		$psw = ''; // password to be returned
-		$psw_array = TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
-		foreach ($psw_array as $c) {
-			$psw .= TCPDF_FONTS::unichr($c, $this->isunicode);
-		}
-		return substr($psw, 0, 127);
-	}
-
-	/**
-	 * Compute encryption key
-	 * @protected
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Nicola Asuni
-	 */
-	protected function _generateencryptionkey() {
-		$keybytelen = ($this->encryptdata['Length'] / 8);
-		if (!$this->encryptdata['pubkey']) { // standard mode
-			if ($this->encryptdata['mode'] == 3) { // AES-256
-				// generate 256 bit random key
-				$this->encryptdata['key'] = substr(hash('sha256', TCPDF_STATIC::getRandomSeed(), true), 0, $keybytelen);
-				// truncate passwords
-				$this->encryptdata['user_password'] = $this->_fixAES256Password($this->encryptdata['user_password']);
-				$this->encryptdata['owner_password'] = $this->_fixAES256Password($this->encryptdata['owner_password']);
-				// Compute U value
-				$this->encryptdata['U'] = $this->_Uvalue();
-				// Compute UE value
-				$this->encryptdata['UE'] = $this->_UEvalue();
-				// Compute O value
-				$this->encryptdata['O'] = $this->_Ovalue();
-				// Compute OE value
-				$this->encryptdata['OE'] = $this->_OEvalue();
-				// Compute P value
-				$this->encryptdata['P'] = $this->encryptdata['protection'];
-				// Computing the encryption dictionary's Perms (permissions) value
-				$perms = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
-				$perms .= chr(255).chr(255).chr(255).chr(255); // bytes 4-7
-				if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) { // byte 8
-					$perms .= 'F';
-				} else {
-					$perms .= 'T';
-				}
-				$perms .= 'adb'; // bytes 9-11
-				$perms .= 'nick'; // bytes 12-15
-				$this->encryptdata['perms'] = TCPDF_STATIC::_AESnopad($this->encryptdata['key'], $perms);
-			} else { // RC4-40, RC4-128, AES-128
-				// Pad passwords
-				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].TCPDF_STATIC::$enc_padding, 0, 32);
-				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].TCPDF_STATIC::$enc_padding, 0, 32);
-				// Compute O value
-				$this->encryptdata['O'] = $this->_Ovalue();
-				// get default permissions (reverse byte order)
-				$permissions = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']);
-				// Compute encryption key
-				$tmp = TCPDF_STATIC::_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
-				if ($this->encryptdata['mode'] > 0) {
-					for ($i = 0; $i < 50; ++$i) {
-						$tmp = TCPDF_STATIC::_md5_16(substr($tmp, 0, $keybytelen));
-					}
-				}
-				$this->encryptdata['key'] = substr($tmp, 0, $keybytelen);
-				// Compute U value
-				$this->encryptdata['U'] = $this->_Uvalue();
-				// Compute P value
-				$this->encryptdata['P'] = $this->encryptdata['protection'];
-			}
-		} else { // Public-Key mode
-			// random 20-byte seed
-			$seed = sha1(TCPDF_STATIC::getRandomSeed(), true);
-			$recipient_bytes = '';
-			foreach ($this->encryptdata['pubkeys'] as $pubkey) {
-				// for each public certificate
-				if (isset($pubkey['p'])) {
-					$pkprotection = TCPDF_STATIC::getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
-				} else {
-					$pkprotection = $this->encryptdata['protection'];
-				}
-				// get default permissions (reverse byte order)
-				$pkpermissions = TCPDF_STATIC::getEncPermissionsString($pkprotection);
-				// envelope data
-				$envelope = $seed.$pkpermissions;
-				// write the envelope data to a temporary file
-				$tempkeyfile = TCPDF_STATIC::getObjFilename('key', $this->file_id);
-				$f = TCPDF_STATIC::fopenLocal($tempkeyfile, 'wb');
-				if (!$f) {
-					$this->Error('Unable to create temporary key file: '.$tempkeyfile);
-				}
-				$envelope_length = strlen($envelope);
-				fwrite($f, $envelope, $envelope_length);
-				fclose($f);
-				$tempencfile = TCPDF_STATIC::getObjFilename('enc', $this->file_id);
-				if (!openssl_pkcs7_encrypt($tempkeyfile, $tempencfile, $pubkey['c'], array(), PKCS7_BINARY | PKCS7_DETACHED)) {
-					$this->Error('Unable to encrypt the file: '.$tempkeyfile);
-				}
-				// read encryption signature
-				$signature = file_get_contents($tempencfile, false, null, $envelope_length);
-				// extract signature
-				$signature = substr($signature, strpos($signature, 'Content-Disposition'));
-				$tmparr = explode("\n\n", $signature);
-				$signature = trim($tmparr[1]);
-				unset($tmparr);
-				// decode signature
-				$signature = base64_decode($signature);
-				// convert signature to hex
-				$hexsignature = current(unpack('H*', $signature));
-				// store signature on recipients array
-				$this->encryptdata['Recipients'][] = $hexsignature;
-				// The bytes of each item in the Recipients array of PKCS#7 objects in the order in which they appear in the array
-				$recipient_bytes .= $signature;
-			}
-			// calculate encryption key
-			if ($this->encryptdata['mode'] == 3) { // AES-256
-				$this->encryptdata['key'] = substr(hash('sha256', $seed.$recipient_bytes, true), 0, $keybytelen);
-			} else { // RC4-40, RC4-128, AES-128
-				$this->encryptdata['key'] = substr(sha1($seed.$recipient_bytes, true), 0, $keybytelen);
-			}
-		}
-	}
 
 	/**
 	 * Set document protection
@@ -11127,7 +9329,7 @@ class TCPDF {
 		}
 		$this->encrypted = true;
 		$this->encryptdata['fileid'] = TCPDF_STATIC::convertHexStringToString($this->file_id);
-		$this->_generateencryptionkey();
+		$this->generateEncryptionKey();
 	}
 
 	// END OF ENCRYPTION FUNCTIONS -------------------------
@@ -12439,125 +10641,8 @@ class TCPDF {
 		return $name;
 	}
 
-	/**
-	 * Return the Named Destination array.
-	 * @return array Named Destination array.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.9.097 (2011-06-23)
-	 */
-	public function getDestination() {
-		return $this->dests;
-	}
 
-	/**
-	 * Insert Named Destinations.
-	 * @protected
-	 * @author Johannes G\FCntert, Nicola Asuni
-	 * @since 5.9.098 (2011-06-23)
-	 */
-	protected function _putdests() {
-		if (empty($this->dests)) {
-			return;
-		}
-		$this->n_dests = $this->_newobj();
-		$out = ' <<';
-		foreach($this->dests as $name => $o) {
-			$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
-		}
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	}
 
-	/**
-	 * Adds a bookmark - alias for Bookmark().
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 */
-	public function setBookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		$this->Bookmark($txt, $level, $y, $page, $style, $color, $x, $link);
-	}
-
-	/**
-	 * Adds a bookmark.
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	public function Bookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		if ($level < 0) {
-			$level = 0;
-		}
-		if (isset($this->outlines[0])) {
-			$lastoutline = end($this->outlines);
-			$maxlevel = $lastoutline['l'] + 1;
-		} else {
-			$maxlevel = 0;
-		}
-		if ($level > $maxlevel) {
-			$level = $maxlevel;
-		}
-		if ($y == -1) {
-			$y = $this->GetY();
-		} elseif ($y < 0) {
-			$y = 0;
-		} elseif ($y > $this->h) {
-			$y = $this->h;
-		}
-		if ($x == -1) {
-			$x = $this->GetX();
-		} elseif ($x < 0) {
-			$x = 0;
-		} elseif ($x > $this->w) {
-			$x = $this->w;
-		}
-		$fixed = false;
-		$pageAsString = (string) $page;
-		if ($pageAsString && $pageAsString[0] == '*') {
-			$page = intval(substr($page, 1));
-			// this page number will not be changed when moving/add/deleting pages
-			$fixed = true;
-		}
-		if (empty($page)) {
-			$page = $this->PageNo();
-			if (empty($page)) {
-				return;
-			}
-		}
-		$this->outlines[] = array('t' => $txt, 'l' => $level, 'x' => $x, 'y' => $y, 'p' => $page, 'f' => $fixed, 's' => strtoupper($style), 'c' => $color, 'u' => $link);
-	}
-
-	/**
-	 * Sort bookmarks for page and key.
-	 * @protected
-	 * @since 5.9.119 (2011-09-19)
-	 */
-	protected function sortBookmarks() {
-		// get sorting columns
-		$outline_p = array();
-		$outline_y = array();
-		foreach ($this->outlines as $key => $row) {
-			$outline_p[$key] = $row['p'];
-			$outline_k[$key] = $key;
-		}
-		// sort outlines by page and original position
-		array_multisort($outline_p, SORT_NUMERIC, SORT_ASC, $outline_k, SORT_NUMERIC, SORT_ASC, $this->outlines);
-	}
 
 	/**
 	 * Create a bookmark PDF string.
@@ -12681,131 +10766,6 @@ class TCPDF {
 		$this->OutlineRoot = $this->_newobj();
 		$this->_out('<< /Type /Outlines /First '.$n.' 0 R /Last '.($n + $lru[0]).' 0 R >>'."\n".'endobj');
 	}
-
-	// --- JAVASCRIPT ------------------------------------------------------
-
-	/**
-	 * Adds a javascript
-	 * @param string $script Javascript code
-	 * @public
-	 * @author Johannes G\FCntert, Nicola Asuni
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	public function IncludeJS($script) {
-		$this->javascript .= $script;
-	}
-
-	/**
-	 * Adds a javascript object and return object ID
-	 * @param string $script Javascript code
-	 * @param boolean $onload if true executes this object when opening the document
-	 * @return int internal object ID
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.8.000 (2009-09-07)
-	 */
-	public function addJavascriptObject($script, $onload=false) {
-		if ($this->pdfa_mode) {
-			// javascript is not allowed in PDF/A mode
-			return false;
-		}
-		++$this->n;
-		$this->js_objects[$this->n] = array('n' => $this->n, 'js' => $script, 'onload' => $onload);
-		return $this->n;
-	}
-
-	/**
-	 * Create a javascript PDF string.
-	 * @protected
-	 * @author Johannes G\FCntert, Nicola Asuni
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected function _putjavascript() {
-		if ($this->pdfa_mode OR (empty($this->javascript) AND empty($this->js_objects))) {
-			return;
-		}
-		if (strpos($this->javascript, 'this.addField') > 0) {
-			if (!$this->ur['enabled']) {
-				//$this->setUserRights();
-			}
-			// the following two lines are used to avoid form fields duplication after saving
-			// The addField method only works when releasing user rights (UR3)
-			$jsa = sprintf("ftcpdfdocsaved=this.addField('%s','%s',%d,[%F,%F,%F,%F]);", 'tcpdfdocsaved', 'text', 0, 0, 1, 0, 1);
-			$jsb = "getField('tcpdfdocsaved').value='saved';";
-			$this->javascript = $jsa."\n".$this->javascript."\n".$jsb;
-		}
-		// name tree for javascript
-		$this->n_js = '<< /Names [';
-		if (!empty($this->javascript)) {
-			$this->n_js .= ' (EmbeddedJS) '.($this->n + 1).' 0 R';
-		}
-		if (!empty($this->js_objects)) {
-			foreach ($this->js_objects as $key => $val) {
-				if ($val['onload']) {
-					$this->n_js .= ' (JS'.$key.') '.$key.' 0 R';
-				}
-			}
-		}
-		$this->n_js .= ' ] >>';
-		// default Javascript object
-		if (!empty($this->javascript)) {
-			$obj_id = $this->_newobj();
-			$out = '<< /S /JavaScript';
-			$out .= ' /JS '.$this->_textstring($this->javascript, $obj_id);
-			$out .= ' >>';
-			$out .= "\n".'endobj';
-			$this->_out($out);
-		}
-		// additional Javascript objects
-		if (!empty($this->js_objects)) {
-			foreach ($this->js_objects as $key => $val) {
-				$out = $this->_getobj($key)."\n".' << /S /JavaScript /JS '.$this->_textstring($val['js'], $key).' >>'."\n".'endobj';
-				$this->_out($out);
-			}
-		}
-	}
-
-	/**
-	 * Adds a javascript form field.
-	 * @param string $type field type
-	 * @param string $name field name
-	 * @param int $x horizontal position
-	 * @param int $y vertical position
-	 * @param int $w width
-	 * @param int $h height
-	 * @param array $prop javascript field properties. Possible values are described on official Javascript for Acrobat API reference.
-	 * @protected
-	 * @author Denis Van Nuffelen, Nicola Asuni
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected function _addfield($type, $name, $x, $y, $w, $h, $prop) {
-		if ($this->rtl) {
-			$x = $x - $w;
-		}
-		// the followind avoid fields duplication after saving the document
-		$this->javascript .= "if (getField('tcpdfdocsaved').value != 'saved') {";
-		$k = $this->k;
-		$this->javascript .= sprintf("f".$name."=this.addField('%s','%s',%u,[%F,%F,%F,%F]);", $name, $type, $this->PageNo()-1, $x*$k, ($this->h-$y)*$k+1, ($x+$w)*$k, ($this->h-$y-$h)*$k+1)."\n";
-		$this->javascript .= 'f'.$name.'.textSize='.$this->FontSizePt.";\n";
-		foreach($prop as $key => $val) {
-			if (strcmp(substr($key, -5), 'Color') == 0) {
-				$val = TCPDF_COLORS::_JScolor($val);
-			} else {
-				$val = "'".$val."'";
-			}
-			$this->javascript .= 'f'.$name.'.'.$key.'='.$val.";\n";
-		}
-		if ($this->rtl) {
-			$this->x -= $w;
-		} else {
-			$this->x += $w;
-		}
-		$this->javascript .= '}';
-	}
-
-	// --- FORM FIELDS -----------------------------------------------------
-
-
 
 	/**
 	 * Set default properties for form fields.
@@ -13480,83 +11440,6 @@ class TCPDF {
 
 	// --- END FORMS FIELDS ------------------------------------------------
 
-	/**
-	 * Add certification signature (DocMDP or UR3)
-	 * You can set only one signature type
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 4.6.008 (2009-05-07)
-	 */
-	protected function _putsignature() {
-		if ((!$this->sign) OR (!isset($this->signature_data['cert_type']))) {
-			return;
-		}
-		$sigobjid = ($this->sig_obj_id + 1);
-		$out = $this->_getobj($sigobjid)."\n";
-		$out .= '<< /Type /Sig';
-		$out .= ' /Filter /Adobe.PPKLite';
-		$out .= ' /SubFilter /adbe.pkcs7.detached';
-		$out .= ' '.TCPDF_STATIC::$byterange_string;
-		$out .= ' /Contents<'.str_repeat('0', $this->signature_max_length).'>';
-		if (empty($this->signature_data['approval']) OR ($this->signature_data['approval'] != 'A')) {
-			$out .= ' /Reference ['; // array of signature reference dictionaries
-			$out .= ' << /Type /SigRef';
-			if ($this->signature_data['cert_type'] > 0) {
-				$out .= ' /TransformMethod /DocMDP';
-				$out .= ' /TransformParams <<';
-				$out .= ' /Type /TransformParams';
-				$out .= ' /P '.$this->signature_data['cert_type'];
-				$out .= ' /V /1.2';
-			} else {
-				$out .= ' /TransformMethod /UR3';
-				$out .= ' /TransformParams <<';
-				$out .= ' /Type /TransformParams';
-				$out .= ' /V /2.2';
-				if (!TCPDF_STATIC::empty_string($this->ur['document'])) {
-					$out .= ' /Document['.$this->ur['document'].']';
-				}
-				if (!TCPDF_STATIC::empty_string($this->ur['form'])) {
-					$out .= ' /Form['.$this->ur['form'].']';
-				}
-				if (!TCPDF_STATIC::empty_string($this->ur['signature'])) {
-					$out .= ' /Signature['.$this->ur['signature'].']';
-				}
-				if (!TCPDF_STATIC::empty_string($this->ur['annots'])) {
-					$out .= ' /Annots['.$this->ur['annots'].']';
-				}
-				if (!TCPDF_STATIC::empty_string($this->ur['ef'])) {
-					$out .= ' /EF['.$this->ur['ef'].']';
-				}
-				if (!TCPDF_STATIC::empty_string($this->ur['formex'])) {
-					$out .= ' /FormEX['.$this->ur['formex'].']';
-				}
-			}
-			$out .= ' >>'; // close TransformParams
-			// optional digest data (values must be calculated and replaced later)
-			//$out .= ' /Data ********** 0 R';
-			//$out .= ' /DigestMethod/MD5';
-			//$out .= ' /DigestLocation[********** 34]';
-			//$out .= ' /DigestValue<********************************>';
-			$out .= ' >>';
-			$out .= ' ]'; // end of reference
-		}
-		if (isset($this->signature_data['info']['Name']) AND !TCPDF_STATIC::empty_string($this->signature_data['info']['Name'])) {
-			$out .= ' /Name '.$this->_textstring($this->signature_data['info']['Name'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['Location']) AND !TCPDF_STATIC::empty_string($this->signature_data['info']['Location'])) {
-			$out .= ' /Location '.$this->_textstring($this->signature_data['info']['Location'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['Reason']) AND !TCPDF_STATIC::empty_string($this->signature_data['info']['Reason'])) {
-			$out .= ' /Reason '.$this->_textstring($this->signature_data['info']['Reason'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['ContactInfo']) AND !TCPDF_STATIC::empty_string($this->signature_data['info']['ContactInfo'])) {
-			$out .= ' /ContactInfo '.$this->_textstring($this->signature_data['info']['ContactInfo'], $sigobjid);
-		}
-		$out .= ' /M '.$this->_datestring($sigobjid, $this->doc_modification_timestamp);
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	}
 
 	/**
 	 * Set User's Rights for PDF Reader
@@ -13569,7 +11452,7 @@ class TCPDF {
 	 * @param string $form Names specifying additional form-field-related usage rights for the document. Valid names are: /Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate
 	 * @param string $signature Names specifying additional signature-related usage rights for the document. The only defined value is /Modify, which permits a user to apply a digital signature to an existing signature form field or clear a signed signature form field.
 	 * @param string $ef Names specifying additional usage rights for named embedded files in the document. Valid names are /Create/Delete/Modify/Import, which permit the user to perform the named operation on named embedded files
-	 Names specifying additional embedded-files-related usage rights for the document.
+	  * Names specifying additional embedded-files-related usage rights for the document.
 	 * @param string $formex Names specifying additional form-field-related usage rights. The only valid name is BarcodePlaintext, which permits text form field data to be encoded as a plaintext two-dimensional barcode.
 	 * @public
 	 * @author Nicola Asuni
@@ -13595,113 +11478,8 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Enable document signature (requires the OpenSSL Library).
-	 * The digital signature improve document authenticity and integrity and allows o enable extra features on Acrobat Reader.
-	 * To create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
-	 * To export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
-	 * To convert pfx certificate to pem: openssl pkcs12 -in tcpdf.pfx -out tcpdf.crt -nodes
-	 * @param mixed $signing_cert signing certificate (string or filename prefixed with 'file://')
-	 * @param mixed $private_key private key (string or filename prefixed with 'file://')
-	 * @param string $private_key_password password
-	 * @param string $extracerts specifies the name of a file containing a bunch of extra certificates to include in the signature which can for example be used to help the recipient to verify the certificate that you used.
-	 * @param int $cert_type The access permissions granted for this document. Valid values shall be: 1 = No changes to the document shall be permitted; any change to the document shall invalidate the signature; 2 = Permitted changes shall be filling in forms, instantiating page templates, and signing; other changes shall invalidate the signature; 3 = Permitted changes shall be the same as for 2, as well as annotation creation, deletion, and modification; other changes shall invalidate the signature.
-	 * @param array $info array of option information: Name, Location, Reason, ContactInfo.
-	 * @param string $approval Enable approval signature eg. for PDF incremental update
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.6.005 (2009-04-24)
-	 */
-	public function setSignature($signing_cert='', $private_key='', $private_key_password='', $extracerts='', $cert_type=2, $info=array(), $approval='') {
-		// to create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
-		// to export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
-		// to convert pfx certificate to pem: openssl
-		//     OpenSSL> pkcs12 -in <cert.pfx> -out <cert.crt> -nodes
-		$this->sign = true;
-		++$this->n;
-		$this->sig_obj_id = $this->n; // signature widget
-		++$this->n; // signature object ($this->sig_obj_id + 1)
-		$this->signature_data = array();
-		if (strlen($signing_cert) == 0) {
-			$this->Error('Please provide a certificate file and password!');
-		}
-		if (strlen($private_key) == 0) {
-			$private_key = $signing_cert;
-		}
-		$this->signature_data['signcert'] = $signing_cert;
-		$this->signature_data['privkey'] = $private_key;
-		$this->signature_data['password'] = $private_key_password;
-		$this->signature_data['extracerts'] = $extracerts;
-		$this->signature_data['cert_type'] = $cert_type;
-		$this->signature_data['info'] = $info;
-		$this->signature_data['approval'] = $approval;
-	}
 
-	/**
-	 * Set the digital signature appearance (a cliccable rectangle area to get signature properties)
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.3.011 (2010-06-17)
-	 */
-	public function setSignatureAppearance($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		$this->signature_appearance = $this->getSignatureAppearanceArray($x, $y, $w, $h, $page, $name);
-	}
 
-	/**
-	 * Add an empty digital signature appearance (a cliccable rectangle area to get signature properties)
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.9.101 (2011-07-06)
-	 */
-	public function addEmptySignatureAppearance($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		++$this->n;
-		$this->empty_signature_appearance[] = array('objid' => $this->n) + $this->getSignatureAppearanceArray($x, $y, $w, $h, $page, $name);
-	}
-
-	/**
-	 * Get the array that defines the signature appearance (page and rectangle coordinates).
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @return array Array defining page and rectangle coordinates of signature appearance.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 5.9.101 (2011-07-06)
-	 */
-	protected function getSignatureAppearanceArray($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		$sigapp = array();
-		if (($page < 1) OR ($page > $this->numpages)) {
-			$sigapp['page'] = $this->page;
-		} else {
-			$sigapp['page'] = intval($page);
-		}
-		if (empty($name)) {
-			$sigapp['name'] = 'Signature';
-		} else {
-			$sigapp['name'] = $name;
-		}
-		$a = $x * $this->k;
-		$b = $this->pagedim[($sigapp['page'])]['h'] - (($y + $h) * $this->k);
-		$c = $w * $this->k;
-		$d = $h * $this->k;
-		$sigapp['rect'] = sprintf('%F %F %F %F', $a, $b, ($a + $c), ($b + $d));
-		return $sigapp;
-	}
 
 	/**
 	 * Enable document timestamping (requires the OpenSSL Library).
@@ -13732,23 +11510,6 @@ class TCPDF {
 		$this->tsa_data['tsa_password'] = $tsa_password;
 		$this->tsa_data['tsa_cert'] = $tsa_cert;
 		$this->tsa_timestamp = true;
-	}
-
-	/**
-	 * NOT YET IMPLEMENTED
-	 * Request TSA for a timestamp
-	 * @param string $signature Digital signature as binary string
-	 * @return string Timestamped digital signature
-	 * @protected
-	 * @author Richard Stockinger
-	 * @since 6.0.090 (2014-06-16)
-	 */
-	protected function applyTSA($signature) {
-		if (!$this->tsa_timestamp) {
-			return $signature;
-		}
-		//@TODO: implement this feature
-		return $signature;
 	}
 
 	/**
@@ -13888,30 +11649,6 @@ class TCPDF {
 	 */
 	public function PageNoFormatted() {
 		return TCPDF_STATIC::formatPageNumber($this->PageNo());
-	}
-
-	/**
-	 * Put pdf layers.
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected function _putocg() {
-		if (empty($this->pdflayers)) {
-			return;
-		}
-		foreach ($this->pdflayers as $key => $layer) {
-			 $this->pdflayers[$key]['objid'] = $this->_newobj();
-			 $out = '<< /Type /OCG';
-			 $out .= ' /Name '.$this->_textstring($layer['name'], $this->pdflayers[$key]['objid']);
-			 $out .= ' /Usage <<';
-			 if (isset($layer['print']) AND ($layer['print'] !== NULL)) {
-				$out .= ' /Print <</PrintState /'.($layer['print']?'ON':'OFF').'>>';
-			 }
-			 $out .= ' /View <</ViewState /'.($layer['view']?'ON':'OFF').'>>';
-			 $out .= ' >> >>';
-			 $out .= "\n".'endobj';
-			 $this->_out($out);
-		}
 	}
 
 	/**
@@ -15448,15 +13185,15 @@ class TCPDF {
 		if (!isset($style['border'])) {
 			$style['border'] = false;
 		}
-		$fontsize = 0;
+		$this->FontSize = 0;
 		if (!isset($style['text'])) {
 			$style['text'] = false;
 		}
 		if ($style['text'] AND isset($style['font'])) {
 			if (isset($style['fontsize'])) {
-				$fontsize = $style['fontsize'];
+				$this->FontSize = $style['fontsize'];
 			}
-			$this->setFont($style['font'], '', $fontsize);
+			$this->setFont($style['font'], '', $this->FontSize);
 		}
 		if (!isset($style['stretchtext'])) {
 			$style['stretchtext'] = 4;
@@ -15551,7 +13288,7 @@ class TCPDF {
 				}
 			}
 		}
-		$text_height = $this->getCellHeight($fontsize / $this->k);
+		$text_height = $this->getCellHeight($this->FontSize / $this->k);
 		// height
 		if (TCPDF_STATIC::empty_string($h) OR ($h <= 0)) {
 			// set default height
@@ -15561,9 +13298,9 @@ class TCPDF {
 		if ($barh <=0) {
 			// try to reduce font or padding to fit barcode on available height
 			if ($text_height > $h) {
-				$fontsize = (($h * $this->k) / (4 * $this->cell_height_ratio));
-				$text_height = $this->getCellHeight($fontsize / $this->k);
-				$this->setFont($style['font'], '', $fontsize);
+				$this->FontSize = (($h * $this->k) / (4 * $this->cell_height_ratio));
+				$text_height = $this->getCellHeight($this->FontSize / $this->k);
+				$this->setFont($style['font'], '', $this->FontSize);
 			}
 			if ($vpadding > 0) {
 				$vpadding = (($h - $text_height) / 4);
@@ -17391,7 +15128,6 @@ class TCPDF {
 		$curfontdescent = $this->getFontDescent($curfontname, $curfontstyle, $curfontsize);
 		$curfontstretcing = $this->font_stretching;
 		$curfonttracking = $this->font_spacing;
-		$this->newline = true;
 		$newline = true;
 		$startlinepage = $this->page;
 		$minstartliney = $this->y;
@@ -17405,7 +15141,7 @@ class TCPDF {
 		$undo = false;
 		$fontaligned = false;
 		$reverse_dir = false; // true when the text direction is reversed
-		$this->premode = false;
+		$premode = false;
 		if ($this->inxobj) {
 			// we are inside an XObject template
 			$pask = count($this->xobjects[$this->xobjid]['annotations']);
@@ -17565,7 +15301,7 @@ class TCPDF {
 						$this->rollbackTransaction(true);
 						// restore previous values
 						foreach ($this_method_vars as $vkey => $vval) {
-							$$vkey = $vval;
+							$vkey = $vval;
 						}
 						// disable table header
 						$tmp_thead = $this->thead;
@@ -17692,18 +15428,18 @@ class TCPDF {
 					$pfontsize = $curfontsize;
 					$fontname = (isset($dom[$key]['fontname']) ? $dom[$key]['fontname'] : $curfontname);
 					$fontstyle = (isset($dom[$key]['fontstyle']) ? $dom[$key]['fontstyle'] : $curfontstyle);
-					$fontsize = (isset($dom[$key]['fontsize']) ? $dom[$key]['fontsize'] : $curfontsize);
-					$fontascent = $this->getFontAscent($fontname, $fontstyle, $fontsize);
-					$fontdescent = $this->getFontDescent($fontname, $fontstyle, $fontsize);
-					if (($fontname != $curfontname) OR ($fontstyle != $curfontstyle) OR ($fontsize != $curfontsize)
+					$this->FontSize = (isset($dom[$key]['fontsize']) ? $dom[$key]['fontsize'] : $curfontsize);
+					$fontascent = $this->getFontAscent($fontname, $fontstyle, $this->FontSize);
+					$fontdescent = $this->getFontDescent($fontname, $fontstyle, $this->FontSize);
+					if (($fontname != $curfontname) OR ($fontstyle != $curfontstyle) OR ($this->FontSize != $curfontsize)
 						OR ($this->cell_height_ratio != $dom[$key]['line-height'])
 						OR ($dom[$key]['tag'] AND $dom[$key]['opening'] AND ($dom[$key]['value'] == 'li')) ) {
 						if (($key < ($maxel - 1)) AND (
 								($dom[$key]['tag'] AND $dom[$key]['opening'] AND ($dom[$key]['value'] == 'li'))
 								OR ($this->cell_height_ratio != $dom[$key]['line-height'])
-								OR (!$this->newline AND is_numeric($fontsize) AND is_numeric($curfontsize)
-								AND ($fontsize >= 0) AND ($curfontsize >= 0)
-								AND (($fontsize != $curfontsize) OR ($fontstyle != $curfontstyle) OR ($fontname != $curfontname)))
+								OR (!$this->newline AND is_numeric($this->FontSize) AND is_numeric($curfontsize)
+								AND ($this->FontSize >= 0) AND ($curfontsize >= 0)
+								AND (($this->FontSize != $curfontsize) OR ($fontstyle != $curfontstyle) OR ($fontname != $curfontname)))
 							)) {
 							if ($this->page > $startlinepage) {
 								// fix lines splitted over two pages
@@ -17750,16 +15486,16 @@ class TCPDF {
 							}
 							if (!$dom[$key]['block']) {
 								if (!(isset($dom[($key + 1)]) AND $dom[($key + 1)]['tag'] AND (!$dom[($key + 1)]['opening']) AND ($dom[($key + 1)]['value'] != 'li') AND $dom[$key]['tag'] AND (!$dom[$key]['opening']))) {
-									$this->y += (((($curfontsize * $this->cell_height_ratio) - ($fontsize * $dom[$key]['line-height'])) / $this->k) + $curfontascent - $fontascent - $curfontdescent + $fontdescent) / 2;
+									$this->y += (((($curfontsize * $this->cell_height_ratio) - ($this->FontSize * $dom[$key]['line-height'])) / $this->k) + $curfontascent - $fontascent - $curfontdescent + $fontdescent) / 2;
 								}
 								if (($dom[$key]['value'] != 'sup') AND ($dom[$key]['value'] != 'sub')) {
 									$current_line_align_data = array($key, $minstartliney, $maxbottomliney);
 									if (isset($line_align_data) AND (($line_align_data[0] == ($key - 1)) OR (($line_align_data[0] == ($key - 2)) AND (isset($dom[($key - 1)])) AND (preg_match('/^([\s]+)$/', $dom[($key - 1)]['value']) > 0)))) {
 										$minstartliney = min($this->y, $line_align_data[1]);
-										$maxbottomliney = max(($this->y + $this->getCellHeight($fontsize / $this->k)), $line_align_data[2]);
+										$maxbottomliney = max(($this->y + $this->getCellHeight($this->FontSize / $this->k)), $line_align_data[2]);
 									} else {
 										$minstartliney = min($this->y, $minstartliney);
-										$maxbottomliney = max(($this->y + $this->getCellHeight($fontsize / $this->k)), $maxbottomliney);
+										$maxbottomliney = max(($this->y + $this->getCellHeight($this->FontSize / $this->k)), $maxbottomliney);
 									}
 									$line_align_data = $current_line_align_data;
 								}
@@ -17767,12 +15503,12 @@ class TCPDF {
 							$this->cell_height_ratio = $dom[$key]['line-height'];
 							$fontaligned = true;
 						}
-						$this->setFont($fontname, $fontstyle, $fontsize);
+						$this->setFont($fontname, $fontstyle, $this->FontSize);
 						// reset row height
 						$this->resetLastH();
 						$curfontname = $fontname;
 						$curfontstyle = $fontstyle;
-						$curfontsize = $fontsize;
+						$curfontsize = $this->FontSize;
 						$curfontascent = $fontascent;
 						$curfontdescent = $fontdescent;
 					}
@@ -18232,7 +15968,7 @@ class TCPDF {
 					$startliney -= (($this->FontSizePt / 0.7) / $this->k);
 				} else {
 					$minstartliney = $startliney;
-					$maxbottomliney = ($this->y + $this->getCellHeight($fontsize / $this->k));
+					$maxbottomliney = ($this->y + $this->getCellHeight($this->FontSize / $this->k));
 				}
 				$startlinepage = $this->page;
 				if (isset($endlinepos) AND (!$pbrk)) {
@@ -18262,7 +15998,7 @@ class TCPDF {
 				if (!($dom[$key]['tag'] AND !$dom[$key]['opening'] AND ($dom[$key]['value'] == 'table')
 					AND (isset($this->emptypagemrk[$this->page]))
 					AND ($this->emptypagemrk[$this->page] == $this->pagelen[$this->page]))) {
-					$this->setFont($fontname, $fontstyle, $fontsize);
+					$this->setFont($fontname, $fontstyle, $this->FontSize);
 					if ($wfill) {
 						$this->setFillColorArray($this->bgcolor);
 					}
@@ -18583,8 +16319,8 @@ class TCPDF {
 				}
 				// text
 				$this->htmlvspace = 0;
-				$isRTLString = preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
-				if ((!$this->premode) AND $this->isRTLTextDir() AND !$isRTLString) {
+				$this->isRTLString = preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
+				if ((!$newline) AND $this->isRTLTextDir() AND !$this->isRTLString) {
 					// reverse spaces order
 					$lsp = ''; // left spaces
 					$rsp = ''; // right spaces
@@ -18599,7 +16335,7 @@ class TCPDF {
 				if ($newline) {
 					if (!$this->premode) {
 						$prelen = strlen($dom[$key]['value']);
-						if ($this->isRTLTextDir() AND !$isRTLString) {
+						if ($this->isRTLTextDir() AND !$this->isRTLString) {
 							// right trim except non-breaking space
 							$dom[$key]['value'] = $this->stringRightTrim($dom[$key]['value']);
 						} else {
@@ -18751,7 +16487,7 @@ class TCPDF {
 					$this->rollbackTransaction(true);
 					// restore previous values
 					foreach ($this_method_vars as $vkey => $vval) {
-						$$vkey = $vval;
+						$vkey = $vval;
 					}
 					if (!empty($dom[$key]['thead'])) {
 						$this->inthead = true;
@@ -21134,16 +18870,33 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2009-01-02)
 	 */
+	//protected function setFontBuffer($font, $data, $value) {
 	protected function setFontBuffer($font, $data) {
-		$this->fonts[$font] = $data;
+		$fonts[$font] = $data;
 		if (!in_array($font, $this->fontkeys)) {
 			$this->fontkeys[] = $font;
 			// store object ID for current font
 			++$this->n;
-			$this->font_obj_ids[$font] = $this->n;
+			$font_obj_ids[$font] = $this->n;
 			$this->setFontSubBuffer($font, 'n', $this->n);
 		}
-	}
+
+    // assuming these are class properties
+    $this->fonts[$font] = $data;
+
+    if (!in_array($font, $this->fontkeys)) {
+        $this->fontkeys[] = $font;
+
+        // increment font object ID
+        ++$this->n;
+
+        $this->font_obj_ids[$font] = $this->n;
+
+        // call to a method on the same object
+        $this->setFontSubBuffer($font, 'n', $this->n);
+    }
+}
+
 
 	/**
 	 * Set font buffer content.
@@ -21602,7 +19355,27 @@ class TCPDF {
 		$this->lastPage(true);
 		return true;
 	}
-
+	protected function returnEncryptData($n, $s) {
+		if (!$this->encrypted) {
+			return $s;
+		}
+		switch (isset($this->encryptdata['mode'])) {
+			case 0:   // RC4-40
+			case 1: { // RC4-128
+				$s = TCPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key);
+				break;
+			}
+			case 2: { // AES-128
+				$s = TCPDF_STATIC::_AES($this->_objectkey($n), $s);
+				break;
+			}
+			case 3: { // AES-256
+				$s = TCPDF_STATIC::_AES($this->encryptdata['key'], $s);
+				break;
+			}
+		}
+		return $s;
+	}
 	/**
 	 * Output a Table of Content Index (TOC).
 	 * This method must be called after all Bookmarks were set.
@@ -21621,7 +19394,7 @@ class TCPDF {
 	 * @see addTOCPage(), endTOCPage(), addHTMLTOC()
 	 */
 	public function addTOC($page=null, $numbersfont='', $filler='.', $toc_name='TOC', $style='', $color=array(0,0,0)) {
-		$fontsize = $this->FontSizePt;
+		$this->FontSize = $this->FontSizePt;
 		$fontfamily = $this->FontFamily;
 		$fontstyle = $this->FontStyle;
 		$w = $this->w - $this->lMargin - $this->rMargin;
@@ -21648,7 +19421,7 @@ class TCPDF {
 				$page = 1;
 			}
 		}
-		$this->setFont($numbersfont, $fontstyle, $fontsize);
+		$this->setFont($numbersfont, $fontstyle, $this->FontSize);
 		$numwidth = $this->GetStringWidth('00000');
 		$maxpage = 0; //used for pages on attached documents
 		foreach ($this->outlines as $key => $outline) {
@@ -21664,9 +19437,9 @@ class TCPDF {
 				$alignnum = 'R';
 			}
 			if ($outline['l'] == 0) {
-				$this->setFont($fontfamily, $outline['s'].'B', $fontsize);
+				$this->setFont($fontfamily, $outline['s'].'B', $this->FontSize);
 			} else {
-				$this->setFont($fontfamily, $outline['s'], $fontsize - $outline['l']);
+				$this->setFont($fontfamily, $outline['s'], $this->FontSize - $outline['l']);
 			}
 			$this->setTextColorArray($outline['c']);
 			// check for page break
@@ -21711,7 +19484,7 @@ class TCPDF {
 			} else {
 				$tw = $this->w - $this->rMargin - $this->x;
 			}
-			$this->setFont($numbersfont, $fontstyle, $fontsize);
+			$this->setFont($numbersfont, $fontstyle, $this->FontSize);
 			if (TCPDF_STATIC::empty_string($page)) {
 				$pagenum = $outline['p'];
 			} else {
@@ -22457,11 +20230,13 @@ class TCPDF {
 	 * @since 5.3.002 (2010-06-07)
 	 */
 	public function setFontSubsetting($enable=true) {
+		
 		if ($this->pdfa_mode) {
 			$this->font_subsetting = false;
 		} else {
 			$this->font_subsetting = $enable ? true : false;
 		}
+			
 	}
 
 	/**
@@ -23264,9 +21039,9 @@ class TCPDF {
 		// disable case-folding for this XML parser
 		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
 		// sets the element handler functions for the XML parser
-		xml_set_element_handler($parser, [$this, 'startSVGElementHandler'], [$this, 'endSVGElementHandler']);
+		xml_set_element_handler($parser, [$this, 'handleSVGElementStart'], [$this, 'endSVGElementHandler']);
 		// sets the character data handler function for the XML parser
-		xml_set_character_data_handler($parser, [$this, 'segSVGContentHandler']);
+		xml_set_character_data_handler($parser, [$this, 'handleSVGContent']);
 		// start parsing an XML document
 		if (!xml_parse($parser, $svgdata)) {
 			$error_message = sprintf('SVG Error: %s at line %d', xml_error_string(xml_get_error_code($parser)), xml_get_current_line_number($parser));
@@ -23342,1515 +21117,6 @@ class TCPDF {
 		$this->cell_padding = $cell_padding;
 	}
 
-	/**
-	 * Convert SVG transformation matrix to PDF.
-	 * @param array $tm original SVG transformation matrix
-	 * @return array transformation matrix
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected function convertSVGtMatrix($tm) {
-		$a = $tm[0];
-		$b = -$tm[1];
-		$c = -$tm[2];
-		$d = $tm[3];
-		$e = $this->getHTMLUnitToUnits($tm[4], 1, $this->svgunit, false) * $this->k;
-		$f = -$this->getHTMLUnitToUnits($tm[5], 1, $this->svgunit, false) * $this->k;
-		$x = 0;
-		$y = $this->h * $this->k;
-		$e = ($x * (1 - $a)) - ($y * $c) + $e;
-		$f = ($y * (1 - $d)) - ($x * $b) + $f;
-		return array($a, $b, $c, $d, $e, $f);
-	}
-
-	/**
-	 * Apply SVG graphic transformation matrix.
-	 * @param array $tm original SVG transformation matrix
-	 * @protected
-	 * @since 5.0.000 (2010-05-02)
-	 */
-	protected function SVGTransform($tm) {
-		$this->Transform($this->convertSVGtMatrix($tm));
-	}
-
-	/**
-	 * Apply the requested SVG styles (*** TO BE COMPLETED ***)
-	 * @param array $svgstyle array of SVG styles to apply
-	 * @param array $prevsvgstyle array of previous SVG style
-	 * @param int $x X origin of the bounding box
-	 * @param int $y Y origin of the bounding box
-	 * @param int $w width of the bounding box
-	 * @param int $h height of the bounding box
-	 * @param string $clip_function clip function
-	 * @param array $clip_params array of parameters for clipping function
-	 * @return string style
-	 * @author Nicola Asuni
-	 * @since 5.0.000 (2010-05-02)
-	 * @protected
-	 */
-	protected function setSVGStyles($svgstyle, $prevsvgstyle, $x=0, $y=0, $w=1, $h=1, $clip_function='', $clip_params=array()) {
-		if ($this->state != 2) {
-			 return;
-		}
-		$objstyle = '';
-		$minlen = (0.01 / $this->k); // minimum acceptable length
-		if (!isset($svgstyle['opacity'])) {
-			return $objstyle;
-		}
-		// clip-path
-		$regs = array();
-		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svgstyle['clip-path'], $regs)) {
-			$clip_path = $this->svgclippaths[$regs[1]];
-			foreach ($clip_path as $cp) {
-				$this->startSVGElementHandler('clip-path', $cp['name'], $cp['attribs'], $cp['tm']);
-			}
-		}
-		// opacity
-		if ($svgstyle['opacity'] != 1) {
-			$this->setAlpha($svgstyle['opacity'], 'Normal', $svgstyle['opacity'], false);
-		}
-		// color
-		$fill_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
-		$this->setFillColorArray($fill_color);
-		// text color
-		$text_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
-		$this->setTextColorArray($text_color);
-		// clip
-		if (preg_match('/rect\(([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)\)/si', $svgstyle['clip'], $regs)) {
-			$top = (isset($regs[1])?$this->getHTMLUnitToUnits($regs[1], 0, $this->svgunit, false):0);
-			$right = (isset($regs[2])?$this->getHTMLUnitToUnits($regs[2], 0, $this->svgunit, false):0);
-			$bottom = (isset($regs[3])?$this->getHTMLUnitToUnits($regs[3], 0, $this->svgunit, false):0);
-			$left = (isset($regs[4])?$this->getHTMLUnitToUnits($regs[4], 0, $this->svgunit, false):0);
-			$cx = $x + $left;
-			$cy = $y + $top;
-			$cw = $w - $left - $right;
-			$ch = $h - $top - $bottom;
-			if ($svgstyle['clip-rule'] == 'evenodd') {
-				$clip_rule = 'CNZ';
-			} else {
-				$clip_rule = 'CEO';
-			}
-			$this->Rect($cx, $cy, $cw, $ch, $clip_rule, array(), array());
-		}
-		// fill
-		$regs = array();
-		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svgstyle['fill'], $regs)) {
-			// gradient
-			$gradient = $this->svggradients[$regs[1]];
-			if (isset($gradient['xref'])) {
-				// reference to another gradient definition
-				$newgradient = $this->svggradients[$gradient['xref']];
-				$newgradient['coords'] = $gradient['coords'];
-				$newgradient['mode'] = $gradient['mode'];
-				$newgradient['type'] = $gradient['type'];
-				$newgradient['gradientUnits'] = $gradient['gradientUnits'];
-				if (isset($gradient['gradientTransform'])) {
-					$newgradient['gradientTransform'] = $gradient['gradientTransform'];
-				}
-				$gradient = $newgradient;
-			}
-			//save current Graphic State
-			$this->_outSaveGraphicsState();
-			//set clipping area
-			if (!empty($clip_function) AND method_exists($this, $clip_function)) {
-				$bbox = call_user_func_array(array($this, $clip_function), $clip_params);
-				if ((!isset($gradient['type']) OR ($gradient['type'] != 3)) AND is_array($bbox) AND (count($bbox) == 4)) {
-					list($x, $y, $w, $h) = $bbox;
-				}
-			}
-			if ($gradient['mode'] == 'measure') {
-				if (!isset($gradient['coords'][4])) {
-					$gradient['coords'][4] = 0.5;
-				}
-				if (isset($gradient['gradientTransform']) AND !empty($gradient['gradientTransform'])) {
-					$gtm = $gradient['gradientTransform'];
-					// apply transformation matrix
-					$xa = ($gtm[0] * $gradient['coords'][0]) + ($gtm[2] * $gradient['coords'][1]) + $gtm[4];
-					$ya = ($gtm[1] * $gradient['coords'][0]) + ($gtm[3] * $gradient['coords'][1]) + $gtm[5];
-					$xb = ($gtm[0] * $gradient['coords'][2]) + ($gtm[2] * $gradient['coords'][3]) + $gtm[4];
-					$yb = ($gtm[1] * $gradient['coords'][2]) + ($gtm[3] * $gradient['coords'][3]) + $gtm[5];
-					$r = sqrt(pow(($gtm[0] * $gradient['coords'][4]), 2) + pow(($gtm[1] * $gradient['coords'][4]), 2));
-					$gradient['coords'][0] = $xa;
-					$gradient['coords'][1] = $ya;
-					$gradient['coords'][2] = $xb;
-					$gradient['coords'][3] = $yb;
-					$gradient['coords'][4] = $r;
-				}
-				// convert SVG coordinates to user units
-				$gradient['coords'][0] = $this->getHTMLUnitToUnits($gradient['coords'][0], 0, $this->svgunit, false);
-				$gradient['coords'][1] = $this->getHTMLUnitToUnits($gradient['coords'][1], 0, $this->svgunit, false);
-				$gradient['coords'][2] = $this->getHTMLUnitToUnits($gradient['coords'][2], 0, $this->svgunit, false);
-				$gradient['coords'][3] = $this->getHTMLUnitToUnits($gradient['coords'][3], 0, $this->svgunit, false);
-				$gradient['coords'][4] = $this->getHTMLUnitToUnits($gradient['coords'][4], 0, $this->svgunit, false);
-				if ($w <= $minlen) {
-					$w = $minlen;
-				}
-				if ($h <= $minlen) {
-					$h = $minlen;
-				}
-				// shift units
-				if ($gradient['gradientUnits'] == 'objectBoundingBox') {
-					// convert to SVG coordinate system
-					$gradient['coords'][0] += $x;
-					$gradient['coords'][1] += $y;
-					$gradient['coords'][2] += $x;
-					$gradient['coords'][3] += $y;
-				}
-				// calculate percentages
-				$gradient['coords'][0] = (($gradient['coords'][0] - $x) / $w);
-				$gradient['coords'][1] = (($gradient['coords'][1] - $y) / $h);
-				$gradient['coords'][2] = (($gradient['coords'][2] - $x) / $w);
-				$gradient['coords'][3] = (($gradient['coords'][3] - $y) / $h);
-				$gradient['coords'][4] /= $w;
-			} elseif ($gradient['mode'] == 'percentage') {
-				foreach($gradient['coords'] as $key => $val) {
-					$gradient['coords'][$key] = (intval($val) / 100);
-					if ($val < 0) {
-						$gradient['coords'][$key] = 0;
-					} elseif ($val > 1) {
-						$gradient['coords'][$key] = 1;
-					}
-				}
-			}
-			if (($gradient['type'] == 2) AND ($gradient['coords'][0] == $gradient['coords'][2]) AND ($gradient['coords'][1] == $gradient['coords'][3])) {
-				// single color (no shading)
-				$gradient['coords'][0] = 1;
-				$gradient['coords'][1] = 0;
-				$gradient['coords'][2] = 0.999;
-				$gradient['coords'][3] = 0;
-			}
-			// swap Y coordinates
-			$tmp = $gradient['coords'][1];
-			$gradient['coords'][1] = $gradient['coords'][3];
-			$gradient['coords'][3] = $tmp;
-			// set transformation map for gradient
-			$cy = ($this->h - $y);
-			if ($gradient['type'] == 3) {
-				// circular gradient
-				$cy -= ($gradient['coords'][1] * ($w + $h));
-				$h = $w = max($w, $h);
-			} else {
-				$cy -= $h;
-			}
-			$this->_out(sprintf('%F 0 0 %F %F %F cm', ($w * $this->k), ($h * $this->k), ($x * $this->k), ($cy * $this->k)));
-			if ((is_array($gradient['stops']) || $gradient['stops'] instanceof Countable) && count($gradient['stops']) > 1) {
-				$this->Gradient($gradient['type'], $gradient['coords'], $gradient['stops']);
-			}
-		} elseif ($svgstyle['fill'] != 'none') {
-			$fill_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
-			if ($svgstyle['fill-opacity'] != 1) {
-				$this->setAlpha($this->alpha['CA'], 'Normal', $svgstyle['fill-opacity'], false);
-			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['fill'], $rgba_matches)) {
-				$this->setAlpha($this->alpha['CA'], 'Normal', $rgba_matches[1], false);
-			}
-			$this->setFillColorArray($fill_color);
-			if ($svgstyle['fill-rule'] == 'evenodd') {
-				$objstyle .= 'F*';
-			} else {
-				$objstyle .= 'F';
-			}
-		}
-		// stroke
-		if ($svgstyle['stroke'] != 'none') {
-			if ($svgstyle['stroke-opacity'] != 1) {
-				$this->setAlpha($svgstyle['stroke-opacity'], 'Normal', $this->alpha['ca'], false);
-			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['stroke'], $rgba_matches)) {
-				$this->setAlpha($rgba_matches[1], 'Normal', $this->alpha['ca'], false);
-			}
-			$stroke_style = array(
-				'color' => TCPDF_COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
-				'width' => $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false),
-				'cap' => $svgstyle['stroke-linecap'],
-				'join' => $svgstyle['stroke-linejoin']
-				);
-			if (isset($svgstyle['stroke-dasharray']) AND !empty($svgstyle['stroke-dasharray']) AND ($svgstyle['stroke-dasharray'] != 'none')) {
-				$stroke_style['dash'] = $svgstyle['stroke-dasharray'];
-			}
-			$this->setLineStyle($stroke_style);
-			$objstyle .= 'D';
-		}
-		// font
-		$regs = array();
-		if (!empty($svgstyle['font'])) {
-			if (preg_match('/font-family[\s]*:[\s]*([^\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_family = $this->getFontFamilyName($regs[1]);
-			} else {
-				$font_family = $this->getFontFamilyName($svgstyle['font-family']);
-			}
-			if (preg_match('/font-size[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_size = trim($regs[1]);
-			} else {
-				$font_size = $svgstyle['font-size'];
-			}
-			if (preg_match('/font-style[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_style = trim($regs[1]);
-			} else {
-				$font_style = $svgstyle['font-style'];
-			}
-			if (preg_match('/font-weight[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_weight = trim($regs[1]);
-			} else {
-				$font_weight = $svgstyle['font-weight'];
-			}
-			if (preg_match('/font-stretch[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_stretch = trim($regs[1]);
-			} else {
-				$font_stretch = $svgstyle['font-stretch'];
-			}
-			if (preg_match('/letter-spacing[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
-				$font_spacing = trim($regs[1]);
-			} else {
-				$font_spacing = $svgstyle['letter-spacing'];
-			}
-		} else {
-			$font_family = $this->getFontFamilyName($svgstyle['font-family']);
-			$font_size = $svgstyle['font-size'];
-			$font_style = $svgstyle['font-style'];
-			$font_weight = $svgstyle['font-weight'];
-			$font_stretch = $svgstyle['font-stretch'];
-			$font_spacing = $svgstyle['letter-spacing'];
-		}
-		$font_size = $this->getHTMLFontUnits($font_size, $this->svgstyles[0]['font-size'], $prevsvgstyle['font-size'], $this->svgunit);
-		$font_stretch = $this->getCSSFontStretching($font_stretch, $svgstyle['font-stretch']);
-		$font_spacing = $this->getCSSFontSpacing($font_spacing, $svgstyle['letter-spacing']);
-		switch ($font_style) {
-			case 'italic': {
-				$font_style = 'I';
-				break;
-			}
-			case 'oblique': {
-				$font_style = 'I';
-				break;
-			}
-			default:
-			case 'normal': {
-				$font_style = '';
-				break;
-			}
-		}
-		switch ($font_weight) {
-			case 'bold':
-			case 'bolder': {
-				$font_style .= 'B';
-				break;
-			}
-			case 'normal': {
-				if ((substr($font_family, -1) == 'I') AND (substr($font_family, -2, 1) == 'B')) {
-					$font_family = substr($font_family, 0, -2).'I';
-				} elseif (substr($font_family, -1) == 'B') {
-					$font_family = substr($font_family, 0, -1);
-				}
-				break;
-			}
-		}
-		switch ($svgstyle['text-decoration']) {
-			case 'underline': {
-				$font_style .= 'U';
-				break;
-			}
-			case 'overline': {
-				$font_style .= 'O';
-				break;
-			}
-			case 'line-through': {
-				$font_style .= 'D';
-				break;
-			}
-			default:
-			case 'none': {
-				break;
-			}
-		}
-		$this->setFont($font_family, $font_style, $font_size);
-		$this->setFontStretching($font_stretch);
-		$this->setFontSpacing($font_spacing);
-		return $objstyle;
-	}
-
-	/**
-	 * Draws an SVG path
-	 * @param string $d attribute d of the path SVG element
-	 * @param string $style Style of rendering. Possible values are:
-	 * <ul>
-	 *	 <li>D or empty string: Draw (default).</li>
-	 *	 <li>F: Fill.</li>
-	 *	 <li>F*: Fill using the even-odd rule to determine which regions lie inside the clipping path.</li>
-	 *	 <li>DF or FD: Draw and fill.</li>
-	 *	 <li>DF* or FD*: Draw and fill using the even-odd rule to determine which regions lie inside the clipping path.</li>
-	 *	 <li>CNZ: Clipping mode (using the even-odd rule to determine which regions lie inside the clipping path).</li>
-	 *	 <li>CEO: Clipping mode (using the nonzero winding number rule to determine which regions lie inside the clipping path).</li>
-	 * </ul>
-	 * @return array of container box measures (x, y, w, h)
-	 * @author Nicola Asuni
-	 * @since 5.0.000 (2010-05-02)
-	 * @protected
-	 */
-	protected function SVGPath($d, $style='') {
-		if ($this->state != 2) {
-			return;
-		}
-		// set fill/stroke style
-		$op = TCPDF_STATIC::getPathPaintOperator($style, '');
-		if (empty($op)) {
-			return;
-		}
-		$paths = array();
-		$d = preg_replace('/([0-9ACHLMQSTVZ])([\-\+])/si', '\\1 \\2', $d);
-		$d = preg_replace('/(\.[0-9]+)(\.)/s', '\\1 \\2', $d);
-		preg_match_all('/([ACHLMQSTVZ])[\s]*([^ACHLMQSTVZ\"]*)/si', $d, $paths, PREG_SET_ORDER);
-		$x = 0;
-		$y = 0;
-		$x1 = 0;
-		$y1 = 0;
-		$x2 = 0;
-		$y2 = 0;
-		$xmin = 2147483647;
-		$xmax = 0;
-		$ymin = 2147483647;
-		$ymax = 0;
-		$xinitial = 0;
-		$yinitial = 0;
-		$relcoord = false;
-		$minlen = (0.01 / $this->k); // minimum acceptable length (3 point)
-		$firstcmd = true; // used to print first point
-		// draw curve pieces
-		foreach ($paths as $key => $val) {
-			// get curve type
-			$cmd = trim($val[1]);
-			if (strtolower($cmd) == $cmd) {
-				// use relative coordinated instead of absolute
-				$relcoord = true;
-				$xoffset = $x;
-				$yoffset = $y;
-			} else {
-				$relcoord = false;
-				$xoffset = 0;
-				$yoffset = 0;
-			}
-			$params = array();
-			if (isset($val[2])) {
-				// get curve parameters
-				preg_match_all('/-?\d*\.?\d+/', trim($val[2]), $matches);
-				$rawparams = $matches[0];
-				$params = array();
-				foreach ($rawparams as $ck => $cp) {
-					$params[$ck] = $this->getHTMLUnitToUnits($cp, 0, $this->svgunit, false);
-					if (abs($params[$ck]) < $minlen) {
-						// approximate little values to zero
-						$params[$ck] = 0;
-					}
-				}
-			}
-			// store current origin point
-			$x0 = $x;
-			$y0 = $y;
-			switch (strtoupper($cmd)) {
-				case 'M': { // moveto
-					foreach ($params as $ck => $cp) {
-						if (($ck % 2) == 0) {
-							$x = $cp + $xoffset;
-						} else {
-							$y = $cp + $yoffset;
-							if ($firstcmd OR (abs($x0 - $x) >= $minlen) OR (abs($y0 - $y) >= $minlen)) {
-								if ($ck == 1) {
-									$this->_outPoint($x, $y);
-									$firstcmd = false;
-									$xinitial = $x;
-									$yinitial = $y;
-								} else {
-									$this->_outLine($x, $y);
-								}
-								$x0 = $x;
-								$y0 = $y;
-							}
-							$xmin = min($xmin, $x);
-							$ymin = min($ymin, $y);
-							$xmax = max($xmax, $x);
-							$ymax = max($ymax, $y);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'L': { // lineto
-					foreach ($params as $ck => $cp) {
-						if (($ck % 2) == 0) {
-							$x = $cp + $xoffset;
-						} else {
-							$y = $cp + $yoffset;
-							if ((abs($x0 - $x) >= $minlen) OR (abs($y0 - $y) >= $minlen)) {
-								$this->_outLine($x, $y);
-								$x0 = $x;
-								$y0 = $y;
-							}
-							$xmin = min($xmin, $x);
-							$ymin = min($ymin, $y);
-							$xmax = max($xmax, $x);
-							$ymax = max($ymax, $y);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'H': { // horizontal lineto
-					foreach ($params as $ck => $cp) {
-						$x = $cp + $xoffset;
-						if ((abs($x0 - $x) >= $minlen) OR (abs($y0 - $y) >= $minlen)) {
-							$this->_outLine($x, $y);
-							$x0 = $x;
-							$y0 = $y;
-						}
-						$xmin = min($xmin, $x);
-						$xmax = max($xmax, $x);
-						if ($relcoord) {
-							$xoffset = $x;
-						}
-					}
-					break;
-				}
-				case 'V': { // vertical lineto
-					foreach ($params as $ck => $cp) {
-						$y = $cp + $yoffset;
-						if ((abs($x0 - $x) >= $minlen) OR (abs($y0 - $y) >= $minlen)) {
-							$this->_outLine($x, $y);
-							$x0 = $x;
-							$y0 = $y;
-						}
-						$ymin = min($ymin, $y);
-						$ymax = max($ymax, $y);
-						if ($relcoord) {
-							$yoffset = $y;
-						}
-					}
-					break;
-				}
-				case 'C': { // curveto
-					foreach ($params as $ck => $cp) {
-						$params[$ck] = $cp;
-						if ((($ck + 1) % 6) == 0) {
-							$x1 = $params[($ck - 5)] + $xoffset;
-							$y1 = $params[($ck - 4)] + $yoffset;
-							$x2 = $params[($ck - 3)] + $xoffset;
-							$y2 = $params[($ck - 2)] + $yoffset;
-							$x = $params[($ck - 1)] + $xoffset;
-							$y = $params[($ck)] + $yoffset;
-							$this->_outCurve($x1, $y1, $x2, $y2, $x, $y);
-							$xmin = min($xmin, $x, $x1, $x2);
-							$ymin = min($ymin, $y, $y1, $y2);
-							$xmax = max($xmax, $x, $x1, $x2);
-							$ymax = max($ymax, $y, $y1, $y2);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'S': { // shorthand/smooth curveto
-					foreach ($params as $ck => $cp) {
-						$params[$ck] = $cp;
-						if ((($ck + 1) % 4) == 0) {
-							if (($key > 0) AND ((strtoupper($paths[($key - 1)][1]) == 'C') OR (strtoupper($paths[($key - 1)][1]) == 'S'))) {
-								$x1 = (2 * $x) - $x2;
-								$y1 = (2 * $y) - $y2;
-							} else {
-								$x1 = $x;
-								$y1 = $y;
-							}
-							$x2 = $params[($ck - 3)] + $xoffset;
-							$y2 = $params[($ck - 2)] + $yoffset;
-							$x = $params[($ck - 1)] + $xoffset;
-							$y = $params[($ck)] + $yoffset;
-							$this->_outCurve($x1, $y1, $x2, $y2, $x, $y);
-							$xmin = min($xmin, $x, $x1, $x2);
-							$ymin = min($ymin, $y, $y1, $y2);
-							$xmax = max($xmax, $x, $x1, $x2);
-							$ymax = max($ymax, $y, $y1, $y2);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'Q': { // quadratic Bezier curveto
-					foreach ($params as $ck => $cp) {
-						$params[$ck] = $cp;
-						if ((($ck + 1) % 4) == 0) {
-							// convert quadratic points to cubic points
-							$x1 = $params[($ck - 3)] + $xoffset;
-							$y1 = $params[($ck - 2)] + $yoffset;
-							$xa = ($x + (2 * $x1)) / 3;
-							$ya = ($y + (2 * $y1)) / 3;
-							$x = $params[($ck - 1)] + $xoffset;
-							$y = $params[($ck)] + $yoffset;
-							$xb = ($x + (2 * $x1)) / 3;
-							$yb = ($y + (2 * $y1)) / 3;
-							$this->_outCurve($xa, $ya, $xb, $yb, $x, $y);
-							$xmin = min($xmin, $x, $xa, $xb);
-							$ymin = min($ymin, $y, $ya, $yb);
-							$xmax = max($xmax, $x, $xa, $xb);
-							$ymax = max($ymax, $y, $ya, $yb);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'T': { // shorthand/smooth quadratic Bezier curveto
-					foreach ($params as $ck => $cp) {
-						$params[$ck] = $cp;
-						if (($ck % 2) != 0) {
-							if (($key > 0) AND ((strtoupper($paths[($key - 1)][1]) == 'Q') OR (strtoupper($paths[($key - 1)][1]) == 'T'))) {
-								$x1 = (2 * $x) - $x1;
-								$y1 = (2 * $y) - $y1;
-							} else {
-								$x1 = $x;
-								$y1 = $y;
-							}
-							// convert quadratic points to cubic points
-							$xa = ($x + (2 * $x1)) / 3;
-							$ya = ($y + (2 * $y1)) / 3;
-							$x = $params[($ck - 1)] + $xoffset;
-							$y = $params[($ck)] + $yoffset;
-							$xb = ($x + (2 * $x1)) / 3;
-							$yb = ($y + (2 * $y1)) / 3;
-							$this->_outCurve($xa, $ya, $xb, $yb, $x, $y);
-							$xmin = min($xmin, $x, $xa, $xb);
-							$ymin = min($ymin, $y, $ya, $yb);
-							$xmax = max($xmax, $x, $xa, $xb);
-							$ymax = max($ymax, $y, $ya, $yb);
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'A': { // elliptical arc
-					foreach ($params as $ck => $cp) {
-						$params[$ck] = $cp;
-						if ((($ck + 1) % 7) == 0) {
-							$x0 = $x;
-							$y0 = $y;
-							$rx = max(abs($params[($ck - 6)]), .000000001);
-							$ry = max(abs($params[($ck - 5)]), .000000001);
-							$ang = -$rawparams[($ck - 4)];
-							$angle = deg2rad($ang);
-							$fa = $rawparams[($ck - 3)]; // large-arc-flag
-							$fs = $rawparams[($ck - 2)]; // sweep-flag
-							$x = $params[($ck - 1)] + $xoffset;
-							$y = $params[$ck] + $yoffset;
-							if ((abs($x0 - $x) < $minlen) AND (abs($y0 - $y) < $minlen)) {
-								// endpoints are almost identical
-								$xmin = min($xmin, $x);
-								$ymin = min($ymin, $y);
-								$xmax = max($xmax, $x);
-								$ymax = max($ymax, $y);
-							} else {
-								$cos_ang = cos($angle);
-								$sin_ang = sin($angle);
-								$a = (($x0 - $x) / 2);
-								$b = (($y0 - $y) / 2);
-								$xa = ($a * $cos_ang) - ($b * $sin_ang);
-								$ya = ($a * $sin_ang) + ($b * $cos_ang);
-								$rx2 = $rx * $rx;
-								$ry2 = $ry * $ry;
-								$xa2 = $xa * $xa;
-								$ya2 = $ya * $ya;
-								$delta = ($xa2 / $rx2) + ($ya2 / $ry2);
-								if ($delta > 1) {
-									$rx *= sqrt($delta);
-									$ry *= sqrt($delta);
-									$rx2 = $rx * $rx;
-									$ry2 = $ry * $ry;
-								}
-								$numerator = (($rx2 * $ry2) - ($rx2 * $ya2) - ($ry2 * $xa2));
-								if ($numerator < 0) {
-									$root = 0;
-								} else {
-									$root = sqrt($numerator / (($rx2 * $ya2) + ($ry2 * $xa2)));
-								}
-								if ($fa == $fs){
-									$root *= -1;
-								}
-								$cax = $root * (($rx * $ya) / $ry);
-								$cay = -$root * (($ry * $xa) / $rx);
-								// coordinates of ellipse center
-								$cx = ($cax * $cos_ang) - ($cay * $sin_ang) + (($x0 + $x) / 2);
-								$cy = ($cax * $sin_ang) + ($cay * $cos_ang) + (($y0 + $y) / 2);
-								// get angles
-								$angs = TCPDF_STATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
-								$dang = TCPDF_STATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
-								if (($fs == 0) AND ($dang > 0)) {
-									$dang -= (2 * M_PI);
-								} elseif (($fs == 1) AND ($dang < 0)) {
-									$dang += (2 * M_PI);
-								}
-								$angf = $angs - $dang;
-								if ((($fs == 0) AND ($angs > $angf)) OR (($fs == 1) AND ($angs < $angf))) {
-									// reverse angles
-									$tmp = $angs;
-									$angs = $angf;
-									$angf = $tmp;
-								}
-								$angs = round(rad2deg($angs), 6);
-								$angf = round(rad2deg($angf), 6);
-								// covent angles to positive values
-								if (($angs < 0) AND ($angf < 0)) {
-									$angs += 360;
-									$angf += 360;
-								}
-								$pie = false;
-								if (($key == 0) AND (isset($paths[($key + 1)][1])) AND (trim($paths[($key + 1)][1]) == 'z')) {
-									$pie = true;
-								}
-								list($axmin, $aymin, $axmax, $aymax) = $this->_outellipticalarc($cx, $cy, $rx, $ry, $ang, $angs, $angf, $pie, 2, false, ($fs == 0), true);
-								$xmin = min($xmin, $x, $axmin);
-								$ymin = min($ymin, $y, $aymin);
-								$xmax = max($xmax, $x, $axmax);
-								$ymax = max($ymax, $y, $aymax);
-							}
-							if ($relcoord) {
-								$xoffset = $x;
-								$yoffset = $y;
-							}
-						}
-					}
-					break;
-				}
-				case 'Z': {
-					$this->_out('h');
-					$x = $x0 = $xinitial;
-					$y = $y0 = $yinitial;
-					break;
-				}
-			}
-			$firstcmd = false;
-		} // end foreach
-		$this->_out($op);
-		return array($xmin, $ymin, ($xmax - $xmin), ($ymax - $ymin));
-	}
-
-	/**
-	 * Return the tag name without the namespace
-	 * @param string $name Tag name
-	 * @protected
-	 */
-	protected function removeTagNamespace($name) {
-		if(strpos($name, ':') !== false) {
-			$parts = explode(':', $name);
-			return $parts[(sizeof($parts) - 1)];
-		}
-		return $name;
-	}
-
-	/**
-	 * Sets the opening SVG element handler function for the XML parser. (*** TO BE COMPLETED ***)
-	 * @param resource|string $parser The first parameter, parser, is a reference to the XML parser calling the handler.
-	 * @param string $name The second parameter, name, contains the name of the element for which this handler is called. If case-folding is in effect for this parser, the element name will be in uppercase letters.
-	 * @param array $attribs The third parameter, attribs, contains an associative array with the element's attributes (if any). The keys of this array are the attribute names, the values are the attribute values. Attribute names are case-folded on the same criteria as element names. Attribute values are not case-folded. The original order of the attributes can be retrieved by walking through attribs the normal way, using each(). The first key in the array was the first attribute, and so on.
-	 * @param array $ctm tranformation matrix for clipping mode (starting transformation matrix).
-	 * @author Nicola Asuni
-	 * @since 5.0.000 (2010-05-02)
-	 * @protected
-	 */
-	protected function startSVGElementHandler($parser, $name, $attribs, $ctm=array()) {
-		$name = $this->removeTagNamespace($name);
-		// check if we are in clip mode
-		if ($this->svgclipmode) {
-			$this->svgclippaths[$this->svgclipid][] = array('name' => $name, 'attribs' => $attribs, 'tm' => $this->svgcliptm[$this->svgclipid]);
-			return;
-		}
-		if ($this->svgdefsmode AND !in_array($name, array('clipPath', 'linearGradient', 'radialGradient', 'stop'))) {
-			if (isset($attribs['id'])) {
-				$attribs['child_elements'] = array();
-				$this->svgdefs[$attribs['id']] = array('name' => $name, 'attribs' => $attribs);
-				return;
-			}
-			if (end($this->svgdefs) !== FALSE) {
-				$last_svgdefs_id = key($this->svgdefs);
-				if (isset($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'])) {
-					$attribs['id'] = 'DF_'.(count($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements']) + 1);
-					$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$attribs['id']] = array('name' => $name, 'attribs' => $attribs);
-					return;
-				}
-			}
-			return;
-		}
-		$clipping = false;
-		if ($parser == 'clip-path') {
-			// set clipping mode
-			$clipping = true;
-		}
-		// get styling properties
-		$prev_svgstyle = $this->svgstyles[max(0,(count($this->svgstyles) - 1))]; // previous style
-		$svgstyle = $this->svgstyles[0]; // set default style
-		if ($clipping AND !isset($attribs['fill']) AND (!isset($attribs['style']) OR (!preg_match('/[;\"\s]{1}fill[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval)))) {
-			// default fill attribute for clipping
-			$attribs['fill'] = 'none';
-		}
-		if (isset($attribs['style']) AND !TCPDF_STATIC::empty_string($attribs['style']) AND ($attribs['style'][0] != ';')) {
-			// fix style for regular expression
-			$attribs['style'] = ';'.$attribs['style'];
-		}
-		foreach ($prev_svgstyle as $key => $val) {
-			if (in_array($key, TCPDF_IMAGES::$svginheritprop)) {
-				// inherit previous value
-				$svgstyle[$key] = $val;
-			}
-			if (isset($attribs[$key]) AND !TCPDF_STATIC::empty_string($attribs[$key])) {
-				// specific attribute settings
-				if ($attribs[$key] == 'inherit') {
-					$svgstyle[$key] = $val;
-				} else {
-					$svgstyle[$key] = $attribs[$key];
-				}
-			} elseif (isset($attribs['style']) AND !TCPDF_STATIC::empty_string($attribs['style'])) {
-				// CSS style syntax
-				$attrval = array();
-				if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval) AND isset($attrval[1])) {
-					if ($attrval[1] == 'inherit') {
-						$svgstyle[$key] = $val;
-					} else {
-						$svgstyle[$key] = $attrval[1];
-					}
-				}
-			}
-		}
-		// transformation matrix
-		if (!empty($ctm)) {
-			$tm = $ctm;
-		} else {
-			$tm = array(1,0,0,1,0,0);
-		}
-		if (isset($attribs['transform']) AND !empty($attribs['transform'])) {
-			$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, TCPDF_STATIC::getSVGTransformMatrix($attribs['transform']));
-		}
-		$svgstyle['transfmatrix'] = $tm;
-		$invisible = false;
-		if (($svgstyle['visibility'] == 'hidden') OR ($svgstyle['visibility'] == 'collapse') OR ($svgstyle['display'] == 'none')) {
-			// the current graphics element is invisible (nothing is painted)
-			$invisible = true;
-		}
-		// process tag
-		switch($name) {
-			case 'defs': {
-				$this->svgdefsmode = true;
-				break;
-			}
-			// clipPath
-			case 'clipPath': {
-				if ($invisible) {
-					break;
-				}
-				$this->svgclipmode = true;
-				if (!isset($attribs['id'])) {
-					$attribs['id'] = 'CP_'.(count($this->svgcliptm) + 1);
-				}
-				$this->svgclipid = $attribs['id'];
-				$this->svgclippaths[$this->svgclipid] = array();
-				$this->svgcliptm[$this->svgclipid] = $tm;
-				break;
-			}
-			case 'svg': {
-				// start of SVG object
-				if(++$this->svg_tag_depth <= 1) {
-					break;
-				}
-				// inner SVG
-				array_push($this->svgstyles, $svgstyle);
-				$this->StartTransform();
-				$svgX = (isset($attribs['x'])?$attribs['x']:0);
-				$svgY = (isset($attribs['y'])?$attribs['y']:0);
-				$svgW = (isset($attribs['width'])?$attribs['width']:0);
-				$svgH = (isset($attribs['height'])?$attribs['height']:0);
-				// set x, y position using transform matrix
-				$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array( 1, 0, 0, 1, $svgX, $svgY));
-				$this->SVGTransform($tm);
-				// set clipping for width and height
-				$x = 0;
-				$y = 0;
-				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):$this->w);
-				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):$this->h);
-				// draw clipping rect
-				$this->Rect($x, $y, $w, $h, 'CNZ', array(), array());
-				// parse viewbox, calculate extra transformation matrix
-				if (isset($attribs['viewBox'])) {
-					$tmp = array();
-					preg_match_all("/[0-9]+/", $attribs['viewBox'], $tmp);
-					$tmp = $tmp[0];
-					if (sizeof($tmp) == 4) {
-						$vx = $tmp[0];
-						$vy = $tmp[1];
-						$vw = $tmp[2];
-						$vh = $tmp[3];
-						// get aspect ratio
-						$tmp = array();
-						$aspectX = 'xMid';
-						$aspectY = 'YMid';
-						$fit = 'meet';
-						if (isset($attribs['preserveAspectRatio'])) {
-							if($attribs['preserveAspectRatio'] == 'none') {
-								$fit = 'none';
-							} else {
-								preg_match_all('/[a-zA-Z]+/', $attribs['preserveAspectRatio'], $tmp);
-								$tmp = $tmp[0];
-								if ((sizeof($tmp) == 2) AND (strlen($tmp[0]) == 8) AND (in_array($tmp[1], array('meet', 'slice', 'none')))) {
-									$aspectX = substr($tmp[0], 0, 4);
-									$aspectY = substr($tmp[0], 4, 4);
-									$fit = $tmp[1];
-								}
-							}
-						}
-						$wr = ($svgW / $vw);
-						$hr = ($svgH / $vh);
-						$ax = $ay = 0;
-						if ((($fit == 'meet') AND ($hr < $wr)) OR (($fit == 'slice') AND ($hr > $wr))) {
-							if ($aspectX == 'xMax') {
-								$ax = (($vw * ($wr / $hr)) - $vw);
-							}
-							if ($aspectX == 'xMid') {
-								$ax = ((($vw * ($wr / $hr)) - $vw) / 2);
-							}
-							$wr = $hr;
-						} elseif ((($fit == 'meet') AND ($hr > $wr)) OR (($fit == 'slice') AND ($hr < $wr))) {
-							if ($aspectY == 'YMax') {
-								$ay = (($vh * ($hr / $wr)) - $vh);
-							}
-							if ($aspectY == 'YMid') {
-								$ay = ((($vh * ($hr / $wr)) - $vh) / 2);
-							}
-							$hr = $wr;
-						}
-						$newtm = array($wr, 0, 0, $hr, (($wr * ($ax - $vx)) - $svgX), (($hr * ($ay - $vy)) - $svgY));
-						$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, $newtm);
-						$this->SVGTransform($tm);
-					}
-				}
-				$this->setSVGStyles($svgstyle, $prev_svgstyle);
-				break;
-			}
-			case 'g': {
-				// group together related graphics elements
-				array_push($this->svgstyles, $svgstyle);
-				$this->StartTransform();
-				$x = (isset($attribs['x'])?$attribs['x']:0);
-				$y = (isset($attribs['y'])?$attribs['y']:0);
-				$w = 1;//(isset($attribs['width'])?$attribs['width']:1);
-				$h = 1;//(isset($attribs['height'])?$attribs['height']:1);
-				$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
-				$this->SVGTransform($tm);
-				$this->setSVGStyles($svgstyle, $prev_svgstyle);
-				break;
-			}
-			case 'linearGradient': {
-				if ($this->pdfa_mode && $this->pdfa_version < 2) {
-					break;
-				}
-				if (!isset($attribs['id'])) {
-					$attribs['id'] = 'GR_'.(count($this->svggradients) + 1);
-				}
-				$this->svggradientid = $attribs['id'];
-				$this->svggradients[$this->svggradientid] = array();
-				$this->svggradients[$this->svggradientid]['type'] = 2;
-				$this->svggradients[$this->svggradientid]['stops'] = array();
-				if (isset($attribs['gradientUnits'])) {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attribs['gradientUnits'];
-				} else {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = 'objectBoundingBox';
-				}
-				//$attribs['spreadMethod']
-				if (((!isset($attribs['x1'])) AND (!isset($attribs['y1'])) AND (!isset($attribs['x2'])) AND (!isset($attribs['y2'])))
-					OR ((isset($attribs['x1']) AND (substr($attribs['x1'], -1) == '%'))
-						OR (isset($attribs['y1']) AND (substr($attribs['y1'], -1) == '%'))
-						OR (isset($attribs['x2']) AND (substr($attribs['x2'], -1) == '%'))
-						OR (isset($attribs['y2']) AND (substr($attribs['y2'], -1) == '%')))) {
-					$this->svggradients[$this->svggradientid]['mode'] = 'percentage';
-				} else {
-					$this->svggradients[$this->svggradientid]['mode'] = 'measure';
-				}
-				$x1 = (isset($attribs['x1'])?$attribs['x1']:'0');
-				$y1 = (isset($attribs['y1'])?$attribs['y1']:'0');
-				$x2 = (isset($attribs['x2'])?$attribs['x2']:'100');
-				$y2 = (isset($attribs['y2'])?$attribs['y2']:'0');
-				if (isset($attribs['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
-				}
-				$this->svggradients[$this->svggradientid]['coords'] = array($x1, $y1, $x2, $y2);
-				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
-					// gradient is defined on another place
-					$this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
-				}
-				break;
-			}
-			case 'radialGradient': {
-				if ($this->pdfa_mode && $this->pdfa_version < 2) {
-					break;
-				}
-				if (!isset($attribs['id'])) {
-					$attribs['id'] = 'GR_'.(count($this->svggradients) + 1);
-				}
-				$this->svggradientid = $attribs['id'];
-				$this->svggradients[$this->svggradientid] = array();
-				$this->svggradients[$this->svggradientid]['type'] = 3;
-				$this->svggradients[$this->svggradientid]['stops'] = array();
-				if (isset($attribs['gradientUnits'])) {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attribs['gradientUnits'];
-				} else {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = 'objectBoundingBox';
-				}
-				//$attribs['spreadMethod']
-				if (((!isset($attribs['cx'])) AND (!isset($attribs['cy'])))
-					OR ((isset($attribs['cx']) AND (substr($attribs['cx'], -1) == '%'))
-					OR (isset($attribs['cy']) AND (substr($attribs['cy'], -1) == '%')))) {
-					$this->svggradients[$this->svggradientid]['mode'] = 'percentage';
-				} elseif (isset($attribs['r']) AND is_numeric($attribs['r']) AND ($attribs['r']) <= 1) {
-					$this->svggradients[$this->svggradientid]['mode'] = 'ratio';
-				} else {
-					$this->svggradients[$this->svggradientid]['mode'] = 'measure';
-				}
-				$cx = (isset($attribs['cx']) ? $attribs['cx'] : 0.5);
-				$cy = (isset($attribs['cy']) ? $attribs['cy'] : 0.5);
-				$fx = (isset($attribs['fx']) ? $attribs['fx'] : $cx);
-				$fy = (isset($attribs['fy']) ? $attribs['fy'] : $cy);
-				$r = (isset($attribs['r']) ? $attribs['r'] : 0.5);
-				if (isset($attribs['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
-				}
-				$this->svggradients[$this->svggradientid]['coords'] = array($cx, $cy, $fx, $fy, $r);
-				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
-					// gradient is defined on another place
-					$this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
-				}
-				break;
-			}
-			case 'stop': {
-				// gradient stops
-				if (substr($attribs['offset'], -1) == '%') {
-					$offset = floatval(substr($attribs['offset'], 0, -1)) / 100;
-				} else {
-					$offset = floatval($attribs['offset']);
-					if ($offset > 1) {
-						$offset /= 100;
-					}
-				}
-				$stop_color = isset($svgstyle['stop-color'])?TCPDF_COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
-				$opacity = isset($svgstyle['stop-opacity'])?$svgstyle['stop-opacity']:1;
-				$this->svggradients[$this->svggradientid]['stops'][] = array('offset' => $offset, 'color' => $stop_color, 'opacity' => $opacity);
-				break;
-			}
-			// paths
-			case 'path': {
-				if ($invisible) {
-					break;
-				}
-				if (isset($attribs['d'])) {
-					$d = trim($attribs['d']);
-					if (!empty($d)) {
-						$x = (isset($attribs['x'])?$attribs['x']:0);
-						$y = (isset($attribs['y'])?$attribs['y']:0);
-						$w = (isset($attribs['width'])?$attribs['width']:1);
-						$h = (isset($attribs['height'])?$attribs['height']:1);
-						$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
-						if ($clipping) {
-							$this->SVGTransform($tm);
-							$this->SVGPath($d, 'CNZ');
-						} else {
-							$this->StartTransform();
-							$this->SVGTransform($tm);
-							$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'SVGPath', array($d, 'CNZ'));
-							if (!empty($obstyle)) {
-								$this->SVGPath($d, $obstyle);
-							}
-							$this->StopTransform();
-						}
-					}
-				}
-				break;
-			}
-			// shapes
-			case 'rect': {
-				if ($invisible) {
-					break;
-				}
-				$x = (isset($attribs['x'])?$this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false):0);
-				$y = (isset($attribs['y'])?$this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false):0);
-				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):0);
-				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):0);
-				$rx = (isset($attribs['rx'])?$this->getHTMLUnitToUnits($attribs['rx'], 0, $this->svgunit, false):0);
-				$ry = (isset($attribs['ry'])?$this->getHTMLUnitToUnits($attribs['ry'], 0, $this->svgunit, false):$rx);
-				if ($clipping) {
-					$this->SVGTransform($tm);
-					$this->RoundedRectXY($x, $y, $w, $h, $rx, $ry, '1111', 'CNZ', array(), array());
-				} else {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'RoundedRectXY', array($x, $y, $w, $h, $rx, $ry, '1111', 'CNZ'));
-					if (!empty($obstyle)) {
-						$this->RoundedRectXY($x, $y, $w, $h, $rx, $ry, '1111', $obstyle, array(), array());
-					}
-					$this->StopTransform();
-				}
-				break;
-			}
-			case 'circle': {
-				if ($invisible) {
-					break;
-				}
-				$r = (isset($attribs['r']) ? $this->getHTMLUnitToUnits($attribs['r'], 0, $this->svgunit, false) : 0);
-				$cx = (isset($attribs['cx']) ? $this->getHTMLUnitToUnits($attribs['cx'], 0, $this->svgunit, false) : (isset($attribs['x']) ? $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false) : 0));
-				$cy = (isset($attribs['cy']) ? $this->getHTMLUnitToUnits($attribs['cy'], 0, $this->svgunit, false) : (isset($attribs['y']) ? $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false) : 0));
-				$x = ($cx - $r);
-				$y = ($cy - $r);
-				$w = (2 * $r);
-				$h = $w;
-				if ($clipping) {
-					$this->SVGTransform($tm);
-					$this->Circle($cx, $cy, $r, 0, 360, 'CNZ', array(), array(), 8);
-				} else {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Circle', array($cx, $cy, $r, 0, 360, 'CNZ'));
-					if (!empty($obstyle)) {
-						$this->Circle($cx, $cy, $r, 0, 360, $obstyle, array(), array(), 8);
-					}
-					$this->StopTransform();
-				}
-				break;
-			}
-			case 'ellipse': {
-				if ($invisible) {
-					break;
-				}
-				$rx = (isset($attribs['rx']) ? $this->getHTMLUnitToUnits($attribs['rx'], 0, $this->svgunit, false) : 0);
-				$ry = (isset($attribs['ry']) ? $this->getHTMLUnitToUnits($attribs['ry'], 0, $this->svgunit, false) : 0);
-				$cx = (isset($attribs['cx']) ? $this->getHTMLUnitToUnits($attribs['cx'], 0, $this->svgunit, false) : (isset($attribs['x']) ? $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false) : 0));
-				$cy = (isset($attribs['cy']) ? $this->getHTMLUnitToUnits($attribs['cy'], 0, $this->svgunit, false) : (isset($attribs['y']) ? $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false) : 0));
-				$x = ($cx - $rx);
-				$y = ($cy - $ry);
-				$w = (2 * $rx);
-				$h = (2 * $ry);
-				if ($clipping) {
-					$this->SVGTransform($tm);
-					$this->Ellipse($cx, $cy, $rx, $ry, 0, 0, 360, 'CNZ', array(), array(), 8);
-				} else {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Ellipse', array($cx, $cy, $rx, $ry, 0, 0, 360, 'CNZ'));
-					if (!empty($obstyle)) {
-						$this->Ellipse($cx, $cy, $rx, $ry, 0, 0, 360, $obstyle, array(), array(), 8);
-					}
-					$this->StopTransform();
-				}
-				break;
-			}
-			case 'line': {
-				if ($invisible) {
-					break;
-				}
-				$x1 = (isset($attribs['x1'])?$this->getHTMLUnitToUnits($attribs['x1'], 0, $this->svgunit, false):0);
-				$y1 = (isset($attribs['y1'])?$this->getHTMLUnitToUnits($attribs['y1'], 0, $this->svgunit, false):0);
-				$x2 = (isset($attribs['x2'])?$this->getHTMLUnitToUnits($attribs['x2'], 0, $this->svgunit, false):0);
-				$y2 = (isset($attribs['y2'])?$this->getHTMLUnitToUnits($attribs['y2'], 0, $this->svgunit, false):0);
-				$x = $x1;
-				$y = $y1;
-				$w = abs($x2 - $x1);
-				$h = abs($y2 - $y1);
-				if (!$clipping) {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Line', array($x1, $y1, $x2, $y2));
-					$this->Line($x1, $y1, $x2, $y2);
-					$this->StopTransform();
-				}
-				break;
-			}
-			case 'polyline':
-			case 'polygon': {
-				if ($invisible) {
-					break;
-				}
-				$points = (isset($attribs['points'])?$attribs['points']:'0 0');
-				$points = trim($points);
-				// note that point may use a complex syntax not covered here
-				$points = preg_split('/[\,\s]+/si', $points);
-				if (count($points) < 4) {
-					break;
-				}
-				$p = array();
-				$xmin = 2147483647;
-				$xmax = 0;
-				$ymin = 2147483647;
-				$ymax = 0;
-				foreach ($points as $key => $val) {
-					$p[$key] = $this->getHTMLUnitToUnits($val, 0, $this->svgunit, false);
-					if (($key % 2) == 0) {
-						// X coordinate
-						$xmin = min($xmin, $p[$key]);
-						$xmax = max($xmax, $p[$key]);
-					} else {
-						// Y coordinate
-						$ymin = min($ymin, $p[$key]);
-						$ymax = max($ymax, $p[$key]);
-					}
-				}
-				$x = $xmin;
-				$y = $ymin;
-				$w = ($xmax - $xmin);
-				$h = ($ymax - $ymin);
-				if ($name == 'polyline') {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'PolyLine', array($p, 'CNZ'));
-					if (!empty($obstyle)) {
-						$this->PolyLine($p, $obstyle, array(), array());
-					}
-					$this->StopTransform();
-				} else { // polygon
-					if ($clipping) {
-						$this->SVGTransform($tm);
-						$this->Polygon($p, 'CNZ', array(), array(), true);
-					} else {
-						$this->StartTransform();
-						$this->SVGTransform($tm);
-						$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Polygon', array($p, 'CNZ'));
-						if (!empty($obstyle)) {
-							$this->Polygon($p, $obstyle, array(), array(), true);
-						}
-						$this->StopTransform();
-					}
-				}
-				break;
-			}
-			// image
-			case 'image': {
-				if ($invisible) {
-					break;
-				}
-				if (!isset($attribs['xlink:href']) OR empty($attribs['xlink:href'])) {
-					break;
-				}
-				$x = (isset($attribs['x'])?$this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false):0);
-				$y = (isset($attribs['y'])?$this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false):0);
-				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):0);
-				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):0);
-				$img = $attribs['xlink:href'];
-				if (!$clipping) {
-					$this->StartTransform();
-					$this->SVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h);
-					if (preg_match('/^data:image\/[^;]+;base64,/', $img, $m) > 0) {
-						// embedded image encoded as base64
-						$img = '@'.base64_decode(substr($img, strlen($m[0])));
-					} else {
-						// fix image path
-						if ($this->isRelativePath($img) || $this->hasExtForbiddenProtocol($img)) {
-							break;
-						}
-						if (!TCPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
-							// replace relative path with full server path
-							$img = $this->svgdir.'/'.$img;
-						}
-						if (($img[0] == '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')) {
-							$findroot = strpos($img, $_SERVER['DOCUMENT_ROOT']);
-							if (($findroot === false) OR ($findroot > 1)) {
-								if (substr($_SERVER['DOCUMENT_ROOT'], -1) == '/') {
-									$img = substr($_SERVER['DOCUMENT_ROOT'], 0, -1).$img;
-								} else {
-									$img = $_SERVER['DOCUMENT_ROOT'].$img;
-								}
-							}
-						}
-						$img = urldecode($img);
-						$testscrtype = @parse_url($img);
-						if (empty($testscrtype['query'])) {
-							// convert URL to server path
-							$img = str_replace(K_PATH_URL, K_PATH_MAIN, $img);
-						} elseif (preg_match('|^https?://|', $img) !== 1) {
-							// convert server path to URL
-							$img = str_replace(K_PATH_MAIN, K_PATH_URL, $img);
-						}
-					}
-					// get image type
-					$imgtype = TCPDF_IMAGES::getImageFileType($img);
-					if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
-						$this->ImageEps($img, $x, $y, $w, $h);
-					} elseif ($imgtype == 'svg') {
-						// store SVG vars
-						$svggradients = $this->svggradients;
-						$svggradientid = $this->svggradientid;
-						$svgdefsmode = $this->svgdefsmode;
-						$svgdefs = $this->svgdefs;
-						$svgclipmode = $this->svgclipmode;
-						$svgclippaths = $this->svgclippaths;
-						$svgcliptm = $this->svgcliptm;
-						$svgclipid = $this->svgclipid;
-						$svgtext = $this->svgtext;
-						$svgtextmode = $this->svgtextmode;
-						$this->ImageSVG($img, $x, $y, $w, $h);
-						// restore SVG vars
-						$this->svggradients = $svggradients;
-						$this->svggradientid = $svggradientid;
-						$this->svgdefsmode = $svgdefsmode;
-						$this->svgdefs = $svgdefs;
-						$this->svgclipmode = $svgclipmode;
-						$this->svgclippaths = $svgclippaths;
-						$this->svgcliptm = $svgcliptm;
-						$this->svgclipid = $svgclipid;
-						$this->svgtext = $svgtext;
-						$this->svgtextmode = $svgtextmode;
-					} else {
-						$this->Image($img, $x, $y, $w, $h);
-					}
-					$this->StopTransform();
-				}
-				break;
-			}
-			// text
-			case 'text':
-			case 'tspan': {
-				if (isset($this->svgtextmode['text-anchor']) AND !empty($this->svgtext)) {
-					// @TODO: unsupported feature
-				}
-				// only basic support - advanced features must be implemented
-				$this->svgtextmode['invisible'] = $invisible;
-				if ($invisible) {
-					break;
-				}
-				array_push($this->svgstyles, $svgstyle);
-				if (isset($attribs['x'])) {
-					$x = $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false);
-				} elseif ($name == 'tspan') {
-					$x = $this->x;
-				} else {
-					$x = 0;
-				}
-				if (isset($attribs['dx'])) {
-					$x += $this->getHTMLUnitToUnits($attribs['dx'], 0, $this->svgunit, false);
-				}
-				if (isset($attribs['y'])) {
-					$y = $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false);
-				} elseif ($name == 'tspan') {
-					$y = $this->y;
-				} else {
-					$y = 0;
-				}
-				if (isset($attribs['dy'])) {
-					$y += $this->getHTMLUnitToUnits($attribs['dy'], 0, $this->svgunit, false);
-				}
-				$svgstyle['text-color'] = $svgstyle['fill'];
-				$this->svgtext = '';
-				if (isset($svgstyle['text-anchor'])) {
-					$this->svgtextmode['text-anchor'] = $svgstyle['text-anchor'];
-				} else {
-					$this->svgtextmode['text-anchor'] = 'start';
-				}
-				if (isset($svgstyle['direction'])) {
-					if ($svgstyle['direction'] == 'rtl') {
-						$this->svgtextmode['rtl'] = true;
-					} else {
-						$this->svgtextmode['rtl'] = false;
-					}
-				} else {
-					$this->svgtextmode['rtl'] = false;
-				}
-				if (isset($svgstyle['stroke']) AND ($svgstyle['stroke'] != 'none') AND isset($svgstyle['stroke-width']) AND ($svgstyle['stroke-width'] > 0)) {
-					$this->svgtextmode['stroke'] = $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false);
-				} else {
-					$this->svgtextmode['stroke'] = false;
-				}
-				$this->StartTransform();
-				$this->SVGTransform($tm);
-				$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, 1, 1);
-				$this->x = $x;
-				$this->y = $y;
-				break;
-			}
-			// use
-			case 'use': {
-				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
-					$svgdefid = substr($attribs['xlink:href'], 1);
-					if (isset($this->svgdefs[$svgdefid])) {
-						$use = $this->svgdefs[$svgdefid];
-						if (isset($attribs['xlink:href'])) {
-							unset($attribs['xlink:href']);
-						}
-						if (isset($attribs['id'])) {
-							unset($attribs['id']);
-						}
-						if (isset($use['attribs']['x']) AND isset($attribs['x'])) {
-							$attribs['x'] += $use['attribs']['x'];
-						}
-						if (isset($use['attribs']['y']) AND isset($attribs['y'])) {
-							$attribs['y'] += $use['attribs']['y'];
-						}
-						if (empty($attribs['style'])) {
-							$attribs['style'] = '';
-						}
-						if (!empty($use['attribs']['style'])) {
-							// merge styles
-							$attribs['style'] = str_replace(';;',';',';'.$use['attribs']['style'].$attribs['style']);
-						}
-						$attribs = array_merge($use['attribs'], $attribs);
-						$this->startSVGElementHandler($parser, $use['name'], $attribs);
-						return;
-					}
-				}
-				break;
-			}
-			default: {
-				break;
-			}
-		} // end of switch
-		// process child elements
-		if (!empty($attribs['child_elements'])) {
-			$child_elements = $attribs['child_elements'];
-			unset($attribs['child_elements']);
-			foreach($child_elements as $child_element) {
-				if (empty($child_element['attribs']['closing_tag'])) {
-					$this->startSVGElementHandler('child-tag', $child_element['name'], $child_element['attribs']);
-				} else {
-					if (isset($child_element['attribs']['content'])) {
-						$this->svgtext = $child_element['attribs']['content'];
-					}
-					$this->endSVGElementHandler('child-tag', $child_element['name']);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Sets the closing SVG element handler function for the XML parser.
-	 * @param resource|string $parser The first parameter, parser, is a reference to the XML parser calling the handler.
-	 * @param string $name The second parameter, name, contains the name of the element for which this handler is called. If case-folding is in effect for this parser, the element name will be in uppercase letters.
-	 * @author Nicola Asuni
-	 * @since 5.0.000 (2010-05-02)
-	 * @protected
-	 */
-	protected function endSVGElementHandler($parser, $name) {
-		$name = $this->removeTagNamespace($name);
-		if ($this->svgdefsmode AND !in_array($name, array('defs', 'clipPath', 'linearGradient', 'radialGradient', 'stop'))) {;
-			if (end($this->svgdefs) !== FALSE) {
-				$last_svgdefs_id = key($this->svgdefs);
-				if (isset($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'])) {
-					foreach($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'] as $child_element) {
-						if (isset($child_element['attribs']['id']) AND ($child_element['name'] == $name)) {
-							$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$child_element['attribs']['id'].'_CLOSE'] = array('name' => $name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
-							return;
-						}
-					}
-					if ($this->svgdefs[$last_svgdefs_id]['name'] == $name) {
-						$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$last_svgdefs_id.'_CLOSE'] = array('name' => $name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
-						return;
-					}
-				}
-			}
-			return;
-		}
-		switch($name) {
-			case 'defs': {
-				$this->svgdefsmode = false;
-				break;
-			}
-			// clipPath
-			case 'clipPath': {
-				$this->svgclipmode = false;
-				break;
-			}
-			case 'svg': {
-				if (--$this->svg_tag_depth <= 0) {
-					break;
-				}
-			}
-			case 'g': {
-				// ungroup: remove last style from array
-				array_pop($this->svgstyles);
-				$this->StopTransform();
-				break;
-			}
-			case 'text':
-			case 'tspan': {
-				if ($this->svgtextmode['invisible']) {
-					// This implementation must be fixed to following the rule:
-					// If the 'visibility' property is set to hidden on a 'tspan', 'tref' or 'altGlyph' element, then the text is invisible but still takes up space in text layout calculations.
-					break;
-				}
-				// print text
-				$text = $this->svgtext;
-				//$text = $this->stringTrim($text);
-				$textlen = $this->GetStringWidth($text);
-				if ($this->svgtextmode['text-anchor'] != 'start') {
-					// check if string is RTL text
-					if ($this->svgtextmode['text-anchor'] == 'end') {
-						if ($this->svgtextmode['rtl']) {
-							$this->x += $textlen;
-						} else {
-							$this->x -= $textlen;
-						}
-					} elseif ($this->svgtextmode['text-anchor'] == 'middle') {
-						if ($this->svgtextmode['rtl']) {
-							$this->x += ($textlen / 2);
-						} else {
-							$this->x -= ($textlen / 2);
-						}
-					}
-				}
-				$textrendermode = $this->textrendermode;
-				$textstrokewidth = $this->textstrokewidth;
-				$this->setTextRenderingMode($this->svgtextmode['stroke'], true, false);
-				if ($name == 'text') {
-					// store current coordinates
-					$tmpx = $this->x;
-					$tmpy = $this->y;
-				}
-				// print the text
-				$this->Cell($textlen, 0, $text, 0, 0, '', false, '', 0, false, 'L', 'T');
-				if ($name == 'text') {
-					// restore coordinates
-					$this->x = $tmpx;
-					$this->y = $tmpy;
-				}
-				// restore previous rendering mode
-				$this->textrendermode = $textrendermode;
-				$this->textstrokewidth = $textstrokewidth;
-				$this->svgtext = '';
-				$this->StopTransform();
-				if (!$this->svgdefsmode) {
-					array_pop($this->svgstyles);
-				}
-				break;
-			}
-			default: {
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Sets the character data handler function for the XML parser.
-	 * @param resource $parser The first parameter, parser, is a reference to the XML parser calling the handler.
-	 * @param string $data The second parameter, data, contains the character data as a string.
-	 * @author Nicola Asuni
-	 * @since 5.0.000 (2010-05-02)
-	 * @protected
-	 */
-	protected function segSVGContentHandler($parser, $data) {
-		$this->svgtext .= $data;
-	}
-
-	// --- END SVG METHODS -----------------------------------------------------
 
     /**
      * Keeps files in memory, so it doesn't need to downloaded everytime in a loop
