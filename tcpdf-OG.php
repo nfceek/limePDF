@@ -125,40 +125,23 @@
 // require_once(dirname(__FILE__).'/include/limepdf_property_manager.php');
 
 
-// // TCPDF configuration
-// require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
-// // TCPDF static font methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
-// // TCPDF static font methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
-// // TCPDF static color methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
-// // TCPDF static image methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_images.php');
-// // TCPDF static methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_static.php');
-// // new
-// require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
-// //new
-// require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
-
-
 // TCPDF configuration
 require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_font_data.php');
+require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_fonts.php');
+require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
 // TCPDF static color methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_colors.php');
+require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
 // TCPDF static image methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_images.php');
+require_once(dirname(__FILE__).'/include/tcpdf_images.php');
 // TCPDF static methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_static.php');
+require_once(dirname(__FILE__).'/include/tcpdf_static.php');
 // new
-require_once(dirname(__FILE__).'/src/include/limePDF_properties.php');
+require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
 //new
-require_once(dirname(__FILE__).'/src/include/limePDF_property_manager.php');
+require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
