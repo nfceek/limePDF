@@ -160,6 +160,9 @@ require_once(dirname(__FILE__).'/src/include/limePDF_properties.php');
 //new
 require_once(dirname(__FILE__).'/src/include/limePDF_property_manager.php');
 
+//new
+require_once(dirname(__FILE__).'/src/utils/limePDF_put.php');
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
@@ -175,6 +178,8 @@ require_once(dirname(__FILE__).'/src/include/limePDF_property_manager.php');
  * @IgnoreAnnotation("pre")
  */
 class TCPDF {
+
+	protected $utils;
 
 	// Protected properties
 
@@ -224,7 +229,15 @@ class TCPDF {
 	 * Compression flag.
 	 * @protected
 	 */
-	protected $compress;
+	//protected $compress;
+	//protected int $page = 0;
+    public bool $compress = true;
+    //protected array $pagedim = [];
+   //protected array $form_obj_id = [];
+    //protected array $font_obj_ids = [];
+    //protected string $someNewVar = '';
+
+
 
 	/**
 	 * Current page orientation (P = Portrait, L = Landscape).
@@ -1232,7 +1245,8 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2008-12-31)
 	 */
-	protected $imagekeys = array();
+	//protected $imagekeys = array();
+	public $imagekeys = array();
 
 	/**
 	 * Length of the buffer in bytes.
@@ -1574,7 +1588,8 @@ class TCPDF {
 	 * @protected
 	 * @since 5.8.014 (2010-08-23)
 	 */
-	protected $xobjects = array();
+	//protected $xobjects = array();
+	public $xobjects = array();
 
 	/**
 	 * Boolean value true when we are inside an XObject.
@@ -1813,8 +1828,8 @@ class TCPDF {
 	 * @protected
 	 * @since 5.9.121 (2011-09-27)
 	 */
-	protected $pdfa_mode = false;
-
+	//protected $pdfa_mode = false;
+	public $pdfa_mode = false;
 	/**
 	 * version of PDF/A mode (1 - 3).
 	 * @protected
@@ -1931,6 +1946,9 @@ class TCPDF {
 	 * @see getPageSizeFromFormat(), setPageFormat()
 	 */
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
+
+        $this->utils = new limePDF_put();
+    
 		// set file ID for trailer
 		$serformat = (is_array($format) ? json_encode($format) : $format);
 		$this->file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
@@ -5005,59 +5023,7 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Embedd the attached files.
-	 * @since 4.4.000 (2008-12-07)
-	 * @protected
-	 * @see Annotation()
-	 */
-	protected function _putEmbeddedFiles() {
-		if ($this->pdfa_mode && $this->pdfa_version != 3)  {
-			// embedded files are not allowed in PDF/A mode version 1 and 2
-			return;
-		}
-		reset($this->embeddedfiles);
-		foreach ($this->embeddedfiles as $filename => $filedata) {
-			$data = false;
-			if (isset($filedata['file']) && !empty($filedata['file'])) {
-				$data = $this->getCachedFileContents($filedata['file']);
-			} elseif ($filedata['content'] && !empty($filedata['content'])) {
-				$data = $filedata['content'];
-			}
-			if ($data !== FALSE) {
-				$rawsize = strlen($data);
-				if ($rawsize > 0) {
-					// update name tree
-					$this->efnames[$filename] = $filedata['f'].' 0 R';
-					// embedded file specification object
-					$out = $this->_getobj($filedata['f'])."\n";
-					$out .= '<</Type /Filespec /F '.$this->_datastring($filename, $filedata['f']);
-					$out .= ' /UF '.$this->_datastring($filename, $filedata['f']);
-					$out .= ' /AFRelationship /Source';
-					$out .= ' /EF <</F '.$filedata['n'].' 0 R>> >>';
-					$out .= "\n".'endobj';
-					$this->_out($out);
-					// embedded file object
-					$filter = '';
-					if ($this->compress) {
-						$data = gzcompress($data);
-						$filter = ' /Filter /FlateDecode';
-					}
 
-					if ($this->pdfa_version == 3) {
-						$filter = ' /Subtype /text#2Fxml';
-					}
-
-					$stream = $this->_getrawstream($data, $filedata['n']);
-					$out = $this->_getobj($filedata['n'])."\n";
-					$out .= '<< /Type /EmbeddedFile'.$filter.' /Length '.strlen($stream).' /Params <</Size '.$rawsize.'>> >>';
-					$out .= ' stream'."\n".$stream."\n".'endstream';
-					$out .= "\n".'endobj';
-					$this->_out($out);
-				}
-			}
-		}
-	}
 
 	/**
 	 * Prints a text cell at the specified position.
@@ -8963,151 +8929,151 @@ class TCPDF {
 		return $this->n;
 	}
 
-	/**
-	 * Output fonts.
-	 * @author Nicola Asuni
-	 * @protected
-	 */
-	protected function _putfonts() {
-		$nf = $this->n;
-		foreach ($this->diffs as $diff) {
-			//Encodings
-			$this->_newobj();
-			$this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
-		}
-		foreach ($this->FontFiles as $file => $info) {
-			// search and get font file to embedd
-			$fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
-			if (!TCPDF_STATIC::empty_string($fontfile)) {
-				$font = file_get_contents($fontfile);
-				$compressed = (substr($file, -2) == '.z');
-				if ((!$compressed) AND (isset($info['length2']))) {
-					$header = (ord($font[0]) == 128);
-					if ($header) {
-						// strip first binary header
-						$font = substr($font, 6);
-					}
-					if ($header AND (ord($font[$info['length1']]) == 128)) {
-						// strip second binary header
-						$font = substr($font, 0, $info['length1']).substr($font, ($info['length1'] + 6));
-					}
-				} elseif ($info['subset'] AND ((!$compressed) OR ($compressed AND function_exists('gzcompress')))) {
-					if ($compressed) {
-						// uncompress font
-						$font = gzuncompress($font);
-					}
-					// merge subset characters
-					$subsetchars = array(); // used chars
-					foreach ($info['fontkeys'] as $fontkey) {
-						$fontinfo = $this->getFontBuffer($fontkey);
-						$subsetchars += $fontinfo['subsetchars'];
-					}
-					// rebuild a font subset
-					$font = TCPDF_FONTS::_getTrueTypeFontSubset($font, $subsetchars);
-					// calculate new font length
-					$info['length1'] = strlen($font);
-					if ($compressed) {
-						// recompress font
-						$font = gzcompress($font);
-					}
-				}
-				$this->_newobj();
-				$this->FontFiles[$file]['n'] = $this->n;
-				$stream = $this->_getrawstream($font);
-				$out = '<< /Length '.strlen($stream);
-				if ($compressed) {
-					$out .= ' /Filter /FlateDecode';
-				}
-				$out .= ' /Length1 '.$info['length1'];
-				if (isset($info['length2'])) {
-					$out .= ' /Length2 '.$info['length2'].' /Length3 0';
-				}
-				$out .= ' >>';
-				$out .= ' stream'."\n".$stream."\n".'endstream';
-				$out .= "\n".'endobj';
-				$this->_out($out);
-			}
-		}
-		foreach ($this->fontkeys as $k) {
-			//Font objects
-			$font = $this->getFontBuffer($k);
-			$type = $font['type'];
-			$name = $font['name'];
-			if ($type == 'core') {
-				// standard core font
-				$out = $this->_getobj($this->font_obj_ids[$k])."\n";
-				$out .= '<</Type /Font';
-				$out .= ' /Subtype /Type1';
-				$out .= ' /BaseFont /'.$name;
-				$out .= ' /Name /F'.$font['i'];
-				if ((strtolower($name) != 'symbol') AND (strtolower($name) != 'zapfdingbats')) {
-					$out .= ' /Encoding /WinAnsiEncoding';
-				}
-				if ($k == 'helvetica') {
-					// add default font for annotations
-					$this->annotation_fonts[$k] = $font['i'];
-				}
-				$out .= ' >>';
-				$out .= "\n".'endobj';
-				$this->_out($out);
-			} elseif (($type == 'Type1') OR ($type == 'TrueType')) {
-				// additional Type1 or TrueType font
-				$out = $this->_getobj($this->font_obj_ids[$k])."\n";
-				$out .= '<</Type /Font';
-				$out .= ' /Subtype /'.$type;
-				$out .= ' /BaseFont /'.$name;
-				$out .= ' /Name /F'.$font['i'];
-				$out .= ' /FirstChar 32 /LastChar 255';
-				$out .= ' /Widths '.($this->n + 1).' 0 R';
-				$out .= ' /FontDescriptor '.($this->n + 2).' 0 R';
-				if ($font['enc']) {
-					if (isset($font['diff'])) {
-						$out .= ' /Encoding '.($nf + $font['diff']).' 0 R';
-					} else {
-						$out .= ' /Encoding /WinAnsiEncoding';
-					}
-				}
-				$out .= ' >>';
-				$out .= "\n".'endobj';
-				$this->_out($out);
-				// Widths
-				$this->_newobj();
-				$s = '[';
-				for ($i = 32; $i < 256; ++$i) {
-					if (isset($font['cw'][$i])) {
-						$s .= $font['cw'][$i].' ';
-					} else {
-						$s .= $font['dw'].' ';
-					}
-				}
-				$s .= ']';
-				$s .= "\n".'endobj';
-				$this->_out($s);
-				//Descriptor
-				$this->_newobj();
-				$s = '<</Type /FontDescriptor /FontName /'.$name;
-				foreach ($font['desc'] as $fdk => $fdv) {
-					if (is_float($fdv)) {
-						$fdv = sprintf('%F', $fdv);
-					}
-					$s .= ' /'.$fdk.' '.$fdv.'';
-				}
-				if (!TCPDF_STATIC::empty_string($font['file'])) {
-					$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
-				}
-				$s .= '>>';
-				$s .= "\n".'endobj';
-				$this->_out($s);
-			} else {
-				// additional types
-				$mtd = '_put'.strtolower($type);
-				if (!method_exists($this, $mtd)) {
-					$this->Error('Unsupported font type: '.$type);
-				}
-				$this->$mtd($font);
-			}
-		}
-	}
+	// /**
+	//  * Output fonts.
+	//  * @author Nicola Asuni
+	//  * @protected
+	//  */
+	// protected function _putfonts() {
+	// 	$nf = $this->n;
+	// 	foreach ($this->diffs as $diff) {
+	// 		//Encodings
+	// 		$this->_newobj();
+	// 		$this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
+	// 	}
+	// 	foreach ($this->FontFiles as $file => $info) {
+	// 		// search and get font file to embedd
+	// 		$fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
+	// 		if (!TCPDF_STATIC::empty_string($fontfile)) {
+	// 			$font = file_get_contents($fontfile);
+	// 			$compressed = (substr($file, -2) == '.z');
+	// 			if ((!$compressed) AND (isset($info['length2']))) {
+	// 				$header = (ord($font[0]) == 128);
+	// 				if ($header) {
+	// 					// strip first binary header
+	// 					$font = substr($font, 6);
+	// 				}
+	// 				if ($header AND (ord($font[$info['length1']]) == 128)) {
+	// 					// strip second binary header
+	// 					$font = substr($font, 0, $info['length1']).substr($font, ($info['length1'] + 6));
+	// 				}
+	// 			} elseif ($info['subset'] AND ((!$compressed) OR ($compressed AND function_exists('gzcompress')))) {
+	// 				if ($compressed) {
+	// 					// uncompress font
+	// 					$font = gzuncompress($font);
+	// 				}
+	// 				// merge subset characters
+	// 				$subsetchars = array(); // used chars
+	// 				foreach ($info['fontkeys'] as $fontkey) {
+	// 					$fontinfo = $this->getFontBuffer($fontkey);
+	// 					$subsetchars += $fontinfo['subsetchars'];
+	// 				}
+	// 				// rebuild a font subset
+	// 				$font = TCPDF_FONTS::_getTrueTypeFontSubset($font, $subsetchars);
+	// 				// calculate new font length
+	// 				$info['length1'] = strlen($font);
+	// 				if ($compressed) {
+	// 					// recompress font
+	// 					$font = gzcompress($font);
+	// 				}
+	// 			}
+	// 			$this->_newobj();
+	// 			$this->FontFiles[$file]['n'] = $this->n;
+	// 			$stream = $this->_getrawstream($font);
+	// 			$out = '<< /Length '.strlen($stream);
+	// 			if ($compressed) {
+	// 				$out .= ' /Filter /FlateDecode';
+	// 			}
+	// 			$out .= ' /Length1 '.$info['length1'];
+	// 			if (isset($info['length2'])) {
+	// 				$out .= ' /Length2 '.$info['length2'].' /Length3 0';
+	// 			}
+	// 			$out .= ' >>';
+	// 			$out .= ' stream'."\n".$stream."\n".'endstream';
+	// 			$out .= "\n".'endobj';
+	// 			$this->_out($out);
+	// 		}
+	// 	}
+	// 	foreach ($this->fontkeys as $k) {
+	// 		//Font objects
+	// 		$font = $this->getFontBuffer($k);
+	// 		$type = $font['type'];
+	// 		$name = $font['name'];
+	// 		if ($type == 'core') {
+	// 			// standard core font
+	// 			$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+	// 			$out .= '<</Type /Font';
+	// 			$out .= ' /Subtype /Type1';
+	// 			$out .= ' /BaseFont /'.$name;
+	// 			$out .= ' /Name /F'.$font['i'];
+	// 			if ((strtolower($name) != 'symbol') AND (strtolower($name) != 'zapfdingbats')) {
+	// 				$out .= ' /Encoding /WinAnsiEncoding';
+	// 			}
+	// 			if ($k == 'helvetica') {
+	// 				// add default font for annotations
+	// 				$this->annotation_fonts[$k] = $font['i'];
+	// 			}
+	// 			$out .= ' >>';
+	// 			$out .= "\n".'endobj';
+	// 			$this->_out($out);
+	// 		} elseif (($type == 'Type1') OR ($type == 'TrueType')) {
+	// 			// additional Type1 or TrueType font
+	// 			$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+	// 			$out .= '<</Type /Font';
+	// 			$out .= ' /Subtype /'.$type;
+	// 			$out .= ' /BaseFont /'.$name;
+	// 			$out .= ' /Name /F'.$font['i'];
+	// 			$out .= ' /FirstChar 32 /LastChar 255';
+	// 			$out .= ' /Widths '.($this->n + 1).' 0 R';
+	// 			$out .= ' /FontDescriptor '.($this->n + 2).' 0 R';
+	// 			if ($font['enc']) {
+	// 				if (isset($font['diff'])) {
+	// 					$out .= ' /Encoding '.($nf + $font['diff']).' 0 R';
+	// 				} else {
+	// 					$out .= ' /Encoding /WinAnsiEncoding';
+	// 				}
+	// 			}
+	// 			$out .= ' >>';
+	// 			$out .= "\n".'endobj';
+	// 			$this->_out($out);
+	// 			// Widths
+	// 			$this->_newobj();
+	// 			$s = '[';
+	// 			for ($i = 32; $i < 256; ++$i) {
+	// 				if (isset($font['cw'][$i])) {
+	// 					$s .= $font['cw'][$i].' ';
+	// 				} else {
+	// 					$s .= $font['dw'].' ';
+	// 				}
+	// 			}
+	// 			$s .= ']';
+	// 			$s .= "\n".'endobj';
+	// 			$this->_out($s);
+	// 			//Descriptor
+	// 			$this->_newobj();
+	// 			$s = '<</Type /FontDescriptor /FontName /'.$name;
+	// 			foreach ($font['desc'] as $fdk => $fdv) {
+	// 				if (is_float($fdv)) {
+	// 					$fdv = sprintf('%F', $fdv);
+	// 				}
+	// 				$s .= ' /'.$fdk.' '.$fdv.'';
+	// 			}
+	// 			if (!TCPDF_STATIC::empty_string($font['file'])) {
+	// 				$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
+	// 			}
+	// 			$s .= '>>';
+	// 			$s .= "\n".'endobj';
+	// 			$this->_out($s);
+	// 		} else {
+	// 			// additional types
+	// 			$mtd = '_put'.strtolower($type);
+	// 			if (!method_exists($this, $mtd)) {
+	// 				$this->Error('Unsupported font type: '.$type);
+	// 			}
+	// 			$this->$mtd($font);
+	// 		}
+	// 	}
+	// }
 
 	/**
 	 * Adds unicode fonts.<br>
@@ -9321,128 +9287,128 @@ class TCPDF {
 	 * Output images.
 	 * @protected
 	 */
-	protected function _putimages() {
-		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-		foreach ($this->imagekeys as $file) {
-			$info = $this->getImageBuffer($file);
-			// set object for alternate images array
-			$altoid = null;
-			if ((!$this->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
-				$altoid = $this->_newobj();
-				$out = '[';
-				foreach ($info['altimgs'] as $altimage) {
-					if (isset($this->xobjects['I'.$altimage[0]]['n'])) {
-						$out .= ' << /Image '.$this->xobjects['I'.$altimage[0]]['n'].' 0 R';
-						$out .= ' /DefaultForPrinting';
-						if ($altimage[1] === true) {
-							$out .= ' true';
-						} else {
-							$out .= ' false';
-						}
-						$out .= ' >>';
-					}
-				}
-				$out .= ' ]';
-				$out .= "\n".'endobj';
-				$this->_out($out);
-			}
-			// set image object
-			$oid = $this->_newobj();
-			$this->xobjects['I'.$info['i']] = array('n' => $oid);
-			$this->setImageSubBuffer($file, 'n', $this->n);
-			$out = '<</Type /XObject';
-			$out .= ' /Subtype /Image';
-			$out .= ' /Width '.$info['w'];
-			$out .= ' /Height '.$info['h'];
-			if (array_key_exists('masked', $info)) {
-				$out .= ' /SMask '.($this->n - 1).' 0 R';
-			}
-			// set color space
-			$icc = false;
-			if (isset($info['icc']) AND ($info['icc'] !== false)) {
-				// ICC Colour Space
-				$icc = true;
-				$out .= ' /ColorSpace [/ICCBased '.($this->n + 1).' 0 R]';
-			} elseif ($info['cs'] == 'Indexed') {
-				// Indexed Colour Space
-				$out .= ' /ColorSpace [/Indexed /DeviceRGB '.((strlen($info['pal']) / 3) - 1).' '.($this->n + 1).' 0 R]';
-			} else {
-				// Device Colour Space
-				$out .= ' /ColorSpace /'.$info['cs'];
-			}
-			if ($info['cs'] == 'DeviceCMYK') {
-				$out .= ' /Decode [1 0 1 0 1 0 1 0]';
-			}
-			$out .= ' /BitsPerComponent '.$info['bpc'];
-			if ($altoid > 0) {
-				// reference to alternate images dictionary
-				$out .= ' /Alternates '.$altoid.' 0 R';
-			}
-			if (isset($info['exurl']) AND !empty($info['exurl'])) {
-				// external stream
-				$out .= ' /Length 0';
-				$out .= ' /F << /FS /URL /F '.$this->_datastring($info['exurl'], $oid).' >>';
-				if (isset($info['f'])) {
-					$out .= ' /FFilter /'.$info['f'];
-				}
-				$out .= ' >>';
-				$out .= ' stream'."\n".'endstream';
-			} else {
-				if (isset($info['f'])) {
-					$out .= ' /Filter /'.$info['f'];
-				}
-				if (isset($info['parms'])) {
-					$out .= ' '.$info['parms'];
-				}
-				if (isset($info['trns']) AND is_array($info['trns'])) {
-					$trns = '';
-					$count_info = count($info['trns']);
-					if ($info['cs'] == 'Indexed') {
-						$maxval =(pow(2, $info['bpc']) - 1);
-						for ($i = 0; $i < $count_info; ++$i) {
-							if (($info['trns'][$i] != 0) AND ($info['trns'][$i] != $maxval)) {
-								// this is not a binary type mask @TODO: create a SMask
-								$trns = '';
-								break;
-							} elseif (empty($trns) AND ($info['trns'][$i] == 0)) {
-								// store the first fully transparent value
-								$trns .= $i.' '.$i.' ';
-							}
-						}
-					} else {
-						// grayscale or RGB
-						for ($i = 0; $i < $count_info; ++$i) {
-							if ($info['trns'][$i] == 0) {
-								$trns .= $info['trns'][$i].' '.$info['trns'][$i].' ';
-							}
-						}
-					}
-					// Colour Key Masking
-					if (!empty($trns)) {
-						$out .= ' /Mask ['.$trns.']';
-					}
-				}
-				$stream = $this->_getrawstream($info['data']);
-				$out .= ' /Length '.strlen($stream).' >>';
-				$out .= ' stream'."\n".$stream."\n".'endstream';
-			}
-			$out .= "\n".'endobj';
-			$this->_out($out);
-			if ($icc) {
-				// ICC colour profile
-				$this->_newobj();
-				$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
-				$icc = $this->_getrawstream($icc);
-				$this->_out('<</N '.$info['ch'].' /Alternate /'.$info['cs'].' '.$filter.'/Length '.strlen($icc).'>> stream'."\n".$icc."\n".'endstream'."\n".'endobj');
-			} elseif ($info['cs'] == 'Indexed') {
-				// colour palette
-				$this->_newobj();
-				$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
-				$pal = $this->_getrawstream($pal);
-				$this->_out('<<'.$filter.'/Length '.strlen($pal).'>> stream'."\n".$pal."\n".'endstream'."\n".'endobj');
-			}
-		}
-	}
+	// protected function _putimages() {
+	// 	$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
+	// 	foreach ($this->imagekeys as $file) {
+	// 		$info = $this->getImageBuffer($file);
+	// 		// set object for alternate images array
+	// 		$altoid = null;
+	// 		if ((!$this->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
+	// 			$altoid = $this->_newobj();
+	// 			$out = '[';
+	// 			foreach ($info['altimgs'] as $altimage) {
+	// 				if (isset($this->xobjects['I'.$altimage[0]]['n'])) {
+	// 					$out .= ' << /Image '.$this->xobjects['I'.$altimage[0]]['n'].' 0 R';
+	// 					$out .= ' /DefaultForPrinting';
+	// 					if ($altimage[1] === true) {
+	// 						$out .= ' true';
+	// 					} else {
+	// 						$out .= ' false';
+	// 					}
+	// 					$out .= ' >>';
+	// 				}
+	// 			}
+	// 			$out .= ' ]';
+	// 			$out .= "\n".'endobj';
+	// 			$this->_out($out);
+	// 		}
+	// 		// set image object
+	// 		$oid = $this->_newobj();
+	// 		$this->xobjects['I'.$info['i']] = array('n' => $oid);
+	// 		$this->setImageSubBuffer($file, 'n', $this->n);
+	// 		$out = '<</Type /XObject';
+	// 		$out .= ' /Subtype /Image';
+	// 		$out .= ' /Width '.$info['w'];
+	// 		$out .= ' /Height '.$info['h'];
+	// 		if (array_key_exists('masked', $info)) {
+	// 			$out .= ' /SMask '.($this->n - 1).' 0 R';
+	// 		}
+	// 		// set color space
+	// 		$icc = false;
+	// 		if (isset($info['icc']) AND ($info['icc'] !== false)) {
+	// 			// ICC Colour Space
+	// 			$icc = true;
+	// 			$out .= ' /ColorSpace [/ICCBased '.($this->n + 1).' 0 R]';
+	// 		} elseif ($info['cs'] == 'Indexed') {
+	// 			// Indexed Colour Space
+	// 			$out .= ' /ColorSpace [/Indexed /DeviceRGB '.((strlen($info['pal']) / 3) - 1).' '.($this->n + 1).' 0 R]';
+	// 		} else {
+	// 			// Device Colour Space
+	// 			$out .= ' /ColorSpace /'.$info['cs'];
+	// 		}
+	// 		if ($info['cs'] == 'DeviceCMYK') {
+	// 			$out .= ' /Decode [1 0 1 0 1 0 1 0]';
+	// 		}
+	// 		$out .= ' /BitsPerComponent '.$info['bpc'];
+	// 		if ($altoid > 0) {
+	// 			// reference to alternate images dictionary
+	// 			$out .= ' /Alternates '.$altoid.' 0 R';
+	// 		}
+	// 		if (isset($info['exurl']) AND !empty($info['exurl'])) {
+	// 			// external stream
+	// 			$out .= ' /Length 0';
+	// 			$out .= ' /F << /FS /URL /F '.$this->_datastring($info['exurl'], $oid).' >>';
+	// 			if (isset($info['f'])) {
+	// 				$out .= ' /FFilter /'.$info['f'];
+	// 			}
+	// 			$out .= ' >>';
+	// 			$out .= ' stream'."\n".'endstream';
+	// 		} else {
+	// 			if (isset($info['f'])) {
+	// 				$out .= ' /Filter /'.$info['f'];
+	// 			}
+	// 			if (isset($info['parms'])) {
+	// 				$out .= ' '.$info['parms'];
+	// 			}
+	// 			if (isset($info['trns']) AND is_array($info['trns'])) {
+	// 				$trns = '';
+	// 				$count_info = count($info['trns']);
+	// 				if ($info['cs'] == 'Indexed') {
+	// 					$maxval =(pow(2, $info['bpc']) - 1);
+	// 					for ($i = 0; $i < $count_info; ++$i) {
+	// 						if (($info['trns'][$i] != 0) AND ($info['trns'][$i] != $maxval)) {
+	// 							// this is not a binary type mask @TODO: create a SMask
+	// 							$trns = '';
+	// 							break;
+	// 						} elseif (empty($trns) AND ($info['trns'][$i] == 0)) {
+	// 							// store the first fully transparent value
+	// 							$trns .= $i.' '.$i.' ';
+	// 						}
+	// 					}
+	// 				} else {
+	// 					// grayscale or RGB
+	// 					for ($i = 0; $i < $count_info; ++$i) {
+	// 						if ($info['trns'][$i] == 0) {
+	// 							$trns .= $info['trns'][$i].' '.$info['trns'][$i].' ';
+	// 						}
+	// 					}
+	// 				}
+	// 				// Colour Key Masking
+	// 				if (!empty($trns)) {
+	// 					$out .= ' /Mask ['.$trns.']';
+	// 				}
+	// 			}
+	// 			$stream = $this->_getrawstream($info['data']);
+	// 			$out .= ' /Length '.strlen($stream).' >>';
+	// 			$out .= ' stream'."\n".$stream."\n".'endstream';
+	// 		}
+	// 		$out .= "\n".'endobj';
+	// 		$this->_out($out);
+	// 		if ($icc) {
+	// 			// ICC colour profile
+	// 			$this->_newobj();
+	// 			$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
+	// 			$icc = $this->_getrawstream($icc);
+	// 			$this->_out('<</N '.$info['ch'].' /Alternate /'.$info['cs'].' '.$filter.'/Length '.strlen($icc).'>> stream'."\n".$icc."\n".'endstream'."\n".'endobj');
+	// 		} elseif ($info['cs'] == 'Indexed') {
+	// 			// colour palette
+	// 			$this->_newobj();
+	// 			$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
+	// 			$pal = $this->_getrawstream($pal);
+	// 			$this->_out('<<'.$filter.'/Length '.strlen($pal).'>> stream'."\n".$pal."\n".'endstream'."\n".'endobj');
+	// 		}
+	// 	}
+	// }
 
 	/**
 	 * Output Form XObjects Templates.
@@ -9646,25 +9612,115 @@ class TCPDF {
 		$this->_out($out);
 	}
 
+
 	/**
 	 * Output Resources.
 	 * @protected
+	 * 
 	 */
-	protected function _putresources() {
-		$this->_putextgstates();
-		$this->_putocg();
+
+	// new
+	public function &getExtGStates() {
+		return $this->extgstates;
+	}
+	public function setExtGStates($extgstates) {
+		$this->extgstates = $extgstates;
+	}
+
+	public function &getPdfLayers() {
+		return $this->pdflayers;
+	}
+
+	public function setPdfLayers($pdflayers) {
+		$this->pdflayers = $pdflayers;
+	}
+
+	// public function &getFontDiffs() {
+	// 	return $this->diffs;
+	// }
+
+	// public function &getFontFiles() {
+	// 	return $this->FontFiles;
+	// }
+
+	// public function setFontFileRef($file, $key, $value) {
+	// 	$this->FontFiles[$file][$key] = $value;
+	// }
+
+	// public function &getFontKeys() {
+	// 	return $this->fontkeys;
+	// }
+
+	// public function &getFontObjIDs() {
+	// 	return $this->font_obj_ids;
+	// }
+
+	// public function &getAnnotationFonts() {
+	// 	return $this->annotation_fonts;
+	// }
+
+	// // Add to class TCPDF
+	// public function getN() {
+	// 	return $this->n;
+	// }
+
+	// public function setN($value) {
+	// 	$this->n = $value;
+	// }
+
+	// public function isCompressionEnabled(): bool {
+	// 	return $this->compress;
+	// }
+
+	// public function getImageBufferPublic($file) {
+	// 	return $this->getImageBuffer($file);
+	// }
+
+	public function getCurrentObjectId(): int {
+		return $this->n;
+	}
+
+	public function getObjectId(): int {
+		return $this->n;
+	}
+
+	public function getRawStream(string $data): string {
+		return $this->_getrawstream($data);
+	}
+
+	//old
+	public function _putresources() {
+		limePDF_put::putExtGStates($this);
+		limePDF_put::putOcg($this);
+		//limePDF_put::_putimages($this);		
+		$utils = new \limePDF_put();  
+
+		// echo '<pre>';
+		// var_dump($this);
+		// echo '</pre>';
+		// exit;
+
+		$utils->_putimages($this);    
+
+		
+		//$this->_putextgstates();
+		//$this->_putocg();
 		$this->_putfonts();
-		$this->_putimages();
+		//$this->_putimages();
 		$this->_putspotcolors();
 		$this->_putshaders();
 		$this->_putxobjects();
 		$this->_putresourcedict();
 		$this->_putdests();
-		$this->_putEmbeddedFiles();
+		//$this->_putEmbeddedFiles();
 		$this->_putannotsobjs();
 		$this->_putjavascript();
 		$this->_putbookmarks();
 		$this->_putencryption();
+
+
+		//limePDF_put::putFonts($this);
+
 	}
 
 	/**
@@ -10322,7 +10378,8 @@ class TCPDF {
 	 * @return int object number
 	 * @protected
 	 */
-	protected function _newobj() {
+	//protected function _newobj() {
+	public function _newobj() {
 		$this->_out($this->_getobj());
 		return $this->n;
 	}
@@ -10533,7 +10590,8 @@ class TCPDF {
 	 * @param string $s string to output.
 	 * @protected
 	 */
-	protected function _out($s) {
+	//protected function _out($s) {
+	public function _out($s) {
 		if ($this->state == 2) {
 			if ($this->inxobj) {
 				// we are inside an XObject template
@@ -13957,29 +14015,6 @@ class TCPDF {
 		return TCPDF_STATIC::formatPageNumber($this->PageNo());
 	}
 
-	/**
-	 * Put pdf layers.
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected function _putocg() {
-		if (empty($this->pdflayers)) {
-			return;
-		}
-		foreach ($this->pdflayers as $key => $layer) {
-			 $this->pdflayers[$key]['objid'] = $this->_newobj();
-			 $out = '<< /Type /OCG';
-			 $out .= ' /Name '.$this->_textstring($layer['name'], $this->pdflayers[$key]['objid']);
-			 $out .= ' /Usage <<';
-			 if (isset($layer['print']) AND ($layer['print'] !== NULL)) {
-				$out .= ' /Print <</PrintState /'.($layer['print']?'ON':'OFF').'>>';
-			 }
-			 $out .= ' /View <</ViewState /'.($layer['view']?'ON':'OFF').'>>';
-			 $out .= ' >> >>';
-			 $out .= "\n".'endobj';
-			 $this->_out($out);
-		}
-	}
 
 	/**
 	 * Start a new pdf layer.
@@ -14099,31 +14134,6 @@ class TCPDF {
 			return;
 		}
 		$this->_out(sprintf('/GS%d gs', $gs));
-	}
-
-	/**
-	 * Put extgstates for object transparency
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected function _putextgstates() {
-		foreach ($this->extgstates as $i => $ext) {
-			$this->extgstates[$i]['n'] = $this->_newobj();
-			$out = '<< /Type /ExtGState';
-			foreach ($ext['parms'] as $k => $v) {
-				if (is_float($v)) {
-					$v = sprintf('%F', $v);
-				} elseif ($v === true) {
-					$v = 'true';
-				} elseif ($v === false) {
-					$v = 'false';
-				}
-				$out .= ' /'.$k.' '.$v;
-			}
-			$out .= ' >>';
-			$out .= "\n".'endobj';
-			$this->_out($out);
-		}
 	}
 
 	/**
@@ -21173,7 +21183,8 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2008-12-31)
 	 */
-	protected function setImageSubBuffer($image, $key, $data) {
+	//protected function setImageSubBuffer($image, $key, $data) {
+	public function setImageSubBuffer($image, $key, $data) {
 		if (!isset($this->images[$image])) {
 			$this->setImageBuffer($image, array());
 		}
@@ -21187,7 +21198,8 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2008-12-31)
 	 */
-	protected function getImageBuffer($image) {
+	// protected function getImageBuffer($image) {
+	public function getImageBuffer($image) {
 		if (isset($this->images[$image])) {
 			return $this->images[$image];
 		}
