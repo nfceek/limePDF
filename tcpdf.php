@@ -234,7 +234,7 @@ class TCPDF {
     public bool $compress = true;
     //protected array $pagedim = [];
    //protected array $form_obj_id = [];
-    //protected array $font_obj_ids = [];
+
     //protected string $someNewVar = '';
 
 
@@ -383,13 +383,15 @@ class TCPDF {
 	 * Array of font files.
 	 * @protected
 	 */
-	protected $FontFiles = array();
+	//protected $FontFiles = array();
+	protected array $FontFiles = [];
 
 	/**
 	 * Array of encoding differences.
 	 * @protected
 	 */
-	protected $diffs = array();
+	// protected $diffs = array();
+	protected array $diffs = [];
 
 	/**
 	 * Array of used images.
@@ -1267,14 +1269,18 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2009-01-02)
 	 */
-	protected $fontkeys = array();
+	//protected $fontkeys = array();
+	protected array $fontkeys = [];
+
+	protected array $getFontBuffer = [];
 
 	/**
 	 * Store the font object IDs.
 	 * @protected
 	 * @since 4.8.001 (2009-09-09)
 	 */
-	protected $font_obj_ids = array();
+	//protected $font_obj_ids = array();
+	protected array $font_obj_ids = [];
 
 	/**
 	 * Store the fage status (true when opened, false when closed).
@@ -1442,7 +1448,8 @@ class TCPDF {
 	 * @protected
 	 * @since 4.8.001 (2009-09-09)
 	 */
-	protected $annotation_fonts = array();
+	//protected $annotation_fonts = array();
+	protected array $annotation_fonts = [];
 
 	/**
 	 * List of radio buttons parent objects.
@@ -9083,7 +9090,7 @@ class TCPDF {
 	 * @author Nicola Asuni
 	 * @since 1.52.0.TC005 (2005-01-05)
 	 */
-	protected function _puttruetypeunicode($font) {
+	public function _puttruetypeunicode($font) {
 		$fontname = '';
 		if ($font['subset']) {
 			// change name for font subsetting
@@ -9676,6 +9683,7 @@ class TCPDF {
 	// 	return $this->getImageBuffer($file);
 	// }
 
+	// --- GETTERS --
 	public function getCurrentObjectId(): int {
 		return $this->n;
 	}
@@ -9687,6 +9695,74 @@ class TCPDF {
 	public function getRawStream(string $data): string {
 		return $this->_getrawstream($data);
 	}
+
+	public function getDiffs(): array {
+		return $this->diffs;
+	}
+
+	public function getFontFiles(): array {
+		return $this->FontFiles;
+	}
+
+	public function getFontKeys(): array {
+		return $this->fontkeys;
+	}
+
+	// public function getFontBuffer(string $key): array {
+	// 	return $this->fonts[$key] ?? [];
+	// }
+
+	public function getAnnotationFonts(): array {
+		return $this->annotation_fonts;
+	}
+
+	public function getN(): int {
+		return $this->n;
+	}
+
+	public function getFontObjId(string $key): ?int {
+		return $this->font_obj_ids[$key] ?? null;
+	}
+
+	// --- SETTERS ---
+
+	public function setDiffs(array $diffs): void {
+		$this->diffs = $diffs;
+	}
+
+	public function setFontFiles(array $fontFiles): void {
+		$this->FontFiles = $fontFiles;
+	}
+
+	public function addFontKey(string $key): void {
+		if (!in_array($key, $this->fontkeys)) {
+			$this->fontkeys[] = $key;
+		}
+	}
+
+	// public function setFontBuffer(string $key, array $data): void {
+	// 	$this->fonts[$key] = $data;
+	// }
+
+	public function setAnnotationFont(string $key, int $value): void {
+		$this->annotation_fonts[$key] = $value;
+	}
+
+	public function setFontObjId(string $key, int $id): void {
+		$this->font_obj_ids[$key] = $id;
+	}
+
+	public function incrementN(): int {
+		return ++$this->n;
+	}
+
+	public function setFontFileN(string $file, int $n): void {
+		if (!isset($this->FontFiles[$file])) {
+			$this->FontFiles[$file] = [];
+		}
+		$this->FontFiles[$file]['n'] = $n;
+	}
+
 
 	//old
 	public function _putresources() {
@@ -9701,11 +9777,11 @@ class TCPDF {
 		// exit;
 
 		$utils->_putimages($this);    
-
+		$utils->_putfonts($this);
 		
 		//$this->_putextgstates();
 		//$this->_putocg();
-		$this->_putfonts();
+		//$this->_putfonts();
 		//$this->_putimages();
 		$this->_putspotcolors();
 		$this->_putshaders();
@@ -10391,7 +10467,7 @@ class TCPDF {
 	 * @protected
 	 * @since 5.8.009 (2010-08-20)
 	 */
-	protected function _getobj($objid=null) {
+	public function _getobj($objid=null) {
 		if (TCPDF_STATIC::empty_string($objid)) {
 			++$this->n;
 			$objid = $this->n;
@@ -10577,7 +10653,7 @@ class TCPDF {
 	 * @author Nicola Asuni
 	 * @since 5.5.000 (2010-06-22)
 	 */
-	protected function _getrawstream($s, $n=0) {
+	public function _getrawstream($s, $n=0) {
 		if ($n <= 0) {
 			// default to current object
 			$n = $this->n;
@@ -21246,7 +21322,7 @@ class TCPDF {
 	 * @protected
 	 * @since 4.5.000 (2009-01-02)
 	 */
-	protected function getFontBuffer($font) {
+	public function getFontBuffer($font) {
 		if (isset($this->fonts[$font])) {
 			return $this->fonts[$font];
 		}

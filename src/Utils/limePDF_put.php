@@ -236,14 +236,18 @@
             }
         }
 
-        protected function _putfonts(TCPDF $tcpdf) {
-            $nf = $this->n;
-            foreach ($this->diffs as $diff) {
+        public function _putfonts(TCPDF $tcpdf) {
+            $nf = $tcpdf->getObjectId();
+            $diffs = $tcpdf->getDiffs();
+            $FontFiles = $tcpdf->getFontFiles();
+            $fontkeys = $tcpdf->getFontKeys();
+
+            foreach ($diffs as $diff) {
                 //Encodings
-                $this->_newobj();
-                $this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
+                $tcpdf->_newobj();
+                $tcpdf->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
             }
-            foreach ($this->FontFiles as $file => $info) {
+            foreach ($FontFiles as $file => $info) {
                 // search and get font file to embedd
                 $fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
                 if (!TCPDF_STATIC::empty_string($fontfile)) {
@@ -267,7 +271,7 @@
                         // merge subset characters
                         $subsetchars = array(); // used chars
                         foreach ($info['fontkeys'] as $fontkey) {
-                            $fontinfo = $this->getFontBuffer($fontkey);
+                            $fontinfo = $tcpdf->getFontBuffer($fontkey);
                             $subsetchars += $fontinfo['subsetchars'];
                         }
                         // rebuild a font subset
@@ -279,9 +283,9 @@
                             $font = gzcompress($font);
                         }
                     }
-                    $this->_newobj();
-                    $this->FontFiles[$file]['n'] = $this->n;
-                    $stream = $this->_getrawstream($font);
+                    $tcpdf->_newobj();
+                    $tcpdf->setFontFileN($file, $tcpdf->getN());
+                    $stream = $tcpdf->_getrawstream($font);
                     $out = '<< /Length '.strlen($stream);
                     if ($compressed) {
                         $out .= ' /Filter /FlateDecode';
@@ -293,17 +297,18 @@
                     $out .= ' >>';
                     $out .= ' stream'."\n".$stream."\n".'endstream';
                     $out .= "\n".'endobj';
-                    $this->_out($out);
+                    $tcpdf->_out($out);
                 }
             }
-            foreach ($this->fontkeys as $k) {
+            foreach ($fontkeys as $k) {
                 //Font objects
-                $font = $this->getFontBuffer($k);
+                $font = $tcpdf->getFontBuffer($k);
                 $type = $font['type'];
                 $name = $font['name'];
                 if ($type == 'core') {
                     // standard core font
-                    $out = $this->_getobj($this->font_obj_ids[$k])."\n";
+                    $obj_id = $tcpdf->getFontObjId($k);
+                    $out = $tcpdf->_getobj($obj_id) . "\n";
                     $out .= '<</Type /Font';
                     $out .= ' /Subtype /Type1';
                     $out .= ' /BaseFont /'.$name;
@@ -313,21 +318,23 @@
                     }
                     if ($k == 'helvetica') {
                         // add default font for annotations
-                        $this->annotation_fonts[$k] = $font['i'];
+                        $annotation_fonts = $tcpdf->getAnnotationFonts($k);
+                        $annotation_fonts[$k] = $font['i'];
                     }
                     $out .= ' >>';
                     $out .= "\n".'endobj';
-                    $this->_out($out);
+                    $tcpdf->_out($out);
                 } elseif (($type == 'Type1') OR ($type == 'TrueType')) {
                     // additional Type1 or TrueType font
-                    $out = $this->_getobj($this->font_obj_ids[$k])."\n";
+                    $obj_id = $tcpdf->getFontObjId($k);
+                    $out = $tcpdf->_getobj($obj_id) . "\n";
                     $out .= '<</Type /Font';
                     $out .= ' /Subtype /'.$type;
                     $out .= ' /BaseFont /'.$name;
                     $out .= ' /Name /F'.$font['i'];
                     $out .= ' /FirstChar 32 /LastChar 255';
-                    $out .= ' /Widths '.($this->n + 1).' 0 R';
-                    $out .= ' /FontDescriptor '.($this->n + 2).' 0 R';
+                    $out .= ' /Widths '.($tcpdf->n + 1).' 0 R';
+                    $out .= ' /FontDescriptor '.($tcpdf->n + 2).' 0 R';
                     if ($font['enc']) {
                         if (isset($font['diff'])) {
                             $out .= ' /Encoding '.($nf + $font['diff']).' 0 R';
@@ -337,9 +344,9 @@
                     }
                     $out .= ' >>';
                     $out .= "\n".'endobj';
-                    $this->_out($out);
+                    $tcpdf->_out($out);
                     // Widths
-                    $this->_newobj();
+                    $tcpdf->_newobj();
                     $s = '[';
                     for ($i = 32; $i < 256; ++$i) {
                         if (isset($font['cw'][$i])) {
@@ -350,9 +357,9 @@
                     }
                     $s .= ']';
                     $s .= "\n".'endobj';
-                    $this->_out($s);
+                    $tcpdf->_out($s);
                     //Descriptor
-                    $this->_newobj();
+                    $tcpdf->_newobj();
                     $s = '<</Type /FontDescriptor /FontName /'.$name;
                     foreach ($font['desc'] as $fdk => $fdv) {
                         if (is_float($fdv)) {
@@ -361,18 +368,18 @@
                         $s .= ' /'.$fdk.' '.$fdv.'';
                     }
                     if (!TCPDF_STATIC::empty_string($font['file'])) {
-                        $s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
+                        $s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$FontFiles[$font['file']]['n'].' 0 R';
                     }
                     $s .= '>>';
                     $s .= "\n".'endobj';
-                    $this->_out($s);
+                    $tcpdf->_out($s);
                 } else {
                     // additional types
                     $mtd = '_put'.strtolower($type);
-                    if (!method_exists($this, $mtd)) {
-                        $this->Error('Unsupported font type: '.$type);
+                    if (!method_exists($tcpdf, $mtd)) {
+                        $tcpdf->Error('Unsupported font type: '.$type);
                     }
-                    $this->$mtd($font);
+                    $tcpdf->$mtd($font);
                 }
             }
         }
