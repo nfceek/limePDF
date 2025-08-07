@@ -6,7 +6,7 @@
  * Handles SVG parsing, transformation, and rendering within PDF documents.
  * This class is LAZY LOADED - only instantiated when SVG content is processed.
  */
-class SVGProcessor
+class limePDF_SVGProcessor
 {
     /**
      * Reference to main TCPDF instance for accessing core properties

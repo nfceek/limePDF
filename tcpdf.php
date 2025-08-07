@@ -126,42 +126,45 @@
 
 
 // // TCPDF configuration
-// require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
-// // TCPDF static font methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
-// // TCPDF static font methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
-// // TCPDF static color methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
-// // TCPDF static image methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_images.php');
-// // TCPDF static methods and data
-// require_once(dirname(__FILE__).'/include/tcpdf_static.php');
-// // new
-// require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
-// //new
-// require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
-
-
-// TCPDF configuration
 require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_font_data.php');
+require_once(dirname(__FILE__).'/include/tcpdf_font_data.php');
 // TCPDF static font methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_fonts.php');
+require_once(dirname(__FILE__).'/include/tcpdf_fonts.php');
 // TCPDF static color methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_colors.php');
+require_once(dirname(__FILE__).'/include/tcpdf_colors.php');
 // TCPDF static image methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_images.php');
+require_once(dirname(__FILE__).'/include/tcpdf_images.php');
 // TCPDF static methods and data
-require_once(dirname(__FILE__).'/src/include/limePDF_static.php');
+require_once(dirname(__FILE__).'/include/tcpdf_static.php');
 // new
-require_once(dirname(__FILE__).'/src/include/limePDF_properties.php');
+require_once(dirname(__FILE__).'/include/tcpdf_properties.php');
 //new
-require_once(dirname(__FILE__).'/src/include/limePDF_property_manager.php');
+require_once(dirname(__FILE__).'/include/tcpdf_property_manager.php');
+
+
+
+// TODO migrate to this after finish separating this file
+// TCPDF configuration
+// require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
+// // TCPDF static font methods and data
+// require_once(dirname(__FILE__).'/src/include/limePDF_font_data.php');
+// // TCPDF static font methods and data
+// require_once(dirname(__FILE__).'/src/include/limePDF_fonts.php');
+// // TCPDF static color methods and data
+// require_once(dirname(__FILE__).'/src/include/limePDF_colors.php');
+// // TCPDF static image methods and data
+// require_once(dirname(__FILE__).'/src/include/limePDF_images.php');
+// // TCPDF static methods and data
+// require_once(dirname(__FILE__).'/src/include/limePDF_static.php');
+// // new
+// require_once(dirname(__FILE__).'/src/include/limePDF_properties.php');
+// //new
+// require_once(dirname(__FILE__).'/src/include/limePDF_property_manager.php');
 
 //new
-require_once(dirname(__FILE__).'/src/utils/limePDF_put.php');
+require_once(dirname(__FILE__).'/src/utils/limePDF_Put.php');
+require_once(dirname(__FILE__).'/src/utils/limePDF_Misc.php');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -180,6 +183,8 @@ require_once(dirname(__FILE__).'/src/utils/limePDF_put.php');
 class TCPDF {
 
 	protected $utils;
+	protected $utilsPut;
+	protected $utilsMisc;		
 
 	// Protected properties
 
@@ -409,7 +414,8 @@ class TCPDF {
 	 * Array of Annotations in pages.
 	 * @protected
 	 */
-	protected $PageAnnots = array();
+	//protected $PageAnnots = array();
+	protected array $PageAnnots = [];
 
 	/**
 	 * Array of internal links.
@@ -1120,7 +1126,8 @@ class TCPDF {
 	 * @protected
 	 * @since 4.0.024 (2008-09-12)
 	 */
-	protected $spot_colors = array();
+	//protected $spot_colors = array();
+	protected array $spot_colors = [];
 
 	/**
 	 * Symbol used for HTML unordered list items.
@@ -1954,7 +1961,8 @@ class TCPDF {
 	 */
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
 
-        $this->utils = new limePDF_put();
+        $this->utilsPut = new limePDF_Put();
+	    $this->utilsMisc = new limePDF_Misc();
     
 		// set file ID for trailer
 		$serformat = (is_array($format) ? json_encode($format) : $format);
@@ -8253,654 +8261,654 @@ class TCPDF {
 		return $out;
 	}
 
-	/**
-	 * Output annotations objects for all pages.
-	 * !!! THIS METHOD IS NOT YET COMPLETED !!!
-	 * See section 12.5 of PDF 32000_2008 reference.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 4.0.018 (2008-08-06)
-	 */
-	protected function _putannotsobjs() {
-		// reset object counter
-		for ($n=1; $n <= $this->numpages; ++$n) {
-			if (isset($this->PageAnnots[$n])) {
-				// set page annotations
-				foreach ($this->PageAnnots[$n] as $key => $pl) {
-					$annot_obj_id = $this->PageAnnots[$n][$key]['n'];
-					// create annotation object for grouping radiobuttons
-					if (isset($this->radiobutton_groups[$n][$pl['txt']]) AND is_array($this->radiobutton_groups[$n][$pl['txt']])) {
-						$radio_button_obj_id = $this->radiobutton_groups[$n][$pl['txt']]['n'];
-						$annots = '<<';
-						$annots .= ' /Type /Annot';
-						$annots .= ' /Subtype /Widget';
-						$annots .= ' /Rect [0 0 0 0]';
-						if ($this->radiobutton_groups[$n][$pl['txt']]['#readonly#']) {
-							// read only
-							$annots .= ' /F 68';
-							$annots .= ' /Ff 49153';
-						} else {
-							$annots .= ' /F 4'; // default print for PDF/A
-							$annots .= ' /Ff 49152';
-						}
-						$annots .= ' /T '.$this->_datastring($pl['txt'], $radio_button_obj_id);
-						if (isset($pl['opt']['tu']) AND is_string($pl['opt']['tu'])) {
-							$annots .= ' /TU '.$this->_datastring($pl['opt']['tu'], $radio_button_obj_id);
-						}
-						$annots .= ' /FT /Btn';
-						$annots .= ' /Kids [';
-						$defval = '';
-						foreach ($this->radiobutton_groups[$n][$pl['txt']] as $key => $data) {
-							if (isset($data['kid'])) {
-								$annots .= ' '.$data['kid'].' 0 R';
-								if ($data['def'] !== 'Off') {
-									$defval = $data['def'];
-								}
-							}
-						}
-						$annots .= ' ]';
-						if (!empty($defval)) {
-							$annots .= ' /V /'.$defval;
-						}
-						$annots .= ' >>';
-						$this->_out($this->_getobj($radio_button_obj_id)."\n".$annots."\n".'endobj');
-						$this->form_obj_id[] = $radio_button_obj_id;
-						// store object id to be used on Parent entry of Kids
-						$this->radiobutton_groups[$n][$pl['txt']] = $radio_button_obj_id;
-					}
-					$formfield = false;
-					$pl['opt'] = array_change_key_case($pl['opt'], CASE_LOWER);
-					$a = $pl['x'] * $this->k;
-					$b = $this->pagedim[$n]['h'] - (($pl['y'] + $pl['h']) * $this->k);
-					$c = $pl['w'] * $this->k;
-					$d = $pl['h'] * $this->k;
-					$rect = sprintf('%F %F %F %F', $a, $b, $a+$c, $b+$d);
-					// create new annotation object
-					$annots = '<</Type /Annot';
-					$annots .= ' /Subtype /'.$pl['opt']['subtype'];
-					$annots .= ' /Rect ['.$rect.']';
-					$ft = array('Btn', 'Tx', 'Ch', 'Sig');
-					if (isset($pl['opt']['ft']) AND in_array($pl['opt']['ft'], $ft)) {
-						$annots .= ' /FT /'.$pl['opt']['ft'];
-						$formfield = true;
-					}
-					if ($pl['opt']['subtype'] !== 'Link') {
-						$annots .= ' /Contents '.$this->_textstring($pl['txt'], $annot_obj_id);
-					}
-					$annots .= ' /P '.$this->page_obj_id[$n].' 0 R';
-					$annots .= ' /NM '.$this->_datastring(sprintf('%04u-%04u', $n, $key), $annot_obj_id);
-					$annots .= ' /M '.$this->_datestring($annot_obj_id, $this->doc_modification_timestamp);
-					if (isset($pl['opt']['f'])) {
-						$fval = 0;
-						if (is_array($pl['opt']['f'])) {
-							foreach ($pl['opt']['f'] as $f) {
-								switch (strtolower($f)) {
-									case 'invisible': {
-										$fval += 1 << 0;
-										break;
-									}
-									case 'hidden': {
-										$fval += 1 << 1;
-										break;
-									}
-									case 'print': {
-										$fval += 1 << 2;
-										break;
-									}
-									case 'nozoom': {
-										$fval += 1 << 3;
-										break;
-									}
-									case 'norotate': {
-										$fval += 1 << 4;
-										break;
-									}
-									case 'noview': {
-										$fval += 1 << 5;
-										break;
-									}
-									case 'readonly': {
-										$fval += 1 << 6;
-										break;
-									}
-									case 'locked': {
-										$fval += 1 << 7;
-										break;
-									}
-									case 'togglenoview': {
-										$fval += 1 << 8;
-										break;
-									}
-									case 'lockedcontents': {
-										$fval += 1 << 9;
-										break;
-									}
-									default: {
-										break;
-									}
-								}
-							}
-						} else {
-							$fval = intval($pl['opt']['f']);
-						}
-					} else {
-						$fval = 4;
-					}
-					if ($this->pdfa_mode) {
-						// force print flag for PDF/A mode
-						$fval |= 4;
-					}
-					$annots .= ' /F '.intval($fval);
-					if (isset($pl['opt']['as']) AND is_string($pl['opt']['as'])) {
-						$annots .= ' /AS /'.$pl['opt']['as'];
-					}
-					if (isset($pl['opt']['ap'])) {
-						// appearance stream
-						$annots .= ' /AP <<';
-						if (is_array($pl['opt']['ap'])) {
-							foreach ($pl['opt']['ap'] as $apmode => $apdef) {
-								// $apmode can be: n = normal; r = rollover; d = down;
-								$annots .= ' /'.strtoupper($apmode);
-								if (is_array($apdef)) {
-									$annots .= ' <<';
-									foreach ($apdef as $apstate => $stream) {
-										// reference to XObject that define the appearance for this mode-state
-										$apsobjid = $this->_putAPXObject($c, $d, $stream);
-										$annots .= ' /'.$apstate.' '.$apsobjid.' 0 R';
-									}
-									$annots .= ' >>';
-								} else {
-									// reference to XObject that define the appearance for this mode
-									$apsobjid = $this->_putAPXObject($c, $d, $apdef);
-									$annots .= ' '.$apsobjid.' 0 R';
-								}
-							}
-						} else {
-							$annots .= $pl['opt']['ap'];
-						}
-						$annots .= ' >>';
-					}
-					if (isset($pl['opt']['bs']) AND (is_array($pl['opt']['bs']))) {
-						$annots .= ' /BS <<';
-						$annots .= ' /Type /Border';
-						if (isset($pl['opt']['bs']['w'])) {
-							$annots .= ' /W '.intval($pl['opt']['bs']['w']);
-						}
-						$bstyles = array('S', 'D', 'B', 'I', 'U');
-						if (isset($pl['opt']['bs']['s']) AND in_array($pl['opt']['bs']['s'], $bstyles)) {
-							$annots .= ' /S /'.$pl['opt']['bs']['s'];
-						}
-						if (isset($pl['opt']['bs']['d']) AND (is_array($pl['opt']['bs']['d']))) {
-							$annots .= ' /D [';
-							foreach ($pl['opt']['bs']['d'] as $cord) {
-								$annots .= ' '.intval($cord);
-							}
-							$annots .= ']';
-						}
-						$annots .= ' >>';
-					} else {
-						$annots .= ' /Border [';
-						if (isset($pl['opt']['border']) AND (count($pl['opt']['border']) >= 3)) {
-							$annots .= intval($pl['opt']['border'][0]).' ';
-							$annots .= intval($pl['opt']['border'][1]).' ';
-							$annots .= intval($pl['opt']['border'][2]);
-							if (isset($pl['opt']['border'][3]) AND is_array($pl['opt']['border'][3])) {
-								$annots .= ' [';
-								foreach ($pl['opt']['border'][3] as $dash) {
-									$annots .= intval($dash).' ';
-								}
-								$annots .= ']';
-							}
-						} else {
-							$annots .= '0 0 0';
-						}
-						$annots .= ']';
-					}
-					if (isset($pl['opt']['be']) AND (is_array($pl['opt']['be']))) {
-						$annots .= ' /BE <<';
-						$bstyles = array('S', 'C');
-						if (isset($pl['opt']['be']['s']) AND in_array($pl['opt']['be']['s'], $bstyles)) {
-							$annots .= ' /S /'.$pl['opt']['bs']['s'];
-						} else {
-							$annots .= ' /S /S';
-						}
-						if (isset($pl['opt']['be']['i']) AND ($pl['opt']['be']['i'] >= 0) AND ($pl['opt']['be']['i'] <= 2)) {
-							$annots .= ' /I '.sprintf(' %F', $pl['opt']['be']['i']);
-						}
-						$annots .= '>>';
-					}
-					if (isset($pl['opt']['c']) AND (is_array($pl['opt']['c'])) AND !empty($pl['opt']['c'])) {
-						$annots .= ' /C '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['c']);
-					}
-					//$annots .= ' /StructParent ';
-					//$annots .= ' /OC ';
-					$markups = array('text', 'freetext', 'line', 'square', 'circle', 'polygon', 'polyline', 'highlight', 'underline', 'squiggly', 'strikeout', 'stamp', 'caret', 'ink', 'fileattachment', 'sound');
-					if (in_array(strtolower($pl['opt']['subtype']), $markups)) {
-						// this is a markup type
-						if (isset($pl['opt']['t']) AND is_string($pl['opt']['t'])) {
-							$annots .= ' /T '.$this->_textstring($pl['opt']['t'], $annot_obj_id);
-						}
-						//$annots .= ' /Popup ';
-						if (isset($pl['opt']['ca'])) {
-							$annots .= ' /CA '.sprintf('%F', floatval($pl['opt']['ca']));
-						}
-						if (isset($pl['opt']['rc'])) {
-							$annots .= ' /RC '.$this->_textstring($pl['opt']['rc'], $annot_obj_id);
-						}
-						$annots .= ' /CreationDate '.$this->_datestring($annot_obj_id, $this->doc_creation_timestamp);
-						//$annots .= ' /IRT ';
-						if (isset($pl['opt']['subj'])) {
-							$annots .= ' /Subj '.$this->_textstring($pl['opt']['subj'], $annot_obj_id);
-						}
-						//$annots .= ' /RT ';
-						//$annots .= ' /IT ';
-						//$annots .= ' /ExData ';
-					}
-					$lineendings = array('Square', 'Circle', 'Diamond', 'OpenArrow', 'ClosedArrow', 'None', 'Butt', 'ROpenArrow', 'RClosedArrow', 'Slash');
-					// Annotation types
-					switch (strtolower($pl['opt']['subtype'])) {
-						case 'text': {
-							if (isset($pl['opt']['open'])) {
-								$annots .= ' /Open '. (strtolower($pl['opt']['open']) == 'true' ? 'true' : 'false');
-							}
-							$iconsapp = array('Comment', 'Help', 'Insert', 'Key', 'NewParagraph', 'Note', 'Paragraph');
-							if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
-								$annots .= ' /Name /'.$pl['opt']['name'];
-							} else {
-								$annots .= ' /Name /Note';
-							}
-							$hasStateModel = isset($pl['opt']['statemodel']);
-							$hasState = isset($pl['opt']['state']);
-							$statemodels = array('Marked', 'Review');
-							if (!$hasStateModel && !$hasState) {
-								break;
-							}
-							if ($hasStateModel AND in_array($pl['opt']['statemodel'], $statemodels)) {
-								$annots .= ' /StateModel /'.$pl['opt']['statemodel'];
-							} else {
-								$pl['opt']['statemodel'] = 'Marked';
-								$annots .= ' /StateModel /'.$pl['opt']['statemodel'];
-							}
-							if ($pl['opt']['statemodel'] == 'Marked') {
-								$states = array('Accepted', 'Unmarked');
-							} else {
-								$states = array('Accepted', 'Rejected', 'Cancelled', 'Completed', 'None');
-							}
-							if ($hasState AND in_array($pl['opt']['state'], $states)) {
-								$annots .= ' /State /'.$pl['opt']['state'];
-							} else {
-								if ($pl['opt']['statemodel'] == 'Marked') {
-									$annots .= ' /State /Unmarked';
-								} else {
-									$annots .= ' /State /None';
-								}
-							}
-							break;
-						}
-						case 'link': {
-							if (is_string($pl['txt']) && !empty($pl['txt'])) {
-								if ($pl['txt'][0] == '#') {
-									// internal destination
-									$annots .= ' /A <</S /GoTo /D /'.TCPDF_STATIC::encodeNameObject(substr($pl['txt'], 1)).'>>';
-								} elseif ($pl['txt'][0] == '%') {
-									// embedded PDF file
-									$filename = basename(substr($pl['txt'], 1));
-									$annots .= ' /A << /S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($n - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
-								} elseif ($pl['txt'][0] == '*') {
-									// embedded generic file
-									$filename = basename(substr($pl['txt'], 1));
-									$jsa = 'var D=event.target.doc;var MyData=D.dataObjects;for (var i in MyData) if (MyData[i].path=="'.$filename.'") D.exportDataObject( { cName : MyData[i].name, nLaunch : 2});';
-									$annots .= ' /A << /S /JavaScript /JS '.$this->_textstring($jsa, $annot_obj_id).'>>';
-								} else {
-									$parsedUrl = parse_url($pl['txt']);
-									if (empty($parsedUrl['scheme']) AND (!empty($parsedUrl['path']) && strtolower(substr($parsedUrl['path'], -4)) == '.pdf')) {
-										// relative link to a PDF file
-										$dest = '[0 /Fit]'; // default page 0
-										if (!empty($parsedUrl['fragment'])) {
-											// check for named destination
-											$tmp = explode('=', $parsedUrl['fragment']);
-											$dest = '('.((count($tmp) == 2) ? $tmp[1] : $tmp[0]).')';
-										}
-										$annots .= ' /A <</S /GoToR /D '.$dest.' /F '.$this->_datastring($this->unhtmlentities($parsedUrl['path']), $annot_obj_id).' /NewWindow true>>';
-									} else {
-										// external URI link
-										$annots .= ' /A <</S /URI /URI '.$this->_datastring($this->unhtmlentities($pl['txt']), $annot_obj_id).'>>';
-									}
-								}
-							} elseif (isset($this->links[$pl['txt']])) {
-								// internal link ID
-								$l = $this->links[$pl['txt']];
-								if (isset($this->page_obj_id[($l['p'])])) {
-									$annots .= sprintf(' /Dest [%u 0 R /XYZ 0 %F null]', $this->page_obj_id[($l['p'])], ($this->pagedim[$l['p']]['h'] - ($l['y'] * $this->k)));
-								}
-							}
-							$hmodes = array('N', 'I', 'O', 'P');
-							if (isset($pl['opt']['h']) AND in_array($pl['opt']['h'], $hmodes)) {
-								$annots .= ' /H /'.$pl['opt']['h'];
-							} else {
-								$annots .= ' /H /I';
-							}
-							//$annots .= ' /PA ';
-							//$annots .= ' /Quadpoints ';
-							break;
-						}
-						case 'freetext': {
-							if (isset($pl['opt']['da']) AND !empty($pl['opt']['da'])) {
-								$annots .= ' /DA '.$this->_datastring($pl['opt']['da']);
-							}
-							if (isset($pl['opt']['q']) AND ($pl['opt']['q'] >= 0) AND ($pl['opt']['q'] <= 2)) {
-								$annots .= ' /Q '.intval($pl['opt']['q']);
-							}
-							if (isset($pl['opt']['rc'])) {
-								$annots .= ' /RC '.$this->_textstring($pl['opt']['rc'], $annot_obj_id);
-							}
-							if (isset($pl['opt']['ds'])) {
-								$annots .= ' /DS '.$this->_textstring($pl['opt']['ds'], $annot_obj_id);
-							}
-							if (isset($pl['opt']['cl']) AND is_array($pl['opt']['cl'])) {
-								$annots .= ' /CL [';
-								foreach ($pl['opt']['cl'] as $cl) {
-									$annots .= sprintf('%F ', $cl * $this->k);
-								}
-								$annots .= ']';
-							}
-							$tfit = array('FreeText', 'FreeTextCallout', 'FreeTextTypeWriter');
-							if (isset($pl['opt']['it']) AND in_array($pl['opt']['it'], $tfit)) {
-								$annots .= ' /IT /'.$pl['opt']['it'];
-							}
-							if (isset($pl['opt']['rd']) AND is_array($pl['opt']['rd'])) {
-								$l = $pl['opt']['rd'][0] * $this->k;
-								$r = $pl['opt']['rd'][1] * $this->k;
-								$t = $pl['opt']['rd'][2] * $this->k;
-								$b = $pl['opt']['rd'][3] * $this->k;
-								$annots .= ' /RD ['.sprintf('%F %F %F %F', $l, $r, $t, $b).']';
-							}
-							if (isset($pl['opt']['le']) AND in_array($pl['opt']['le'], $lineendings)) {
-								$annots .= ' /LE /'.$pl['opt']['le'];
-							}
-							break;
-						}
-						case 'line': {
-							break;
-						}
-						case 'square': {
-							break;
-						}
-						case 'circle': {
-							break;
-						}
-						case 'polygon': {
-							break;
-						}
-						case 'polyline': {
-							break;
-						}
-						case 'highlight': {
-							break;
-						}
-						case 'underline': {
-							break;
-						}
-						case 'squiggly': {
-							break;
-						}
-						case 'strikeout': {
-							break;
-						}
-						case 'stamp': {
-							break;
-						}
-						case 'caret': {
-							break;
-						}
-						case 'ink': {
-							break;
-						}
-						case 'popup': {
-							break;
-						}
-						case 'fileattachment': {
-							if ($this->pdfa_mode && $this->pdfa_version != 3) {
-								// embedded files are not allowed in PDF/A mode version 1 and 2
-								break;
-							}
-							if (!isset($pl['opt']['fs'])) {
-								break;
-							}
-							$filename = basename($pl['opt']['fs']);
-							if (isset($this->embeddedfiles[$filename]['f'])) {
-								$annots .= ' /FS '.$this->embeddedfiles[$filename]['f'].' 0 R';
-								$iconsapp = array('Graph', 'Paperclip', 'PushPin', 'Tag');
-								if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
-									$annots .= ' /Name /'.$pl['opt']['name'];
-								} else {
-									$annots .= ' /Name /PushPin';
-								}
-								// index (zero-based) of the annotation in the Annots array of this page
-								$this->embeddedfiles[$filename]['a'] = $key;
-							}
-							break;
-						}
-						case 'sound': {
-							if (!isset($pl['opt']['fs'])) {
-								break;
-							}
-							$filename = basename($pl['opt']['fs']);
-							if (isset($this->embeddedfiles[$filename]['f'])) {
-								// ... TO BE COMPLETED ...
-								// /R /C /B /E /CO /CP
-								$annots .= ' /Sound '.$this->embeddedfiles[$filename]['f'].' 0 R';
-								$iconsapp = array('Speaker', 'Mic');
-								if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
-									$annots .= ' /Name /'.$pl['opt']['name'];
-								} else {
-									$annots .= ' /Name /Speaker';
-								}
-							}
-							break;
-						}
-						case 'movie': {
-							break;
-						}
-						case 'widget': {
-							$hmode = array('N', 'I', 'O', 'P', 'T');
-							if (isset($pl['opt']['h']) AND in_array($pl['opt']['h'], $hmode)) {
-								$annots .= ' /H /'.$pl['opt']['h'];
-							}
-							if (isset($pl['opt']['mk']) AND (is_array($pl['opt']['mk'])) AND !empty($pl['opt']['mk'])) {
-								$annots .= ' /MK <<';
-								if (isset($pl['opt']['mk']['r'])) {
-									$annots .= ' /R '.$pl['opt']['mk']['r'];
-								}
-								if (isset($pl['opt']['mk']['bc']) AND (is_array($pl['opt']['mk']['bc']))) {
-									$annots .= ' /BC '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bc']);
-								}
-								if (isset($pl['opt']['mk']['bg']) AND (is_array($pl['opt']['mk']['bg']))) {
-									$annots .= ' /BG '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bg']);
-								}
-								if (isset($pl['opt']['mk']['ca'])) {
-									$annots .= ' /CA '.$pl['opt']['mk']['ca'];
-								}
-								if (isset($pl['opt']['mk']['rc'])) {
-									$annots .= ' /RC '.$pl['opt']['mk']['rc'];
-								}
-								if (isset($pl['opt']['mk']['ac'])) {
-									$annots .= ' /AC '.$pl['opt']['mk']['ac'];
-								}
-								if (isset($pl['opt']['mk']['i'])) {
-									$info = $this->getImageBuffer($pl['opt']['mk']['i']);
-									if ($info !== false) {
-										$annots .= ' /I '.$info['n'].' 0 R';
-									}
-								}
-								if (isset($pl['opt']['mk']['ri'])) {
-									$info = $this->getImageBuffer($pl['opt']['mk']['ri']);
-									if ($info !== false) {
-										$annots .= ' /RI '.$info['n'].' 0 R';
-									}
-								}
-								if (isset($pl['opt']['mk']['ix'])) {
-									$info = $this->getImageBuffer($pl['opt']['mk']['ix']);
-									if ($info !== false) {
-										$annots .= ' /IX '.$info['n'].' 0 R';
-									}
-								}
-								if (isset($pl['opt']['mk']['if']) AND (is_array($pl['opt']['mk']['if'])) AND !empty($pl['opt']['mk']['if'])) {
-									$annots .= ' /IF <<';
-									$if_sw = array('A', 'B', 'S', 'N');
-									if (isset($pl['opt']['mk']['if']['sw']) AND in_array($pl['opt']['mk']['if']['sw'], $if_sw)) {
-										$annots .= ' /SW /'.$pl['opt']['mk']['if']['sw'];
-									}
-									$if_s = array('A', 'P');
-									if (isset($pl['opt']['mk']['if']['s']) AND in_array($pl['opt']['mk']['if']['s'], $if_s)) {
-										$annots .= ' /S /'.$pl['opt']['mk']['if']['s'];
-									}
-									if (isset($pl['opt']['mk']['if']['a']) AND (is_array($pl['opt']['mk']['if']['a'])) AND !empty($pl['opt']['mk']['if']['a'])) {
-										$annots .= sprintf(' /A [%F %F]', $pl['opt']['mk']['if']['a'][0], $pl['opt']['mk']['if']['a'][1]);
-									}
-									if (isset($pl['opt']['mk']['if']['fb']) AND ($pl['opt']['mk']['if']['fb'])) {
-										$annots .= ' /FB true';
-									}
-									$annots .= '>>';
-								}
-								if (isset($pl['opt']['mk']['tp']) AND ($pl['opt']['mk']['tp'] >= 0) AND ($pl['opt']['mk']['tp'] <= 6)) {
-									$annots .= ' /TP '.intval($pl['opt']['mk']['tp']);
-								}
-								$annots .= '>>';
-							} // end MK
-							// --- Entries for field dictionaries ---
-							if (isset($this->radiobutton_groups[$n][$pl['txt']])) {
-								// set parent
-								$annots .= ' /Parent '.$this->radiobutton_groups[$n][$pl['txt']].' 0 R';
-							}
-							if (isset($pl['opt']['t']) AND is_string($pl['opt']['t'])) {
-								$annots .= ' /T '.$this->_datastring($pl['opt']['t'], $annot_obj_id);
-							}
-							if (isset($pl['opt']['tu']) AND is_string($pl['opt']['tu'])) {
-								$annots .= ' /TU '.$this->_datastring($pl['opt']['tu'], $annot_obj_id);
-							}
-							if (isset($pl['opt']['tm']) AND is_string($pl['opt']['tm'])) {
-								$annots .= ' /TM '.$this->_datastring($pl['opt']['tm'], $annot_obj_id);
-							}
-							if (isset($pl['opt']['ff'])) {
-								if (is_array($pl['opt']['ff'])) {
-									// array of bit settings
-									$flag = 0;
-									foreach($pl['opt']['ff'] as $val) {
-										$flag += 1 << ($val - 1);
-									}
-								} else {
-									$flag = intval($pl['opt']['ff']);
-								}
-								$annots .= ' /Ff '.$flag;
-							}
-							if (isset($pl['opt']['maxlen'])) {
-								$annots .= ' /MaxLen '.intval($pl['opt']['maxlen']);
-							}
-							if (isset($pl['opt']['v'])) {
-								$annots .= ' /V';
-								if (is_array($pl['opt']['v'])) {
-									foreach ($pl['opt']['v'] AS $optval) {
-										if (is_float($optval)) {
-											$optval = sprintf('%F', $optval);
-										}
-										$annots .= ' '.$optval;
-									}
-								} else {
-									$annots .= ' '.$this->_textstring($pl['opt']['v'], $annot_obj_id);
-								}
-							}
-							if (isset($pl['opt']['dv'])) {
-								$annots .= ' /DV';
-								if (is_array($pl['opt']['dv'])) {
-									foreach ($pl['opt']['dv'] AS $optval) {
-										if (is_float($optval)) {
-											$optval = sprintf('%F', $optval);
-										}
-										$annots .= ' '.$optval;
-									}
-								} else {
-									$annots .= ' '.$this->_textstring($pl['opt']['dv'], $annot_obj_id);
-								}
-							}
-							if (isset($pl['opt']['rv'])) {
-								$annots .= ' /RV';
-								if (is_array($pl['opt']['rv'])) {
-									foreach ($pl['opt']['rv'] AS $optval) {
-										if (is_float($optval)) {
-											$optval = sprintf('%F', $optval);
-										}
-										$annots .= ' '.$optval;
-									}
-								} else {
-									$annots .= ' '.$this->_textstring($pl['opt']['rv'], $annot_obj_id);
-								}
-							}
-							if (isset($pl['opt']['a']) AND !empty($pl['opt']['a'])) {
-								$annots .= ' /A << '.$pl['opt']['a'].' >>';
-							}
-							if (isset($pl['opt']['aa']) AND !empty($pl['opt']['aa'])) {
-								$annots .= ' /AA << '.$pl['opt']['aa'].' >>';
-							}
-							if (isset($pl['opt']['da']) AND !empty($pl['opt']['da'])) {
-								$annots .= ' /DA '.$this->_datastring($pl['opt']['da']);
-							}
-							if (isset($pl['opt']['q']) AND ($pl['opt']['q'] >= 0) AND ($pl['opt']['q'] <= 2)) {
-								$annots .= ' /Q '.intval($pl['opt']['q']);
-							}
-							if (isset($pl['opt']['opt']) AND (is_array($pl['opt']['opt'])) AND !empty($pl['opt']['opt'])) {
-								$annots .= ' /Opt [';
-								foreach($pl['opt']['opt'] AS $copt) {
-									if (is_array($copt)) {
-										$annots .= ' ['.$this->_textstring($copt[0], $annot_obj_id).' '.$this->_textstring($copt[1], $annot_obj_id).']';
-									} else {
-										$annots .= ' '.$this->_textstring($copt, $annot_obj_id);
-									}
-								}
-								$annots .= ']';
-							}
-							if (isset($pl['opt']['ti'])) {
-								$annots .= ' /TI '.intval($pl['opt']['ti']);
-							}
-							if (isset($pl['opt']['i']) AND (is_array($pl['opt']['i'])) AND !empty($pl['opt']['i'])) {
-								$annots .= ' /I [';
-								foreach($pl['opt']['i'] AS $copt) {
-									$annots .= intval($copt).' ';
-								}
-								$annots .= ']';
-							}
-							break;
-						}
-						case 'screen': {
-							break;
-						}
-						case 'printermark': {
-							break;
-						}
-						case 'trapnet': {
-							break;
-						}
-						case 'watermark': {
-							break;
-						}
-						case '3d': {
-							break;
-						}
-						default: {
-							break;
-						}
-					}
-					$annots .= '>>';
-					// create new annotation object
-					$this->_out($this->_getobj($annot_obj_id)."\n".$annots."\n".'endobj');
-					if ($formfield AND !isset($this->radiobutton_groups[$n][$pl['txt']])) {
-						// store reference of form object
-						$this->form_obj_id[] = $annot_obj_id;
-					}
-				}
-			}
-		} // end for each page
-	}
+	// /**
+	//  * Output annotations objects for all pages.
+	//  * !!! THIS METHOD IS NOT YET COMPLETED !!!
+	//  * See section 12.5 of PDF 32000_2008 reference.
+	//  * @protected
+	//  * @author Nicola Asuni
+	//  * @since 4.0.018 (2008-08-06)
+	//  */
+	// protected function _putannotsobjs() {
+	// 	// reset object counter
+	// 	for ($n=1; $n <= $this->numpages; ++$n) {
+	// 		if (isset($this->PageAnnots[$n])) {
+	// 			// set page annotations
+	// 			foreach ($this->PageAnnots[$n] as $key => $pl) {
+	// 				$annot_obj_id = $this->PageAnnots[$n][$key]['n'];
+	// 				// create annotation object for grouping radiobuttons
+	// 				if (isset($this->radiobutton_groups[$n][$pl['txt']]) AND is_array($this->radiobutton_groups[$n][$pl['txt']])) {
+	// 					$radio_button_obj_id = $this->radiobutton_groups[$n][$pl['txt']]['n'];
+	// 					$annots = '<<';
+	// 					$annots .= ' /Type /Annot';
+	// 					$annots .= ' /Subtype /Widget';
+	// 					$annots .= ' /Rect [0 0 0 0]';
+	// 					if ($this->radiobutton_groups[$n][$pl['txt']]['#readonly#']) {
+	// 						// read only
+	// 						$annots .= ' /F 68';
+	// 						$annots .= ' /Ff 49153';
+	// 					} else {
+	// 						$annots .= ' /F 4'; // default print for PDF/A
+	// 						$annots .= ' /Ff 49152';
+	// 					}
+	// 					$annots .= ' /T '.$this->_datastring($pl['txt'], $radio_button_obj_id);
+	// 					if (isset($pl['opt']['tu']) AND is_string($pl['opt']['tu'])) {
+	// 						$annots .= ' /TU '.$this->_datastring($pl['opt']['tu'], $radio_button_obj_id);
+	// 					}
+	// 					$annots .= ' /FT /Btn';
+	// 					$annots .= ' /Kids [';
+	// 					$defval = '';
+	// 					foreach ($this->radiobutton_groups[$n][$pl['txt']] as $key => $data) {
+	// 						if (isset($data['kid'])) {
+	// 							$annots .= ' '.$data['kid'].' 0 R';
+	// 							if ($data['def'] !== 'Off') {
+	// 								$defval = $data['def'];
+	// 							}
+	// 						}
+	// 					}
+	// 					$annots .= ' ]';
+	// 					if (!empty($defval)) {
+	// 						$annots .= ' /V /'.$defval;
+	// 					}
+	// 					$annots .= ' >>';
+	// 					$this->_out($this->_getobj($radio_button_obj_id)."\n".$annots."\n".'endobj');
+	// 					$this->form_obj_id[] = $radio_button_obj_id;
+	// 					// store object id to be used on Parent entry of Kids
+	// 					$this->radiobutton_groups[$n][$pl['txt']] = $radio_button_obj_id;
+	// 				}
+	// 				$formfield = false;
+	// 				$pl['opt'] = array_change_key_case($pl['opt'], CASE_LOWER);
+	// 				$a = $pl['x'] * $this->k;
+	// 				$b = $this->pagedim[$n]['h'] - (($pl['y'] + $pl['h']) * $this->k);
+	// 				$c = $pl['w'] * $this->k;
+	// 				$d = $pl['h'] * $this->k;
+	// 				$rect = sprintf('%F %F %F %F', $a, $b, $a+$c, $b+$d);
+	// 				// create new annotation object
+	// 				$annots = '<</Type /Annot';
+	// 				$annots .= ' /Subtype /'.$pl['opt']['subtype'];
+	// 				$annots .= ' /Rect ['.$rect.']';
+	// 				$ft = array('Btn', 'Tx', 'Ch', 'Sig');
+	// 				if (isset($pl['opt']['ft']) AND in_array($pl['opt']['ft'], $ft)) {
+	// 					$annots .= ' /FT /'.$pl['opt']['ft'];
+	// 					$formfield = true;
+	// 				}
+	// 				if ($pl['opt']['subtype'] !== 'Link') {
+	// 					$annots .= ' /Contents '.$this->_textstring($pl['txt'], $annot_obj_id);
+	// 				}
+	// 				$annots .= ' /P '.$this->page_obj_id[$n].' 0 R';
+	// 				$annots .= ' /NM '.$this->_datastring(sprintf('%04u-%04u', $n, $key), $annot_obj_id);
+	// 				$annots .= ' /M '.$this->_datestring($annot_obj_id, $this->doc_modification_timestamp);
+	// 				if (isset($pl['opt']['f'])) {
+	// 					$fval = 0;
+	// 					if (is_array($pl['opt']['f'])) {
+	// 						foreach ($pl['opt']['f'] as $f) {
+	// 							switch (strtolower($f)) {
+	// 								case 'invisible': {
+	// 									$fval += 1 << 0;
+	// 									break;
+	// 								}
+	// 								case 'hidden': {
+	// 									$fval += 1 << 1;
+	// 									break;
+	// 								}
+	// 								case 'print': {
+	// 									$fval += 1 << 2;
+	// 									break;
+	// 								}
+	// 								case 'nozoom': {
+	// 									$fval += 1 << 3;
+	// 									break;
+	// 								}
+	// 								case 'norotate': {
+	// 									$fval += 1 << 4;
+	// 									break;
+	// 								}
+	// 								case 'noview': {
+	// 									$fval += 1 << 5;
+	// 									break;
+	// 								}
+	// 								case 'readonly': {
+	// 									$fval += 1 << 6;
+	// 									break;
+	// 								}
+	// 								case 'locked': {
+	// 									$fval += 1 << 7;
+	// 									break;
+	// 								}
+	// 								case 'togglenoview': {
+	// 									$fval += 1 << 8;
+	// 									break;
+	// 								}
+	// 								case 'lockedcontents': {
+	// 									$fval += 1 << 9;
+	// 									break;
+	// 								}
+	// 								default: {
+	// 									break;
+	// 								}
+	// 							}
+	// 						}
+	// 					} else {
+	// 						$fval = intval($pl['opt']['f']);
+	// 					}
+	// 				} else {
+	// 					$fval = 4;
+	// 				}
+	// 				if ($this->pdfa_mode) {
+	// 					// force print flag for PDF/A mode
+	// 					$fval |= 4;
+	// 				}
+	// 				$annots .= ' /F '.intval($fval);
+	// 				if (isset($pl['opt']['as']) AND is_string($pl['opt']['as'])) {
+	// 					$annots .= ' /AS /'.$pl['opt']['as'];
+	// 				}
+	// 				if (isset($pl['opt']['ap'])) {
+	// 					// appearance stream
+	// 					$annots .= ' /AP <<';
+	// 					if (is_array($pl['opt']['ap'])) {
+	// 						foreach ($pl['opt']['ap'] as $apmode => $apdef) {
+	// 							// $apmode can be: n = normal; r = rollover; d = down;
+	// 							$annots .= ' /'.strtoupper($apmode);
+	// 							if (is_array($apdef)) {
+	// 								$annots .= ' <<';
+	// 								foreach ($apdef as $apstate => $stream) {
+	// 									// reference to XObject that define the appearance for this mode-state
+	// 									$apsobjid = $this->_putAPXObject($c, $d, $stream);
+	// 									$annots .= ' /'.$apstate.' '.$apsobjid.' 0 R';
+	// 								}
+	// 								$annots .= ' >>';
+	// 							} else {
+	// 								// reference to XObject that define the appearance for this mode
+	// 								$apsobjid = $this->_putAPXObject($c, $d, $apdef);
+	// 								$annots .= ' '.$apsobjid.' 0 R';
+	// 							}
+	// 						}
+	// 					} else {
+	// 						$annots .= $pl['opt']['ap'];
+	// 					}
+	// 					$annots .= ' >>';
+	// 				}
+	// 				if (isset($pl['opt']['bs']) AND (is_array($pl['opt']['bs']))) {
+	// 					$annots .= ' /BS <<';
+	// 					$annots .= ' /Type /Border';
+	// 					if (isset($pl['opt']['bs']['w'])) {
+	// 						$annots .= ' /W '.intval($pl['opt']['bs']['w']);
+	// 					}
+	// 					$bstyles = array('S', 'D', 'B', 'I', 'U');
+	// 					if (isset($pl['opt']['bs']['s']) AND in_array($pl['opt']['bs']['s'], $bstyles)) {
+	// 						$annots .= ' /S /'.$pl['opt']['bs']['s'];
+	// 					}
+	// 					if (isset($pl['opt']['bs']['d']) AND (is_array($pl['opt']['bs']['d']))) {
+	// 						$annots .= ' /D [';
+	// 						foreach ($pl['opt']['bs']['d'] as $cord) {
+	// 							$annots .= ' '.intval($cord);
+	// 						}
+	// 						$annots .= ']';
+	// 					}
+	// 					$annots .= ' >>';
+	// 				} else {
+	// 					$annots .= ' /Border [';
+	// 					if (isset($pl['opt']['border']) AND (count($pl['opt']['border']) >= 3)) {
+	// 						$annots .= intval($pl['opt']['border'][0]).' ';
+	// 						$annots .= intval($pl['opt']['border'][1]).' ';
+	// 						$annots .= intval($pl['opt']['border'][2]);
+	// 						if (isset($pl['opt']['border'][3]) AND is_array($pl['opt']['border'][3])) {
+	// 							$annots .= ' [';
+	// 							foreach ($pl['opt']['border'][3] as $dash) {
+	// 								$annots .= intval($dash).' ';
+	// 							}
+	// 							$annots .= ']';
+	// 						}
+	// 					} else {
+	// 						$annots .= '0 0 0';
+	// 					}
+	// 					$annots .= ']';
+	// 				}
+	// 				if (isset($pl['opt']['be']) AND (is_array($pl['opt']['be']))) {
+	// 					$annots .= ' /BE <<';
+	// 					$bstyles = array('S', 'C');
+	// 					if (isset($pl['opt']['be']['s']) AND in_array($pl['opt']['be']['s'], $bstyles)) {
+	// 						$annots .= ' /S /'.$pl['opt']['bs']['s'];
+	// 					} else {
+	// 						$annots .= ' /S /S';
+	// 					}
+	// 					if (isset($pl['opt']['be']['i']) AND ($pl['opt']['be']['i'] >= 0) AND ($pl['opt']['be']['i'] <= 2)) {
+	// 						$annots .= ' /I '.sprintf(' %F', $pl['opt']['be']['i']);
+	// 					}
+	// 					$annots .= '>>';
+	// 				}
+	// 				if (isset($pl['opt']['c']) AND (is_array($pl['opt']['c'])) AND !empty($pl['opt']['c'])) {
+	// 					$annots .= ' /C '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['c']);
+	// 				}
+	// 				//$annots .= ' /StructParent ';
+	// 				//$annots .= ' /OC ';
+	// 				$markups = array('text', 'freetext', 'line', 'square', 'circle', 'polygon', 'polyline', 'highlight', 'underline', 'squiggly', 'strikeout', 'stamp', 'caret', 'ink', 'fileattachment', 'sound');
+	// 				if (in_array(strtolower($pl['opt']['subtype']), $markups)) {
+	// 					// this is a markup type
+	// 					if (isset($pl['opt']['t']) AND is_string($pl['opt']['t'])) {
+	// 						$annots .= ' /T '.$this->_textstring($pl['opt']['t'], $annot_obj_id);
+	// 					}
+	// 					//$annots .= ' /Popup ';
+	// 					if (isset($pl['opt']['ca'])) {
+	// 						$annots .= ' /CA '.sprintf('%F', floatval($pl['opt']['ca']));
+	// 					}
+	// 					if (isset($pl['opt']['rc'])) {
+	// 						$annots .= ' /RC '.$this->_textstring($pl['opt']['rc'], $annot_obj_id);
+	// 					}
+	// 					$annots .= ' /CreationDate '.$this->_datestring($annot_obj_id, $this->doc_creation_timestamp);
+	// 					//$annots .= ' /IRT ';
+	// 					if (isset($pl['opt']['subj'])) {
+	// 						$annots .= ' /Subj '.$this->_textstring($pl['opt']['subj'], $annot_obj_id);
+	// 					}
+	// 					//$annots .= ' /RT ';
+	// 					//$annots .= ' /IT ';
+	// 					//$annots .= ' /ExData ';
+	// 				}
+	// 				$lineendings = array('Square', 'Circle', 'Diamond', 'OpenArrow', 'ClosedArrow', 'None', 'Butt', 'ROpenArrow', 'RClosedArrow', 'Slash');
+	// 				// Annotation types
+	// 				switch (strtolower($pl['opt']['subtype'])) {
+	// 					case 'text': {
+	// 						if (isset($pl['opt']['open'])) {
+	// 							$annots .= ' /Open '. (strtolower($pl['opt']['open']) == 'true' ? 'true' : 'false');
+	// 						}
+	// 						$iconsapp = array('Comment', 'Help', 'Insert', 'Key', 'NewParagraph', 'Note', 'Paragraph');
+	// 						if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
+	// 							$annots .= ' /Name /'.$pl['opt']['name'];
+	// 						} else {
+	// 							$annots .= ' /Name /Note';
+	// 						}
+	// 						$hasStateModel = isset($pl['opt']['statemodel']);
+	// 						$hasState = isset($pl['opt']['state']);
+	// 						$statemodels = array('Marked', 'Review');
+	// 						if (!$hasStateModel && !$hasState) {
+	// 							break;
+	// 						}
+	// 						if ($hasStateModel AND in_array($pl['opt']['statemodel'], $statemodels)) {
+	// 							$annots .= ' /StateModel /'.$pl['opt']['statemodel'];
+	// 						} else {
+	// 							$pl['opt']['statemodel'] = 'Marked';
+	// 							$annots .= ' /StateModel /'.$pl['opt']['statemodel'];
+	// 						}
+	// 						if ($pl['opt']['statemodel'] == 'Marked') {
+	// 							$states = array('Accepted', 'Unmarked');
+	// 						} else {
+	// 							$states = array('Accepted', 'Rejected', 'Cancelled', 'Completed', 'None');
+	// 						}
+	// 						if ($hasState AND in_array($pl['opt']['state'], $states)) {
+	// 							$annots .= ' /State /'.$pl['opt']['state'];
+	// 						} else {
+	// 							if ($pl['opt']['statemodel'] == 'Marked') {
+	// 								$annots .= ' /State /Unmarked';
+	// 							} else {
+	// 								$annots .= ' /State /None';
+	// 							}
+	// 						}
+	// 						break;
+	// 					}
+	// 					case 'link': {
+	// 						if (is_string($pl['txt']) && !empty($pl['txt'])) {
+	// 							if ($pl['txt'][0] == '#') {
+	// 								// internal destination
+	// 								$annots .= ' /A <</S /GoTo /D /'.TCPDF_STATIC::encodeNameObject(substr($pl['txt'], 1)).'>>';
+	// 							} elseif ($pl['txt'][0] == '%') {
+	// 								// embedded PDF file
+	// 								$filename = basename(substr($pl['txt'], 1));
+	// 								$annots .= ' /A << /S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($n - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
+	// 							} elseif ($pl['txt'][0] == '*') {
+	// 								// embedded generic file
+	// 								$filename = basename(substr($pl['txt'], 1));
+	// 								$jsa = 'var D=event.target.doc;var MyData=D.dataObjects;for (var i in MyData) if (MyData[i].path=="'.$filename.'") D.exportDataObject( { cName : MyData[i].name, nLaunch : 2});';
+	// 								$annots .= ' /A << /S /JavaScript /JS '.$this->_textstring($jsa, $annot_obj_id).'>>';
+	// 							} else {
+	// 								$parsedUrl = parse_url($pl['txt']);
+	// 								if (empty($parsedUrl['scheme']) AND (!empty($parsedUrl['path']) && strtolower(substr($parsedUrl['path'], -4)) == '.pdf')) {
+	// 									// relative link to a PDF file
+	// 									$dest = '[0 /Fit]'; // default page 0
+	// 									if (!empty($parsedUrl['fragment'])) {
+	// 										// check for named destination
+	// 										$tmp = explode('=', $parsedUrl['fragment']);
+	// 										$dest = '('.((count($tmp) == 2) ? $tmp[1] : $tmp[0]).')';
+	// 									}
+	// 									$annots .= ' /A <</S /GoToR /D '.$dest.' /F '.$this->_datastring($this->unhtmlentities($parsedUrl['path']), $annot_obj_id).' /NewWindow true>>';
+	// 								} else {
+	// 									// external URI link
+	// 									$annots .= ' /A <</S /URI /URI '.$this->_datastring($this->unhtmlentities($pl['txt']), $annot_obj_id).'>>';
+	// 								}
+	// 							}
+	// 						} elseif (isset($this->links[$pl['txt']])) {
+	// 							// internal link ID
+	// 							$l = $this->links[$pl['txt']];
+	// 							if (isset($this->page_obj_id[($l['p'])])) {
+	// 								$annots .= sprintf(' /Dest [%u 0 R /XYZ 0 %F null]', $this->page_obj_id[($l['p'])], ($this->pagedim[$l['p']]['h'] - ($l['y'] * $this->k)));
+	// 							}
+	// 						}
+	// 						$hmodes = array('N', 'I', 'O', 'P');
+	// 						if (isset($pl['opt']['h']) AND in_array($pl['opt']['h'], $hmodes)) {
+	// 							$annots .= ' /H /'.$pl['opt']['h'];
+	// 						} else {
+	// 							$annots .= ' /H /I';
+	// 						}
+	// 						//$annots .= ' /PA ';
+	// 						//$annots .= ' /Quadpoints ';
+	// 						break;
+	// 					}
+	// 					case 'freetext': {
+	// 						if (isset($pl['opt']['da']) AND !empty($pl['opt']['da'])) {
+	// 							$annots .= ' /DA '.$this->_datastring($pl['opt']['da']);
+	// 						}
+	// 						if (isset($pl['opt']['q']) AND ($pl['opt']['q'] >= 0) AND ($pl['opt']['q'] <= 2)) {
+	// 							$annots .= ' /Q '.intval($pl['opt']['q']);
+	// 						}
+	// 						if (isset($pl['opt']['rc'])) {
+	// 							$annots .= ' /RC '.$this->_textstring($pl['opt']['rc'], $annot_obj_id);
+	// 						}
+	// 						if (isset($pl['opt']['ds'])) {
+	// 							$annots .= ' /DS '.$this->_textstring($pl['opt']['ds'], $annot_obj_id);
+	// 						}
+	// 						if (isset($pl['opt']['cl']) AND is_array($pl['opt']['cl'])) {
+	// 							$annots .= ' /CL [';
+	// 							foreach ($pl['opt']['cl'] as $cl) {
+	// 								$annots .= sprintf('%F ', $cl * $this->k);
+	// 							}
+	// 							$annots .= ']';
+	// 						}
+	// 						$tfit = array('FreeText', 'FreeTextCallout', 'FreeTextTypeWriter');
+	// 						if (isset($pl['opt']['it']) AND in_array($pl['opt']['it'], $tfit)) {
+	// 							$annots .= ' /IT /'.$pl['opt']['it'];
+	// 						}
+	// 						if (isset($pl['opt']['rd']) AND is_array($pl['opt']['rd'])) {
+	// 							$l = $pl['opt']['rd'][0] * $this->k;
+	// 							$r = $pl['opt']['rd'][1] * $this->k;
+	// 							$t = $pl['opt']['rd'][2] * $this->k;
+	// 							$b = $pl['opt']['rd'][3] * $this->k;
+	// 							$annots .= ' /RD ['.sprintf('%F %F %F %F', $l, $r, $t, $b).']';
+	// 						}
+	// 						if (isset($pl['opt']['le']) AND in_array($pl['opt']['le'], $lineendings)) {
+	// 							$annots .= ' /LE /'.$pl['opt']['le'];
+	// 						}
+	// 						break;
+	// 					}
+	// 					case 'line': {
+	// 						break;
+	// 					}
+	// 					case 'square': {
+	// 						break;
+	// 					}
+	// 					case 'circle': {
+	// 						break;
+	// 					}
+	// 					case 'polygon': {
+	// 						break;
+	// 					}
+	// 					case 'polyline': {
+	// 						break;
+	// 					}
+	// 					case 'highlight': {
+	// 						break;
+	// 					}
+	// 					case 'underline': {
+	// 						break;
+	// 					}
+	// 					case 'squiggly': {
+	// 						break;
+	// 					}
+	// 					case 'strikeout': {
+	// 						break;
+	// 					}
+	// 					case 'stamp': {
+	// 						break;
+	// 					}
+	// 					case 'caret': {
+	// 						break;
+	// 					}
+	// 					case 'ink': {
+	// 						break;
+	// 					}
+	// 					case 'popup': {
+	// 						break;
+	// 					}
+	// 					case 'fileattachment': {
+	// 						if ($this->pdfa_mode && $this->pdfa_version != 3) {
+	// 							// embedded files are not allowed in PDF/A mode version 1 and 2
+	// 							break;
+	// 						}
+	// 						if (!isset($pl['opt']['fs'])) {
+	// 							break;
+	// 						}
+	// 						$filename = basename($pl['opt']['fs']);
+	// 						if (isset($this->embeddedfiles[$filename]['f'])) {
+	// 							$annots .= ' /FS '.$this->embeddedfiles[$filename]['f'].' 0 R';
+	// 							$iconsapp = array('Graph', 'Paperclip', 'PushPin', 'Tag');
+	// 							if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
+	// 								$annots .= ' /Name /'.$pl['opt']['name'];
+	// 							} else {
+	// 								$annots .= ' /Name /PushPin';
+	// 							}
+	// 							// index (zero-based) of the annotation in the Annots array of this page
+	// 							$this->embeddedfiles[$filename]['a'] = $key;
+	// 						}
+	// 						break;
+	// 					}
+	// 					case 'sound': {
+	// 						if (!isset($pl['opt']['fs'])) {
+	// 							break;
+	// 						}
+	// 						$filename = basename($pl['opt']['fs']);
+	// 						if (isset($this->embeddedfiles[$filename]['f'])) {
+	// 							// ... TO BE COMPLETED ...
+	// 							// /R /C /B /E /CO /CP
+	// 							$annots .= ' /Sound '.$this->embeddedfiles[$filename]['f'].' 0 R';
+	// 							$iconsapp = array('Speaker', 'Mic');
+	// 							if (isset($pl['opt']['name']) AND in_array($pl['opt']['name'], $iconsapp)) {
+	// 								$annots .= ' /Name /'.$pl['opt']['name'];
+	// 							} else {
+	// 								$annots .= ' /Name /Speaker';
+	// 							}
+	// 						}
+	// 						break;
+	// 					}
+	// 					case 'movie': {
+	// 						break;
+	// 					}
+	// 					case 'widget': {
+	// 						$hmode = array('N', 'I', 'O', 'P', 'T');
+	// 						if (isset($pl['opt']['h']) AND in_array($pl['opt']['h'], $hmode)) {
+	// 							$annots .= ' /H /'.$pl['opt']['h'];
+	// 						}
+	// 						if (isset($pl['opt']['mk']) AND (is_array($pl['opt']['mk'])) AND !empty($pl['opt']['mk'])) {
+	// 							$annots .= ' /MK <<';
+	// 							if (isset($pl['opt']['mk']['r'])) {
+	// 								$annots .= ' /R '.$pl['opt']['mk']['r'];
+	// 							}
+	// 							if (isset($pl['opt']['mk']['bc']) AND (is_array($pl['opt']['mk']['bc']))) {
+	// 								$annots .= ' /BC '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bc']);
+	// 							}
+	// 							if (isset($pl['opt']['mk']['bg']) AND (is_array($pl['opt']['mk']['bg']))) {
+	// 								$annots .= ' /BG '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bg']);
+	// 							}
+	// 							if (isset($pl['opt']['mk']['ca'])) {
+	// 								$annots .= ' /CA '.$pl['opt']['mk']['ca'];
+	// 							}
+	// 							if (isset($pl['opt']['mk']['rc'])) {
+	// 								$annots .= ' /RC '.$pl['opt']['mk']['rc'];
+	// 							}
+	// 							if (isset($pl['opt']['mk']['ac'])) {
+	// 								$annots .= ' /AC '.$pl['opt']['mk']['ac'];
+	// 							}
+	// 							if (isset($pl['opt']['mk']['i'])) {
+	// 								$info = $this->getImageBuffer($pl['opt']['mk']['i']);
+	// 								if ($info !== false) {
+	// 									$annots .= ' /I '.$info['n'].' 0 R';
+	// 								}
+	// 							}
+	// 							if (isset($pl['opt']['mk']['ri'])) {
+	// 								$info = $this->getImageBuffer($pl['opt']['mk']['ri']);
+	// 								if ($info !== false) {
+	// 									$annots .= ' /RI '.$info['n'].' 0 R';
+	// 								}
+	// 							}
+	// 							if (isset($pl['opt']['mk']['ix'])) {
+	// 								$info = $this->getImageBuffer($pl['opt']['mk']['ix']);
+	// 								if ($info !== false) {
+	// 									$annots .= ' /IX '.$info['n'].' 0 R';
+	// 								}
+	// 							}
+	// 							if (isset($pl['opt']['mk']['if']) AND (is_array($pl['opt']['mk']['if'])) AND !empty($pl['opt']['mk']['if'])) {
+	// 								$annots .= ' /IF <<';
+	// 								$if_sw = array('A', 'B', 'S', 'N');
+	// 								if (isset($pl['opt']['mk']['if']['sw']) AND in_array($pl['opt']['mk']['if']['sw'], $if_sw)) {
+	// 									$annots .= ' /SW /'.$pl['opt']['mk']['if']['sw'];
+	// 								}
+	// 								$if_s = array('A', 'P');
+	// 								if (isset($pl['opt']['mk']['if']['s']) AND in_array($pl['opt']['mk']['if']['s'], $if_s)) {
+	// 									$annots .= ' /S /'.$pl['opt']['mk']['if']['s'];
+	// 								}
+	// 								if (isset($pl['opt']['mk']['if']['a']) AND (is_array($pl['opt']['mk']['if']['a'])) AND !empty($pl['opt']['mk']['if']['a'])) {
+	// 									$annots .= sprintf(' /A [%F %F]', $pl['opt']['mk']['if']['a'][0], $pl['opt']['mk']['if']['a'][1]);
+	// 								}
+	// 								if (isset($pl['opt']['mk']['if']['fb']) AND ($pl['opt']['mk']['if']['fb'])) {
+	// 									$annots .= ' /FB true';
+	// 								}
+	// 								$annots .= '>>';
+	// 							}
+	// 							if (isset($pl['opt']['mk']['tp']) AND ($pl['opt']['mk']['tp'] >= 0) AND ($pl['opt']['mk']['tp'] <= 6)) {
+	// 								$annots .= ' /TP '.intval($pl['opt']['mk']['tp']);
+	// 							}
+	// 							$annots .= '>>';
+	// 						} // end MK
+	// 						// --- Entries for field dictionaries ---
+	// 						if (isset($this->radiobutton_groups[$n][$pl['txt']])) {
+	// 							// set parent
+	// 							$annots .= ' /Parent '.$this->radiobutton_groups[$n][$pl['txt']].' 0 R';
+	// 						}
+	// 						if (isset($pl['opt']['t']) AND is_string($pl['opt']['t'])) {
+	// 							$annots .= ' /T '.$this->_datastring($pl['opt']['t'], $annot_obj_id);
+	// 						}
+	// 						if (isset($pl['opt']['tu']) AND is_string($pl['opt']['tu'])) {
+	// 							$annots .= ' /TU '.$this->_datastring($pl['opt']['tu'], $annot_obj_id);
+	// 						}
+	// 						if (isset($pl['opt']['tm']) AND is_string($pl['opt']['tm'])) {
+	// 							$annots .= ' /TM '.$this->_datastring($pl['opt']['tm'], $annot_obj_id);
+	// 						}
+	// 						if (isset($pl['opt']['ff'])) {
+	// 							if (is_array($pl['opt']['ff'])) {
+	// 								// array of bit settings
+	// 								$flag = 0;
+	// 								foreach($pl['opt']['ff'] as $val) {
+	// 									$flag += 1 << ($val - 1);
+	// 								}
+	// 							} else {
+	// 								$flag = intval($pl['opt']['ff']);
+	// 							}
+	// 							$annots .= ' /Ff '.$flag;
+	// 						}
+	// 						if (isset($pl['opt']['maxlen'])) {
+	// 							$annots .= ' /MaxLen '.intval($pl['opt']['maxlen']);
+	// 						}
+	// 						if (isset($pl['opt']['v'])) {
+	// 							$annots .= ' /V';
+	// 							if (is_array($pl['opt']['v'])) {
+	// 								foreach ($pl['opt']['v'] AS $optval) {
+	// 									if (is_float($optval)) {
+	// 										$optval = sprintf('%F', $optval);
+	// 									}
+	// 									$annots .= ' '.$optval;
+	// 								}
+	// 							} else {
+	// 								$annots .= ' '.$this->_textstring($pl['opt']['v'], $annot_obj_id);
+	// 							}
+	// 						}
+	// 						if (isset($pl['opt']['dv'])) {
+	// 							$annots .= ' /DV';
+	// 							if (is_array($pl['opt']['dv'])) {
+	// 								foreach ($pl['opt']['dv'] AS $optval) {
+	// 									if (is_float($optval)) {
+	// 										$optval = sprintf('%F', $optval);
+	// 									}
+	// 									$annots .= ' '.$optval;
+	// 								}
+	// 							} else {
+	// 								$annots .= ' '.$this->_textstring($pl['opt']['dv'], $annot_obj_id);
+	// 							}
+	// 						}
+	// 						if (isset($pl['opt']['rv'])) {
+	// 							$annots .= ' /RV';
+	// 							if (is_array($pl['opt']['rv'])) {
+	// 								foreach ($pl['opt']['rv'] AS $optval) {
+	// 									if (is_float($optval)) {
+	// 										$optval = sprintf('%F', $optval);
+	// 									}
+	// 									$annots .= ' '.$optval;
+	// 								}
+	// 							} else {
+	// 								$annots .= ' '.$this->_textstring($pl['opt']['rv'], $annot_obj_id);
+	// 							}
+	// 						}
+	// 						if (isset($pl['opt']['a']) AND !empty($pl['opt']['a'])) {
+	// 							$annots .= ' /A << '.$pl['opt']['a'].' >>';
+	// 						}
+	// 						if (isset($pl['opt']['aa']) AND !empty($pl['opt']['aa'])) {
+	// 							$annots .= ' /AA << '.$pl['opt']['aa'].' >>';
+	// 						}
+	// 						if (isset($pl['opt']['da']) AND !empty($pl['opt']['da'])) {
+	// 							$annots .= ' /DA '.$this->_datastring($pl['opt']['da']);
+	// 						}
+	// 						if (isset($pl['opt']['q']) AND ($pl['opt']['q'] >= 0) AND ($pl['opt']['q'] <= 2)) {
+	// 							$annots .= ' /Q '.intval($pl['opt']['q']);
+	// 						}
+	// 						if (isset($pl['opt']['opt']) AND (is_array($pl['opt']['opt'])) AND !empty($pl['opt']['opt'])) {
+	// 							$annots .= ' /Opt [';
+	// 							foreach($pl['opt']['opt'] AS $copt) {
+	// 								if (is_array($copt)) {
+	// 									$annots .= ' ['.$this->_textstring($copt[0], $annot_obj_id).' '.$this->_textstring($copt[1], $annot_obj_id).']';
+	// 								} else {
+	// 									$annots .= ' '.$this->_textstring($copt, $annot_obj_id);
+	// 								}
+	// 							}
+	// 							$annots .= ']';
+	// 						}
+	// 						if (isset($pl['opt']['ti'])) {
+	// 							$annots .= ' /TI '.intval($pl['opt']['ti']);
+	// 						}
+	// 						if (isset($pl['opt']['i']) AND (is_array($pl['opt']['i'])) AND !empty($pl['opt']['i'])) {
+	// 							$annots .= ' /I [';
+	// 							foreach($pl['opt']['i'] AS $copt) {
+	// 								$annots .= intval($copt).' ';
+	// 							}
+	// 							$annots .= ']';
+	// 						}
+	// 						break;
+	// 					}
+	// 					case 'screen': {
+	// 						break;
+	// 					}
+	// 					case 'printermark': {
+	// 						break;
+	// 					}
+	// 					case 'trapnet': {
+	// 						break;
+	// 					}
+	// 					case 'watermark': {
+	// 						break;
+	// 					}
+	// 					case '3d': {
+	// 						break;
+	// 					}
+	// 					default: {
+	// 						break;
+	// 					}
+	// 				}
+	// 				$annots .= '>>';
+	// 				// create new annotation object
+	// 				$this->_out($this->_getobj($annot_obj_id)."\n".$annots."\n".'endobj');
+	// 				if ($formfield AND !isset($this->radiobutton_groups[$n][$pl['txt']])) {
+	// 					// store reference of form object
+	// 					$this->form_obj_id[] = $annot_obj_id;
+	// 				}
+	// 			}
+	// 		}
+	// 	} // end for each page
+	// }
 
 	/**
 	 * Put appearance streams XObject used to define annotation's appearance states.
@@ -8935,152 +8943,6 @@ class TCPDF {
 		$this->_out($out);
 		return $this->n;
 	}
-
-	// /**
-	//  * Output fonts.
-	//  * @author Nicola Asuni
-	//  * @protected
-	//  */
-	// protected function _putfonts() {
-	// 	$nf = $this->n;
-	// 	foreach ($this->diffs as $diff) {
-	// 		//Encodings
-	// 		$this->_newobj();
-	// 		$this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
-	// 	}
-	// 	foreach ($this->FontFiles as $file => $info) {
-	// 		// search and get font file to embedd
-	// 		$fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
-	// 		if (!TCPDF_STATIC::empty_string($fontfile)) {
-	// 			$font = file_get_contents($fontfile);
-	// 			$compressed = (substr($file, -2) == '.z');
-	// 			if ((!$compressed) AND (isset($info['length2']))) {
-	// 				$header = (ord($font[0]) == 128);
-	// 				if ($header) {
-	// 					// strip first binary header
-	// 					$font = substr($font, 6);
-	// 				}
-	// 				if ($header AND (ord($font[$info['length1']]) == 128)) {
-	// 					// strip second binary header
-	// 					$font = substr($font, 0, $info['length1']).substr($font, ($info['length1'] + 6));
-	// 				}
-	// 			} elseif ($info['subset'] AND ((!$compressed) OR ($compressed AND function_exists('gzcompress')))) {
-	// 				if ($compressed) {
-	// 					// uncompress font
-	// 					$font = gzuncompress($font);
-	// 				}
-	// 				// merge subset characters
-	// 				$subsetchars = array(); // used chars
-	// 				foreach ($info['fontkeys'] as $fontkey) {
-	// 					$fontinfo = $this->getFontBuffer($fontkey);
-	// 					$subsetchars += $fontinfo['subsetchars'];
-	// 				}
-	// 				// rebuild a font subset
-	// 				$font = TCPDF_FONTS::_getTrueTypeFontSubset($font, $subsetchars);
-	// 				// calculate new font length
-	// 				$info['length1'] = strlen($font);
-	// 				if ($compressed) {
-	// 					// recompress font
-	// 					$font = gzcompress($font);
-	// 				}
-	// 			}
-	// 			$this->_newobj();
-	// 			$this->FontFiles[$file]['n'] = $this->n;
-	// 			$stream = $this->_getrawstream($font);
-	// 			$out = '<< /Length '.strlen($stream);
-	// 			if ($compressed) {
-	// 				$out .= ' /Filter /FlateDecode';
-	// 			}
-	// 			$out .= ' /Length1 '.$info['length1'];
-	// 			if (isset($info['length2'])) {
-	// 				$out .= ' /Length2 '.$info['length2'].' /Length3 0';
-	// 			}
-	// 			$out .= ' >>';
-	// 			$out .= ' stream'."\n".$stream."\n".'endstream';
-	// 			$out .= "\n".'endobj';
-	// 			$this->_out($out);
-	// 		}
-	// 	}
-	// 	foreach ($this->fontkeys as $k) {
-	// 		//Font objects
-	// 		$font = $this->getFontBuffer($k);
-	// 		$type = $font['type'];
-	// 		$name = $font['name'];
-	// 		if ($type == 'core') {
-	// 			// standard core font
-	// 			$out = $this->_getobj($this->font_obj_ids[$k])."\n";
-	// 			$out .= '<</Type /Font';
-	// 			$out .= ' /Subtype /Type1';
-	// 			$out .= ' /BaseFont /'.$name;
-	// 			$out .= ' /Name /F'.$font['i'];
-	// 			if ((strtolower($name) != 'symbol') AND (strtolower($name) != 'zapfdingbats')) {
-	// 				$out .= ' /Encoding /WinAnsiEncoding';
-	// 			}
-	// 			if ($k == 'helvetica') {
-	// 				// add default font for annotations
-	// 				$this->annotation_fonts[$k] = $font['i'];
-	// 			}
-	// 			$out .= ' >>';
-	// 			$out .= "\n".'endobj';
-	// 			$this->_out($out);
-	// 		} elseif (($type == 'Type1') OR ($type == 'TrueType')) {
-	// 			// additional Type1 or TrueType font
-	// 			$out = $this->_getobj($this->font_obj_ids[$k])."\n";
-	// 			$out .= '<</Type /Font';
-	// 			$out .= ' /Subtype /'.$type;
-	// 			$out .= ' /BaseFont /'.$name;
-	// 			$out .= ' /Name /F'.$font['i'];
-	// 			$out .= ' /FirstChar 32 /LastChar 255';
-	// 			$out .= ' /Widths '.($this->n + 1).' 0 R';
-	// 			$out .= ' /FontDescriptor '.($this->n + 2).' 0 R';
-	// 			if ($font['enc']) {
-	// 				if (isset($font['diff'])) {
-	// 					$out .= ' /Encoding '.($nf + $font['diff']).' 0 R';
-	// 				} else {
-	// 					$out .= ' /Encoding /WinAnsiEncoding';
-	// 				}
-	// 			}
-	// 			$out .= ' >>';
-	// 			$out .= "\n".'endobj';
-	// 			$this->_out($out);
-	// 			// Widths
-	// 			$this->_newobj();
-	// 			$s = '[';
-	// 			for ($i = 32; $i < 256; ++$i) {
-	// 				if (isset($font['cw'][$i])) {
-	// 					$s .= $font['cw'][$i].' ';
-	// 				} else {
-	// 					$s .= $font['dw'].' ';
-	// 				}
-	// 			}
-	// 			$s .= ']';
-	// 			$s .= "\n".'endobj';
-	// 			$this->_out($s);
-	// 			//Descriptor
-	// 			$this->_newobj();
-	// 			$s = '<</Type /FontDescriptor /FontName /'.$name;
-	// 			foreach ($font['desc'] as $fdk => $fdv) {
-	// 				if (is_float($fdv)) {
-	// 					$fdv = sprintf('%F', $fdv);
-	// 				}
-	// 				$s .= ' /'.$fdk.' '.$fdv.'';
-	// 			}
-	// 			if (!TCPDF_STATIC::empty_string($font['file'])) {
-	// 				$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
-	// 			}
-	// 			$s .= '>>';
-	// 			$s .= "\n".'endobj';
-	// 			$this->_out($s);
-	// 		} else {
-	// 			// additional types
-	// 			$mtd = '_put'.strtolower($type);
-	// 			if (!method_exists($this, $mtd)) {
-	// 				$this->Error('Unsupported font type: '.$type);
-	// 			}
-	// 			$this->$mtd($font);
-	// 		}
-	// 	}
-	// }
 
 	/**
 	 * Adds unicode fonts.<br>
@@ -9291,133 +9153,6 @@ class TCPDF {
 	}
 
 	/**
-	 * Output images.
-	 * @protected
-	 */
-	// protected function _putimages() {
-	// 	$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
-	// 	foreach ($this->imagekeys as $file) {
-	// 		$info = $this->getImageBuffer($file);
-	// 		// set object for alternate images array
-	// 		$altoid = null;
-	// 		if ((!$this->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
-	// 			$altoid = $this->_newobj();
-	// 			$out = '[';
-	// 			foreach ($info['altimgs'] as $altimage) {
-	// 				if (isset($this->xobjects['I'.$altimage[0]]['n'])) {
-	// 					$out .= ' << /Image '.$this->xobjects['I'.$altimage[0]]['n'].' 0 R';
-	// 					$out .= ' /DefaultForPrinting';
-	// 					if ($altimage[1] === true) {
-	// 						$out .= ' true';
-	// 					} else {
-	// 						$out .= ' false';
-	// 					}
-	// 					$out .= ' >>';
-	// 				}
-	// 			}
-	// 			$out .= ' ]';
-	// 			$out .= "\n".'endobj';
-	// 			$this->_out($out);
-	// 		}
-	// 		// set image object
-	// 		$oid = $this->_newobj();
-	// 		$this->xobjects['I'.$info['i']] = array('n' => $oid);
-	// 		$this->setImageSubBuffer($file, 'n', $this->n);
-	// 		$out = '<</Type /XObject';
-	// 		$out .= ' /Subtype /Image';
-	// 		$out .= ' /Width '.$info['w'];
-	// 		$out .= ' /Height '.$info['h'];
-	// 		if (array_key_exists('masked', $info)) {
-	// 			$out .= ' /SMask '.($this->n - 1).' 0 R';
-	// 		}
-	// 		// set color space
-	// 		$icc = false;
-	// 		if (isset($info['icc']) AND ($info['icc'] !== false)) {
-	// 			// ICC Colour Space
-	// 			$icc = true;
-	// 			$out .= ' /ColorSpace [/ICCBased '.($this->n + 1).' 0 R]';
-	// 		} elseif ($info['cs'] == 'Indexed') {
-	// 			// Indexed Colour Space
-	// 			$out .= ' /ColorSpace [/Indexed /DeviceRGB '.((strlen($info['pal']) / 3) - 1).' '.($this->n + 1).' 0 R]';
-	// 		} else {
-	// 			// Device Colour Space
-	// 			$out .= ' /ColorSpace /'.$info['cs'];
-	// 		}
-	// 		if ($info['cs'] == 'DeviceCMYK') {
-	// 			$out .= ' /Decode [1 0 1 0 1 0 1 0]';
-	// 		}
-	// 		$out .= ' /BitsPerComponent '.$info['bpc'];
-	// 		if ($altoid > 0) {
-	// 			// reference to alternate images dictionary
-	// 			$out .= ' /Alternates '.$altoid.' 0 R';
-	// 		}
-	// 		if (isset($info['exurl']) AND !empty($info['exurl'])) {
-	// 			// external stream
-	// 			$out .= ' /Length 0';
-	// 			$out .= ' /F << /FS /URL /F '.$this->_datastring($info['exurl'], $oid).' >>';
-	// 			if (isset($info['f'])) {
-	// 				$out .= ' /FFilter /'.$info['f'];
-	// 			}
-	// 			$out .= ' >>';
-	// 			$out .= ' stream'."\n".'endstream';
-	// 		} else {
-	// 			if (isset($info['f'])) {
-	// 				$out .= ' /Filter /'.$info['f'];
-	// 			}
-	// 			if (isset($info['parms'])) {
-	// 				$out .= ' '.$info['parms'];
-	// 			}
-	// 			if (isset($info['trns']) AND is_array($info['trns'])) {
-	// 				$trns = '';
-	// 				$count_info = count($info['trns']);
-	// 				if ($info['cs'] == 'Indexed') {
-	// 					$maxval =(pow(2, $info['bpc']) - 1);
-	// 					for ($i = 0; $i < $count_info; ++$i) {
-	// 						if (($info['trns'][$i] != 0) AND ($info['trns'][$i] != $maxval)) {
-	// 							// this is not a binary type mask @TODO: create a SMask
-	// 							$trns = '';
-	// 							break;
-	// 						} elseif (empty($trns) AND ($info['trns'][$i] == 0)) {
-	// 							// store the first fully transparent value
-	// 							$trns .= $i.' '.$i.' ';
-	// 						}
-	// 					}
-	// 				} else {
-	// 					// grayscale or RGB
-	// 					for ($i = 0; $i < $count_info; ++$i) {
-	// 						if ($info['trns'][$i] == 0) {
-	// 							$trns .= $info['trns'][$i].' '.$info['trns'][$i].' ';
-	// 						}
-	// 					}
-	// 				}
-	// 				// Colour Key Masking
-	// 				if (!empty($trns)) {
-	// 					$out .= ' /Mask ['.$trns.']';
-	// 				}
-	// 			}
-	// 			$stream = $this->_getrawstream($info['data']);
-	// 			$out .= ' /Length '.strlen($stream).' >>';
-	// 			$out .= ' stream'."\n".$stream."\n".'endstream';
-	// 		}
-	// 		$out .= "\n".'endobj';
-	// 		$this->_out($out);
-	// 		if ($icc) {
-	// 			// ICC colour profile
-	// 			$this->_newobj();
-	// 			$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
-	// 			$icc = $this->_getrawstream($icc);
-	// 			$this->_out('<</N '.$info['ch'].' /Alternate /'.$info['cs'].' '.$filter.'/Length '.strlen($icc).'>> stream'."\n".$icc."\n".'endstream'."\n".'endobj');
-	// 		} elseif ($info['cs'] == 'Indexed') {
-	// 			// colour palette
-	// 			$this->_newobj();
-	// 			$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
-	// 			$pal = $this->_getrawstream($pal);
-	// 			$this->_out('<<'.$filter.'/Length '.strlen($pal).'>> stream'."\n".$pal."\n".'endstream'."\n".'endobj');
-	// 		}
-	// 	}
-	// }
-
-	/**
 	 * Output Form XObjects Templates.
 	 * @author Nicola Asuni
 	 * @since 5.8.017 (2010-08-24)
@@ -9522,24 +9257,24 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Output Spot Colors Resources.
-	 * @protected
-	 * @since 4.0.024 (2008-09-12)
-	 */
-	protected function _putspotcolors() {
-		foreach ($this->spot_colors as $name => $color) {
-			$this->_newobj();
-			$this->spot_colors[$name]['n'] = $this->n;
-			$out = '[/Separation /'.str_replace(' ', '#20', $name);
-			$out .= ' /DeviceCMYK <<';
-			$out .= ' /Range [0 1 0 1 0 1 0 1] /C0 [0 0 0 0]';
-			$out .= ' '.sprintf('/C1 [%F %F %F %F] ', ($color['C'] / 100), ($color['M'] / 100), ($color['Y'] / 100), ($color['K'] / 100));
-			$out .= ' /FunctionType 2 /Domain [0 1] /N 1>>]';
-			$out .= "\n".'endobj';
-			$this->_out($out);
-		}
-	}
+	// /**
+	//  * Output Spot Colors Resources.
+	//  * @protected
+	//  * @since 4.0.024 (2008-09-12)
+	//  */
+	// protected function _putspotcolors() {
+	// 	foreach ($this->spot_colors as $name => $color) {
+	// 		$this->_newobj();
+	// 		$this->spot_colors[$name]['n'] = $this->n;
+	// 		$out = '[/Separation /'.str_replace(' ', '#20', $name);
+	// 		$out .= ' /DeviceCMYK <<';
+	// 		$out .= ' /Range [0 1 0 1 0 1 0 1] /C0 [0 0 0 0]';
+	// 		$out .= ' '.sprintf('/C1 [%F %F %F %F] ', ($color['C'] / 100), ($color['M'] / 100), ($color['Y'] / 100), ($color['K'] / 100));
+	// 		$out .= ' /FunctionType 2 /Domain [0 1] /N 1>>]';
+	// 		$out .= "\n".'endobj';
+	// 		$this->_out($out);
+	// 	}
+	// }
 
 	/**
 	 * Return XObjects Dictionary.
@@ -9626,64 +9361,17 @@ class TCPDF {
 	 * 
 	 */
 
-	// new
+	// new	
+	// 
+	// // --- GETTERS --
 	public function &getExtGStates() {
 		return $this->extgstates;
 	}
-	public function setExtGStates($extgstates) {
-		$this->extgstates = $extgstates;
-	}
+
 
 	public function &getPdfLayers() {
 		return $this->pdflayers;
 	}
-
-	public function setPdfLayers($pdflayers) {
-		$this->pdflayers = $pdflayers;
-	}
-
-	// public function &getFontDiffs() {
-	// 	return $this->diffs;
-	// }
-
-	// public function &getFontFiles() {
-	// 	return $this->FontFiles;
-	// }
-
-	// public function setFontFileRef($file, $key, $value) {
-	// 	$this->FontFiles[$file][$key] = $value;
-	// }
-
-	// public function &getFontKeys() {
-	// 	return $this->fontkeys;
-	// }
-
-	// public function &getFontObjIDs() {
-	// 	return $this->font_obj_ids;
-	// }
-
-	// public function &getAnnotationFonts() {
-	// 	return $this->annotation_fonts;
-	// }
-
-	// // Add to class TCPDF
-	// public function getN() {
-	// 	return $this->n;
-	// }
-
-	// public function setN($value) {
-	// 	$this->n = $value;
-	// }
-
-	// public function isCompressionEnabled(): bool {
-	// 	return $this->compress;
-	// }
-
-	// public function getImageBufferPublic($file) {
-	// 	return $this->getImageBuffer($file);
-	// }
-
-	// --- GETTERS --
 	public function getCurrentObjectId(): int {
 		return $this->n;
 	}
@@ -9708,10 +9396,6 @@ class TCPDF {
 		return $this->fontkeys;
 	}
 
-	// public function getFontBuffer(string $key): array {
-	// 	return $this->fonts[$key] ?? [];
-	// }
-
 	public function getAnnotationFonts(): array {
 		return $this->annotation_fonts;
 	}
@@ -9724,7 +9408,23 @@ class TCPDF {
 		return $this->font_obj_ids[$key] ?? null;
 	}
 
+	public function getSpotColors(): array {
+		return $this->spot_colors ?? [];
+	}
+
 	// --- SETTERS ---
+
+	public function setSpotColors(array $colors): void {
+		$this->spot_colors = $colors;
+	}
+
+	public function setPdfLayers($pdflayers) {
+		$this->pdflayers = $pdflayers;
+	}
+
+	public function setExtGStates($extgstates) {
+		$this->extgstates = $extgstates;
+	}
 
 	public function setDiffs(array $diffs): void {
 		$this->diffs = $diffs;
@@ -9739,10 +9439,6 @@ class TCPDF {
 			$this->fontkeys[] = $key;
 		}
 	}
-
-	// public function setFontBuffer(string $key, array $data): void {
-	// 	$this->fonts[$key] = $data;
-	// }
 
 	public function setAnnotationFont(string $key, int $value): void {
 		$this->annotation_fonts[$key] = $value;
@@ -9766,36 +9462,37 @@ class TCPDF {
 
 	//old
 	public function _putresources() {
-		limePDF_put::putExtGStates($this);
-		limePDF_put::putOcg($this);
-		//limePDF_put::_putimages($this);		
-		$utils = new \limePDF_put();  
+		limePDF_Put::putExtGStates($this);
+		limePDF_Put::putOcg($this);
+		limePDF_Put::putSpotColors($this);
 
+		$utilsPut = new \limePDF_Put();  
+		$utilsPut->putImages($this);    
+		$utilsPut->putFonts($this);
+		//$utils->putEncryption($this);		<-- TODO needs updated		
+		//$utils->_putannotsobjs($this);	<-- work in progress
+
+		$utilsMisc = new \limePDF_Misc();  
+		//$utilsMisc->putBookmarks($this);	<-- TODO needs updated
 		// echo '<pre>';
 		// var_dump($this);
 		// echo '</pre>';
 		// exit;
-
-		$utils->_putimages($this);    
-		$utils->_putfonts($this);
 		
 		//$this->_putextgstates();
 		//$this->_putocg();
 		//$this->_putfonts();
 		//$this->_putimages();
-		$this->_putspotcolors();
+		//$this->_putspotcolors();
 		$this->_putshaders();
 		$this->_putxobjects();
 		$this->_putresourcedict();
 		$this->_putdests();
 		//$this->_putEmbeddedFiles();
-		$this->_putannotsobjs();
+		//$this->_putannotsobjs();
 		$this->_putjavascript();
-		$this->_putbookmarks();
-		$this->_putencryption();
-
-
-		//limePDF_put::putFonts($this);
+		//$this->_putbookmarks();
+		//$this->_putencryption();
 
 	}
 
@@ -10882,124 +10579,7 @@ class TCPDF {
 		return $s;
 	}
 
-	/**
-	 * Put encryption on PDF document.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 2.0.000 (2008-01-02)
-	 */
-	protected function _putencryption() {
-		if (!$this->encrypted) {
-			return;
-		}
-		$this->encryptdata['objid'] = $this->_newobj();
-		$out = '<<';
-		if (!isset($this->encryptdata['Filter']) OR empty($this->encryptdata['Filter'])) {
-			$this->encryptdata['Filter'] = 'Standard';
-		}
-		$out .= ' /Filter /'.$this->encryptdata['Filter'];
-		if (isset($this->encryptdata['SubFilter']) AND !empty($this->encryptdata['SubFilter'])) {
-			$out .= ' /SubFilter /'.$this->encryptdata['SubFilter'];
-		}
-		if (!isset($this->encryptdata['V']) OR empty($this->encryptdata['V'])) {
-			$this->encryptdata['V'] = 1;
-		}
-		// V is a code specifying the algorithm to be used in encrypting and decrypting the document
-		$out .= ' /V '.$this->encryptdata['V'];
-		if (isset($this->encryptdata['Length']) AND !empty($this->encryptdata['Length'])) {
-			// The length of the encryption key, in bits. The value shall be a multiple of 8, in the range 40 to 256
-			$out .= ' /Length '.$this->encryptdata['Length'];
-		} else {
-			$out .= ' /Length 40';
-		}
-		if ($this->encryptdata['V'] >= 4) {
-			if (!isset($this->encryptdata['StmF']) OR empty($this->encryptdata['StmF'])) {
-				$this->encryptdata['StmF'] = 'Identity';
-			}
-			if (!isset($this->encryptdata['StrF']) OR empty($this->encryptdata['StrF'])) {
-				// The name of the crypt filter that shall be used when decrypting all strings in the document.
-				$this->encryptdata['StrF'] = 'Identity';
-			}
-			// A dictionary whose keys shall be crypt filter names and whose values shall be the corresponding crypt filter dictionaries.
-			if (isset($this->encryptdata['CF']) AND !empty($this->encryptdata['CF'])) {
-				$out .= ' /CF <<';
-				$out .= ' /'.$this->encryptdata['StmF'].' <<';
-				$out .= ' /Type /CryptFilter';
-				if (isset($this->encryptdata['CF']['CFM']) AND !empty($this->encryptdata['CF']['CFM'])) {
-					// The method used
-					$out .= ' /CFM /'.$this->encryptdata['CF']['CFM'];
-					if ($this->encryptdata['pubkey']) {
-						$out .= ' /Recipients [';
-						foreach ($this->encryptdata['Recipients'] as $rec) {
-							$out .= ' <'.$rec.'>';
-						}
-						$out .= ' ]';
-						if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) {
-							$out .= ' /EncryptMetadata false';
-						} else {
-							$out .= ' /EncryptMetadata true';
-						}
-					}
-				} else {
-					$out .= ' /CFM /None';
-				}
-				if (isset($this->encryptdata['CF']['AuthEvent']) AND !empty($this->encryptdata['CF']['AuthEvent'])) {
-					// The event to be used to trigger the authorization that is required to access encryption keys used by this filter.
-					$out .= ' /AuthEvent /'.$this->encryptdata['CF']['AuthEvent'];
-				} else {
-					$out .= ' /AuthEvent /DocOpen';
-				}
-				if (isset($this->encryptdata['CF']['Length']) AND !empty($this->encryptdata['CF']['Length'])) {
-					// The bit length of the encryption key.
-					$out .= ' /Length '.$this->encryptdata['CF']['Length'];
-				}
-				$out .= ' >> >>';
-			}
-			// The name of the crypt filter that shall be used by default when decrypting streams.
-			$out .= ' /StmF /'.$this->encryptdata['StmF'];
-			// The name of the crypt filter that shall be used when decrypting all strings in the document.
-			$out .= ' /StrF /'.$this->encryptdata['StrF'];
-			if (isset($this->encryptdata['EFF']) AND !empty($this->encryptdata['EFF'])) {
-				// The name of the crypt filter that shall be used when encrypting embedded file streams that do not have their own crypt filter specifier.
-				$out .= ' /EFF /'.$this->encryptdata[''];
-			}
-		}
-		// Additional encryption dictionary entries for the standard security handler
-		if ($this->encryptdata['pubkey']) {
-			if (($this->encryptdata['V'] < 4) AND isset($this->encryptdata['Recipients']) AND !empty($this->encryptdata['Recipients'])) {
-				$out .= ' /Recipients [';
-				foreach ($this->encryptdata['Recipients'] as $rec) {
-					$out .= ' <'.$rec.'>';
-				}
-				$out .= ' ]';
-			}
-		} else {
-			$out .= ' /R';
-			if ($this->encryptdata['V'] == 5) { // AES-256
-				$out .= ' 5';
-				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
-			} elseif ($this->encryptdata['V'] == 4) { // AES-128
-				$out .= ' 4';
-			} elseif ($this->encryptdata['V'] < 2) { // RC-40
-				$out .= ' 2';
-			} else { // RC-128
-				$out .= ' 3';
-			}
-			$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-			$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
-			$out .= ' /P '.$this->encryptdata['P'];
-			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
-				$out .= ' /EncryptMetadata false';
-			} else {
-				$out .= ' /EncryptMetadata true';
-			}
-		}
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	}
+
 
 	/**
 	 * Compute U value (used for encryption)
@@ -12760,128 +12340,7 @@ class TCPDF {
 		array_multisort($outline_p, SORT_NUMERIC, SORT_ASC, $outline_k, SORT_NUMERIC, SORT_ASC, $this->outlines);
 	}
 
-	/**
-	 * Create a bookmark PDF string.
-	 * @protected
-	 * @author Olivier Plathey, Nicola Asuni
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	protected function _putbookmarks() {
-		$nb = count($this->outlines);
-		if ($nb == 0) {
-			return;
-		}
-		// sort bookmarks
-		$this->sortBookmarks();
-		$lru = array();
-		$level = 0;
-		foreach ($this->outlines as $i => $o) {
-			if ($o['l'] > 0) {
-				$parent = $lru[($o['l'] - 1)];
-				//Set parent and last pointers
-				$this->outlines[$i]['parent'] = $parent;
-				$this->outlines[$parent]['last'] = $i;
-				if ($o['l'] > $level) {
-					//Level increasing: set first pointer
-					$this->outlines[$parent]['first'] = $i;
-				}
-			} else {
-				$this->outlines[$i]['parent'] = $nb;
-			}
-			if (($o['l'] <= $level) AND ($i > 0)) {
-				//Set prev and next pointers
-				$prev = $lru[$o['l']];
-				$this->outlines[$prev]['next'] = $i;
-				$this->outlines[$i]['prev'] = $prev;
-			}
-			$lru[$o['l']] = $i;
-			$level = $o['l'];
-		}
-		//Outline items
-		$n = $this->n + 1;
-		$nltags = '/<br[\s]?\/>|<\/(blockquote|dd|dl|div|dt|h1|h2|h3|h4|h5|h6|hr|li|ol|p|pre|ul|tcpdf|table|tr|td)>/si';
-		foreach ($this->outlines as $i => $o) {
-			$oid = $this->_newobj();
-			// covert HTML title to string
-			$title = preg_replace($nltags, "\n", $o['t']);
-			$title = preg_replace("/[\r]+/si", '', $title);
-			$title = preg_replace("/[\n]+/si", "\n", $title);
-			$title = strip_tags($title);
-			$title = $this->stringTrim($title);
-			$out = '<</Title '.$this->_textstring($title, $oid);
-			$out .= ' /Parent '.($n + $o['parent']).' 0 R';
-			if (isset($o['prev'])) {
-				$out .= ' /Prev '.($n + $o['prev']).' 0 R';
-			}
-			if (isset($o['next'])) {
-				$out .= ' /Next '.($n + $o['next']).' 0 R';
-			}
-			if (isset($o['first'])) {
-				$out .= ' /First '.($n + $o['first']).' 0 R';
-			}
-			if (isset($o['last'])) {
-				$out .= ' /Last '.($n + $o['last']).' 0 R';
-			}
-			if (isset($o['u']) AND !empty($o['u'])) {
-				// link
-				if (is_string($o['u'])) {
-					if ($o['u'][0] == '#') {
-						// internal destination
-						$out .= ' /Dest /'.TCPDF_STATIC::encodeNameObject(substr($o['u'], 1));
-					} elseif ($o['u'][0] == '%') {
-						// embedded PDF file
-						$filename = basename(substr($o['u'], 1));
-						$out .= ' /A <</S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($o['p'] - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
-					} elseif ($o['u'][0] == '*') {
-						// embedded generic file
-						$filename = basename(substr($o['u'], 1));
-						$jsa = 'var D=event.target.doc;var MyData=D.dataObjects;for (var i in MyData) if (MyData[i].path=="'.$filename.'") D.exportDataObject( { cName : MyData[i].name, nLaunch : 2});';
-						$out .= ' /A <</S /JavaScript /JS '.$this->_textstring($jsa, $oid).'>>';
-					} else {
-						// external URI link
-						$out .= ' /A <</S /URI /URI '.$this->_datastring($this->unhtmlentities($o['u']), $oid).'>>';
-					}
-				} elseif (isset($this->links[$o['u']])) {
-					// internal link ID
-					$l = $this->links[$o['u']];
-					if (isset($this->page_obj_id[($l['p'])])) {
-						$out .= sprintf(' /Dest [%u 0 R /XYZ 0 %F null]', $this->page_obj_id[($l['p'])], ($this->pagedim[$l['p']]['h'] - ($l['y'] * $this->k)));
-					}
-				}
-			} elseif (isset($this->page_obj_id[($o['p'])])) {
-				// link to a page
-				$out .= ' '.sprintf('/Dest [%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
-			}
-			// set font style
-			$style = 0;
-			if (!empty($o['s'])) {
-				// bold
-				if (strpos($o['s'], 'B') !== false) {
-					$style |= 2;
-				}
-				// oblique
-				if (strpos($o['s'], 'I') !== false) {
-					$style |= 1;
-				}
-			}
-			$out .= sprintf(' /F %d', $style);
-			// set bookmark color
-			if (isset($o['c']) AND is_array($o['c']) AND (count($o['c']) == 3)) {
-				$color = array_values($o['c']);
-				$out .= sprintf(' /C [%F %F %F]', ($color[0] / 255), ($color[1] / 255), ($color[2] / 255));
-			} else {
-				// black
-				$out .= ' /C [0.0 0.0 0.0]';
-			}
-			$out .= ' /Count 0'; // normally closed item
-			$out .= ' >>';
-			$out .= "\n".'endobj';
-			$this->_out($out);
-		}
-		//Outline root
-		$this->OutlineRoot = $this->_newobj();
-		$this->_out('<< /Type /Outlines /First '.$n.' 0 R /Last '.($n + $lru[0]).' 0 R >>'."\n".'endobj');
-	}
+
 
 	// --- JAVASCRIPT ------------------------------------------------------
 
@@ -13770,7 +13229,7 @@ class TCPDF {
 	 * @param string $form Names specifying additional form-field-related usage rights for the document. Valid names are: /Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate
 	 * @param string $signature Names specifying additional signature-related usage rights for the document. The only defined value is /Modify, which permits a user to apply a digital signature to an existing signature form field or clear a signed signature form field.
 	 * @param string $ef Names specifying additional usage rights for named embedded files in the document. Valid names are /Create/Delete/Modify/Import, which permit the user to perform the named operation on named embedded files
-	 Names specifying additional embedded-files-related usage rights for the document.
+	 * Names specifying additional embedded-files-related usage rights for the document.
 	 * @param string $formex Names specifying additional form-field-related usage rights. The only valid name is BarcodePlaintext, which permits text form field data to be encoded as a plaintext two-dimensional barcode.
 	 * @public
 	 * @author Nicola Asuni

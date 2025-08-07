@@ -2,7 +2,7 @@
 
 namespace LimePDF\Utils;
 
-class Environment {
+class limePDF_Environment {
     public static function doChecks(): void {
         if (!extension_loaded('mbstring')) {
             throw new \RuntimeException('The mbstring extension is required.');
