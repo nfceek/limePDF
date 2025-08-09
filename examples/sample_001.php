@@ -15,7 +15,12 @@
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //============================================================+
 
+require_once __DIR__ . '/../tcpdf.php';
 require_once '../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+
+$pdf = new TCPDF();
 
 use LimePDF\Config\ConfigManager;
 
@@ -35,6 +40,8 @@ $pdfText = 'Sample # 001<br /><img src="http://limepdf/examples/images/limePDF_l
 
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
+
+
 
 // Change the $config array ars to be injected or used as necessary
 $cfgArray = $config->toArray();

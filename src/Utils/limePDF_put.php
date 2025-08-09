@@ -1,10 +1,96 @@
 <?php
 
+    namespace LimePDF\Utils;
+
+    use LimePDF\TCPDF;
+
     class limePDF_Put {
 
-        public static function putExtGStates(TCPDF $tcpdf) {
-            $extgstates = &$tcpdf->getExtGStates(); // get reference
+    /**
+	 * Insert Named Destinations.
+	 * @protected
+	 * @author Johannes G\FCntert, Nicola Asuni
+	 * @since 5.9.098 (2011-06-23)
+	 */
+	public function putDests(\LimePDF\TCPDF $tcpdf) {
+		if (empty($this->dests)) {
+			return;
+		}
+		$this->n_dests = $tcpdf->_newobj();
+		$out = ' <<';
+		foreach($this->dests as $name => $o) {
+			$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$tcpdf->_out($out);
+	}
 
+    public function putResourceDict(\LimePDF\TCPDF $tcpdf) {
+        $fontkeys = $tcpdf->getFontKeys();
+
+        $out = $tcpdf->callGetObj(2) . "\n";
+		$out .= '<< /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]';
+		$out .= ' /Font <<';
+		foreach ($fontkeys as $fontkey) {
+			$font = $tcpdf->getFontBuffer($fontkey);
+			$out .= ' /F'.$font['i'].' '.$font['n'].' 0 R';
+		}
+		$out .= ' >>';
+		$out .= ' /XObject <<';
+		$out .= $tcpdf->getXObjectDict();
+		$out .= ' >>';
+		// layers
+		if (!empty($this->pdflayers)) {
+			$out .= ' /Properties <<';
+			foreach ($this->pdflayers as $layer) {
+				$out .= ' /'.$layer['layer'].' '.$layer['objid'].' 0 R';
+			}
+			$out .= ' >>';
+		}
+		if (!$tcpdf->isPdfaMode() || $tcpdf->getPdfAVersion() >= 2) {
+			// transparency
+			if (isset($this->extgstates) AND !empty($this->extgstates)) {
+				$out .= ' /ExtGState <<';
+				foreach ($this->extgstates as $k => $extgstate) {
+					if (isset($extgstate['name'])) {
+						$out .= ' /'.$extgstate['name'];
+					} else {
+						$out .= ' /GS'.$k;
+					}
+					$out .= ' '.$extgstate['n'].' 0 R';
+				}
+				$out .= ' >>';
+			}
+			if (isset($this->gradients) AND !empty($this->gradients)) {
+				$gp = '';
+				$gs = '';
+				foreach ($this->gradients as $id => $grad) {
+					// gradient patterns
+					$gp .= ' /p'.$id.' '.$grad['pattern'].' 0 R';
+					// gradient shadings
+					$gs .= ' /Sh'.$id.' '.$grad['id'].' 0 R';
+				}
+				$out .= ' /Pattern <<'.$gp.' >>';
+				$out .= ' /Shading <<'.$gs.' >>';
+			}
+		}
+
+		// spot colors
+		if (isset($this->spot_colors) AND !empty($this->spot_colors)) {
+			$out .= ' /ColorSpace <<';
+			foreach ($this->spot_colors as $color) {
+				$out .= ' /CS'.$color['i'].' '.$color['n'].' 0 R';
+			}
+			$out .= ' >>';
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$tcpdf->_out($out);
+	}  
+
+        public static function putExtGStates(\LimePDF\TCPDF $tcpdf) {
+            $extgstates = &$tcpdf->getExtGStates(); // get reference
             foreach ($extgstates as $i => &$ext) {
                 $ext['n'] = $tcpdf->_newobj();
                 $out = '<< /Type /ExtGState';
@@ -23,7 +109,7 @@
             }
         }
 
-        public static function putOcg(TCPDF $tcpdf) {
+        public static function putOcg(\LimePDF\TCPDF $tcpdf) {
             $pdflayers = &$tcpdf->getPdfLayers();
             if (empty($pdflayers)) {
                 return;
@@ -44,7 +130,7 @@
             }
         }
 
-        public static function putSpotColors(TCPDF $tcpdf) {
+        public static function putSpotColors(\LimePDF\TCPDF $tcpdf) {
             $spot_colors = $tcpdf->getSpotColors();
 
             foreach ($spot_colors as $name => $color) {
@@ -109,8 +195,8 @@
             }
         }
 
-        public function putImages(TCPDF $tcpdf) {
-            $filter = ($tcpdf->compress) ? '/Filter /FlateDecode ' : '';
+        public function putImages(\LimePDF\TCPDF $tcpdf) {
+            $filter = ($tcpdf->getCompress()) ? '/Filter /FlateDecode ' : '';
 
             foreach ($tcpdf->imagekeys as $file) {
                 $info = $tcpdf->getImageBuffer($file);
@@ -237,7 +323,7 @@
             }
         }
 
-        public function putFonts(TCPDF $tcpdf) {
+        public function putFonts(\LimePDF\TCPDF $tcpdf) {
             $nf = $tcpdf->getObjectId();
             $diffs = $tcpdf->getDiffs();
             $FontFiles = $tcpdf->getFontFiles();
@@ -508,7 +594,7 @@
          * @author Nicola Asuni
          * @since 4.0.018 (2008-08-06)
          */
-        // public function _putannotsobjs() {
+        // public function putAnnotsObjs() {
         //     // reset object counter
         //     for ($n=1; $n <= $this->numpages; ++$n) {
         //         if (isset($this->PageAnnots[$n])) {
