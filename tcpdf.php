@@ -10,59 +10,26 @@ namespace LimePDF;
 
 	// limePDF configuration
 	require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
+
 	// limePDF vars
 	require_once(dirname(__FILE__).'/include/limePDF_Vars.php');
-	//require_once(dirname(__FILE__).'/include/limePDF_Font_Data.php');
-	//require_once(dirname(__FILE__).'/include/limePDF_Font.php');
-	//require_once(dirname(__FILE__).'/include/limePDF_Colors.php');
-	//require_once(dirname(__FILE__).'/include/limePDF_Images.php');
-	require_once(dirname(__FILE__).'/include/limePDF_Static.php');
-	require_once(dirname(__FILE__).'/include/limePDF_Properties.php');
-	require_once(dirname(__FILE__).'/include/limePDF_Property_Manager.php');
-
-	//require_once(dirname(__FILE__).'/src/utils/limePDF_Put.php');
 	require_once(dirname(__FILE__).'/src/utils/limePDF_Misc.php');
 	require_once(dirname(__FILE__).'/src/utils/limePDF_Javascript.php');
 	require_once(dirname(__FILE__).'/src/utils/limePDF_Forms.php');
 	require_once(dirname(__FILE__).'/src/utils/limePDF_Environment.php');
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/**
- * @class TCPDF
- * PHP class for generating PDF documents without requiring external extensions.
- * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
- * @package com.tecnick.tcpdf
- * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.10.0
- * @author Nicola Asuni - info@tecnick.com
- * @IgnoreAnnotation("protected")
- * @IgnoreAnnotation("public")
- * @IgnoreAnnotation("pre")
- */
+	//require_once(dirname(__FILE__).'/include/limePDF_Font_Data.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Font.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Colors.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Images.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Static.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Properties.php');
+	//require_once(dirname(__FILE__).'/include/limePDF_Property_Manager.php');
+	//require_once(dirname(__FILE__).'/src/utils/limePDF_Put.php');
 
 class TCPDF {
 	use LIMEPDF_VARS;
 
-
-	//------------------------------------------------------------
-	// METHODS
-	//------------------------------------------------------------
-
-	/**
-	 * This is the class constructor.
-	 * It allows to set up the page format, the orientation and the measure unit used in all the methods (except for the font sizes).
-	 *
-	 * @param string $orientation page orientation. Possible values are (case insensitive):<ul><li>P or Portrait (default)</li><li>L or Landscape</li><li>'' (empty string) for automatic orientation</li></ul>
-	 * @param string $unit User measure unit. Possible values are:<ul><li>pt: point</li><li>mm: millimeter (default)</li><li>cm: centimeter</li><li>in: inch</li></ul><br />A point equals 1/72 of inch, that is to say about 0.35 mm (an inch being 2.54 cm). This is a very common unit in typography; font sizes are expressed in that unit.
-	 * @param mixed $format The format used for pages. It can be either: one of the string values specified at getPageSizeFromFormat() or an array of parameters specified at setPageFormat().
-	 * @param boolean $unicode TRUE means that the input text is unicode (default = true)
-	 * @param string $encoding Charset encoding (used only when converting back html entities); default is UTF-8.
-	 * @param boolean $diskcache DEPRECATED FEATURE
-	 * @param false|integer $pdfa If not false, set the document to PDF/A mode and the good version (1 or 3).
-	 * @public
-	 * @see getPageSizeFromFormat(), setPageFormat()
-	 */
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
 
         //$this->utilsPut = new limePDF_Put();
@@ -7281,6 +7248,33 @@ class TCPDF {
 	 * 
 	 */
 
+	 public function getImagekeys() {
+        return $this->imagekeys;
+    }
+
+    public function setImagekeys($value) {
+        $this->imagekeys = $value;
+        return $this;
+    }
+
+	public function getPdfa_mode() {
+        return $this->pdfa_mode;
+    }
+
+    public function setPdfa_mode($value) {
+        $this->pdfa_mode = $value;
+        return $this;
+    }
+
+	public function getXobjects() {
+        return $this->xobjects;
+    }
+
+    public function setXobjects($value) {
+        $this->xobjects = $value;
+        return $this;
+    }
+
 	// new	
 	// 
 	// // --- GETTERS --
@@ -7343,6 +7337,11 @@ class TCPDF {
 	public function getPdfAVersion(): bool {
 		return $this->pdfa_version ?? false;
 	}
+
+	public function getCompress(): bool {
+		return $this->compress;
+	}
+
 
 	// public function getPdfAVersion(): bool {
 	// 	return $this->pdfa_version ?? false;

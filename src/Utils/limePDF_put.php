@@ -3,15 +3,11 @@
     namespace LimePDF\Utils;
 
     use LimePDF\TCPDF;
+	use LimePDF\LIMEPDF_STATIC;
+	use LimePDF\LIMEPDF_FONT;
 
-    class limePDF_Put {
+class limePDF_Put {
 
-    /**
-	 * Insert Named Destinations.
-	 * @protected
-	 * @author Johannes G\FCntert, Nicola Asuni
-	 * @since 5.9.098 (2011-06-23)
-	 */
 	public function putDests(\LimePDF\TCPDF $tcpdf) {
 		if (empty($this->dests)) {
 			return;
@@ -197,12 +193,15 @@
 
         public function putImages(\LimePDF\TCPDF $tcpdf) {
             $filter = ($tcpdf->getCompress()) ? '/Filter /FlateDecode ' : '';
+            $ImageKeys = $tcpdf->getImagekeys();
+            $PdfaMode = $tcpdf->getPdfa_mode();
+	        $getXobjects = $tcpdf->getXobjects();
 
-            foreach ($tcpdf->imagekeys as $file) {
+            foreach ($ImageKeys as $file) {
                 $info = $tcpdf->getImageBuffer($file);
                 // set object for alternate images array
                 $altoid = null;
-                if ((!$tcpdf->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
+                if ((!$PdfaMode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
                     $altoid = $tcpdf->_newobj();
                     $out = '[';
                     foreach ($info['altimgs'] as $altimage) {
@@ -224,7 +223,7 @@
                 // set image object
                 $currentObjectId = $tcpdf->getCurrentObjectId();
                 $oid = $tcpdf->_newobj();
-                $tcpdf->xobjects['I'.$info['i']] = array('n' => $oid);
+                $getXobject['I'.$info['i']] = array('n' => $oid);
 
                 $tcpdf->setImageSubBuffer($file, 'n', $tcpdf->getObjectId());
                 //$tcpdf->setImageSubBuffer($file, 'n', $tcpdf->n);
@@ -336,8 +335,8 @@
             }
             foreach ($FontFiles as $file => $info) {
                 // search and get font file to embedd
-                $fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
-                if (!TCPDF_STATIC::empty_string($fontfile)) {
+                $fontfile = LIMEPDF_FONT::getFontFullPath($file, $info['fontdir']);
+                if (!LIMEPDF_STATIC::empty_string($fontfile)) {
                     $font = file_get_contents($fontfile);
                     $compressed = (substr($file, -2) == '.z');
                     if ((!$compressed) AND (isset($info['length2']))) {
@@ -362,7 +361,7 @@
                             $subsetchars += $fontinfo['subsetchars'];
                         }
                         // rebuild a font subset
-                        $font = TCPDF_FONTS::_getTrueTypeFontSubset($font, $subsetchars);
+                        $font = LIMEPDF_FONT::_getTrueTypeFontSubset($font, $subsetchars);
                         // calculate new font length
                         $info['length1'] = strlen($font);
                         if ($compressed) {
@@ -454,7 +453,7 @@
                         }
                         $s .= ' /'.$fdk.' '.$fdv.'';
                     }
-                    if (!TCPDF_STATIC::empty_string($font['file'])) {
+                    if (!LIMEPDF_STATIC::empty_string($font['file'])) {
                         $s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$FontFiles[$font['file']]['n'].' 0 R';
                     }
                     $s .= '>>';
@@ -562,9 +561,9 @@
 	// 		$out .= ' /R';
 	// 		if ($this->encryptdata['V'] == 5) { // AES-256
 	// 			$out .= ' 5';
-	// 			$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-	// 			$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-	// 			$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
+	// 			$out .= ' /OE ('.LIMEPDF_STATIC::_escape($this->encryptdata['OE']).')';
+	// 			$out .= ' /UE ('.LIMEPDF_STATIC::_escape($this->encryptdata['UE']).')';
+	// 			$out .= ' /Perms ('.LIMEPDF_STATIC::_escape($this->encryptdata['perms']).')';
 	// 		} elseif ($this->encryptdata['V'] == 4) { // AES-128
 	// 			$out .= ' 4';
 	// 		} elseif ($this->encryptdata['V'] < 2) { // RC-40
@@ -572,8 +571,8 @@
 	// 		} else { // RC-128
 	// 			$out .= ' 3';
 	// 		}
-	// 		$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-	// 		$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
+	// 		$out .= ' /O ('.LIMEPDF_STATIC::_escape($this->encryptdata['O']).')';
+	// 		$out .= ' /U ('.LIMEPDF_STATIC::_escape($this->encryptdata['U']).')';
 	// 		$out .= ' /P '.$this->encryptdata['P'];
 	// 		if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
 	// 			$out .= ' /EncryptMetadata false';
@@ -874,7 +873,7 @@
         //                         if (is_string($pl['txt']) && !empty($pl['txt'])) {
         //                             if ($pl['txt'][0] == '#') {
         //                                 // internal destination
-        //                                 $annots .= ' /A <</S /GoTo /D /'.TCPDF_STATIC::encodeNameObject(substr($pl['txt'], 1)).'>>';
+        //                                 $annots .= ' /A <</S /GoTo /D /'.LIMEPDF_STATIC::encodeNameObject(substr($pl['txt'], 1)).'>>';
         //                             } elseif ($pl['txt'][0] == '%') {
         //                                 // embedded PDF file
         //                                 $filename = basename(substr($pl['txt'], 1));
@@ -1237,4 +1236,4 @@
 
 
 
-    }
+}
