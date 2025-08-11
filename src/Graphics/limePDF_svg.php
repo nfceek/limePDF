@@ -1,48 +1,354 @@
 <?php
 
-/**
- * TCPDF2 SVG Processing Manager
- * 
- * Handles SVG parsing, transformation, and rendering within PDF documents.
- * This class is LAZY LOADED - only instantiated when SVG content is processed.
- */
-class limePDF_SVGProcessor
-{
-    /**
-     * Reference to main TCPDF instance for accessing core properties
-     */
-    private $tcpdf2;
-    
-    /**
-     * Current SVG transformation matrix
-     */
-    private $svg_transform_matrix = array();
-    
-    /**
-     * SVG style stack for nested elements
-     */
-    private $svg_style_stack = array();
-    
-    /**
-     * Current SVG parsing state
-     */
-    private $svg_parsing_state = array();
+    namespace LimePDF\Graphics;
 
-    /**
-     * Constructor - receives TCPDF instance for accessing needed properties
-     */
-    public function __construct($tcpdf_instance)
-    {
-        $this->tcpdf = $tcpdf_instance;
-        $this->initializeSVGState();
-    }
+	Use LimePDF\TCPDF;
 
-    /**
-     * Convert SVG transformation matrix to PDF format
-     * MOVED FROM: protected function convertSVGtMatrix($tm)
-     */
-    public function convertSVGTransformMatrix($transformation_matrix)
-    {
+class limePDF_SVG {
+
+	// --- SVG METHODS ---------------------------------------------------------
+
+	/**
+	 * Embedd a Scalable Vector Graphics (SVG) image.
+	 * NOTE: SVG standard is not yet fully implemented, use the setRasterizeVectorImages() method to enable/disable rasterization of vector images using ImageMagick library.
+	 * @param string $file Name of the SVG file or a '@' character followed by the SVG data string.
+	 * @param float|null $x Abscissa of the upper-left corner.
+	 * @param float|null $y Ordinate of the upper-left corner.
+	 * @param float $w Width of the image in the page. If not specified or equal to zero, it is automatically calculated.
+	 * @param float $h Height of the image in the page. If not specified or equal to zero, it is automatically calculated.
+	 * @param mixed $link URL or identifier returned by AddLink().
+	 * @param string $align Indicates the alignment of the pointer next to image insertion relative to image height. The value can be:<ul><li>T: top-right for LTR or top-left for RTL</li><li>M: middle-right for LTR or middle-left for RTL</li><li>B: bottom-right for LTR or bottom-left for RTL</li><li>N: next line</li></ul> If the alignment is an empty string, then the pointer will be restored on the starting SVG position.
+	 * @param string $palign Allows to center or align the image on the current line. Possible values are:<ul><li>L : left align</li><li>C : center</li><li>R : right align</li><li>'' : empty string : left for LTR or right for RTL</li></ul>
+	 * @param mixed $border Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
+	 * @param boolean $fitonpage if true the image is resized to not exceed page dimensions.
+	 * @author Nicola Asuni
+	 * @since 5.0.000 (2010-05-02)
+	 * @public
+	 */
+	public function ImageSVG($file, $x=null, $y=null, $w=0, $h=0, $link='', $align='', $palign='', $border=0, $fitonpage=false) {
+		if ($this->state != 2) {
+			 return;
+		}
+		// reset SVG vars
+		$this->svggradients = array();
+		$this->svggradientid = 0;
+		$this->svgdefsmode = false;
+		$this->svgdefs = array();
+		$this->svgclipmode = false;
+		$this->svgclippaths = array();
+		$this->svgcliptm = array();
+		$this->svgclipid = 0;
+		$this->svgtext = '';
+		$this->svgtextmode = array();
+		if ($this->rasterize_vector_images AND ($w > 0) AND ($h > 0)) {
+			// convert SVG to raster image using GD or ImageMagick libraries
+			return $this->Image($file, $x, $y, $w, $h, 'SVG', $link, $align, true, 300, $palign, false, false, $border, false, false, false);
+		}
+		if ($file[0] === '@') { // image from string
+			$this->svgdir = '';
+			$svgdata = substr($file, 1);
+		} else { // SVG file
+			$this->svgdir = dirname($file);
+            $svgdata = $this->getCachedFileContents($file);
+		}
+		if ($svgdata === FALSE) {
+			$this->Error('SVG file not found: '.$file);
+		}
+		if (LIMEPDF_STATIC::empty_string($x)) {
+			$x = $this->x;
+		}
+		if (LIMEPDF_STATIC::empty_string($y)) {
+			$y = $this->y;
+		}
+		// check page for no-write regions and adapt page margins if necessary
+		list($x, $y) = $this->checkPageRegions($h, $x, $y);
+		$k = $this->k;
+		$ox = 0;
+		$oy = 0;
+		$ow = $w;
+		$oh = $h;
+		$aspect_ratio_align = 'xMidYMid';
+		$aspect_ratio_ms = 'meet';
+		$regs = array();
+		// get original image width and height
+		preg_match('/<svg([^\>]*)>/si', $svgdata, $regs);
+		if (isset($regs[1]) AND !empty($regs[1])) {
+			$tmp = array();
+			if (preg_match('/[\s]+x[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
+				$ox = $this->getHTMLUnitToUnits($tmp[1], 0, $this->svgunit, false);
+			}
+			$tmp = array();
+			if (preg_match('/[\s]+y[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
+				$oy = $this->getHTMLUnitToUnits($tmp[1], 0, $this->svgunit, false);
+			}
+			$tmp = array();
+			if (preg_match('/[\s]+width[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
+				$ow = $this->getHTMLUnitToUnits($tmp[1], 1, $this->svgunit, false);
+			}
+			$tmp = array();
+			if (preg_match('/[\s]+height[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
+				$oh = $this->getHTMLUnitToUnits($tmp[1], 1, $this->svgunit, false);
+			}
+			$tmp = array();
+			$view_box = array();
+			if (preg_match('/[\s]+viewBox[\s]*=[\s]*"[\s]*([0-9\.\-]+)[\s]+([0-9\.\-]+)[\s]+([0-9\.]+)[\s]+([0-9\.]+)[\s]*"/si', $regs[1], $tmp)) {
+				if (count($tmp) == 5) {
+					array_shift($tmp);
+					foreach ($tmp as $key => $val) {
+						$view_box[$key] = $this->getHTMLUnitToUnits($val, 0, $this->svgunit, false);
+					}
+					$ox = $view_box[0];
+					$oy = $view_box[1];
+				}
+				// get aspect ratio
+				$tmp = array();
+				if (preg_match('/[\s]+preserveAspectRatio[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
+					$aspect_ratio = preg_split('/[\s]+/si', $tmp[1]);
+					switch (count($aspect_ratio)) {
+						case 3: {
+							$aspect_ratio_align = $aspect_ratio[1];
+							$aspect_ratio_ms = $aspect_ratio[2];
+							break;
+						}
+						case 2: {
+							$aspect_ratio_align = $aspect_ratio[0];
+							$aspect_ratio_ms = $aspect_ratio[1];
+							break;
+						}
+						case 1: {
+							$aspect_ratio_align = $aspect_ratio[0];
+							$aspect_ratio_ms = 'meet';
+							break;
+						}
+					}
+				}
+			}
+		}
+		if ($ow <= 0) {
+			$ow = 1;
+		}
+		if ($oh <= 0) {
+			$oh = 1;
+		}
+		// calculate image width and height on document
+		if (($w <= 0) AND ($h <= 0)) {
+			// convert image size to document unit
+			$w = $ow;
+			$h = $oh;
+		} elseif ($w <= 0) {
+			$w = $h * $ow / $oh;
+		} elseif ($h <= 0) {
+			$h = $w * $oh / $ow;
+		}
+		// fit the image on available space
+		list($w, $h, $x, $y) = $this->fitBlock($w, $h, $x, $y, $fitonpage);
+		if ($this->rasterize_vector_images) {
+			// convert SVG to raster image using GD or ImageMagick libraries
+			return $this->Image($file, $x, $y, $w, $h, 'SVG', $link, $align, true, 300, $palign, false, false, $border, false, false, false);
+		}
+		// set alignment
+		$this->img_rb_y = $y + $h;
+		// set alignment
+		if ($this->rtl) {
+			if ($palign == 'L') {
+				$ximg = $this->lMargin;
+			} elseif ($palign == 'C') {
+				$ximg = ($this->w + $this->lMargin - $this->rMargin - $w) / 2;
+			} elseif ($palign == 'R') {
+				$ximg = $this->w - $this->rMargin - $w;
+			} else {
+				$ximg = $x - $w;
+			}
+			$this->img_rb_x = $ximg;
+		} else {
+			if ($palign == 'L') {
+				$ximg = $this->lMargin;
+			} elseif ($palign == 'C') {
+				$ximg = ($this->w + $this->lMargin - $this->rMargin - $w) / 2;
+			} elseif ($palign == 'R') {
+				$ximg = $this->w - $this->rMargin - $w;
+			} else {
+				$ximg = $x;
+			}
+			$this->img_rb_x = $ximg + $w;
+		}
+		// store current graphic vars
+		$gvars = $this->getGraphicVars();
+		// store SVG position and scale factors
+		$svgoffset_x = ($ximg - $ox) * $this->k;
+		$svgoffset_y = -($y - $oy) * $this->k;
+		if (isset($view_box[2]) AND ($view_box[2] > 0) AND ($view_box[3] > 0)) {
+			$ow = $view_box[2];
+			$oh = $view_box[3];
+		} else {
+			if ($ow <= 0) {
+				$ow = $w;
+			}
+			if ($oh <= 0) {
+				$oh = $h;
+			}
+		}
+		$svgscale_x = $w / $ow;
+		$svgscale_y = $h / $oh;
+		// scaling and alignment
+		if ($aspect_ratio_align != 'none') {
+			// store current scaling values
+			$svgscale_old_x = $svgscale_x;
+			$svgscale_old_y = $svgscale_y;
+			// force uniform scaling
+			if ($aspect_ratio_ms == 'slice') {
+				// the entire viewport is covered by the viewBox
+				if ($svgscale_x > $svgscale_y) {
+					$svgscale_y = $svgscale_x;
+				} elseif ($svgscale_x < $svgscale_y) {
+					$svgscale_x = $svgscale_y;
+				}
+			} else { // meet
+				// the entire viewBox is visible within the viewport
+				if ($svgscale_x < $svgscale_y) {
+					$svgscale_y = $svgscale_x;
+				} elseif ($svgscale_x > $svgscale_y) {
+					$svgscale_x = $svgscale_y;
+				}
+			}
+			// correct X alignment
+			switch (substr($aspect_ratio_align, 1, 3)) {
+				case 'Min': {
+					// do nothing
+					break;
+				}
+				case 'Max': {
+					$svgoffset_x += (($w * $this->k) - ($ow * $this->k * $svgscale_x));
+					break;
+				}
+				default:
+				case 'Mid': {
+					$svgoffset_x += ((($w * $this->k) - ($ow * $this->k * $svgscale_x)) / 2);
+					break;
+				}
+			}
+			// correct Y alignment
+			switch (substr($aspect_ratio_align, 5)) {
+				case 'Min': {
+					// do nothing
+					break;
+				}
+				case 'Max': {
+					$svgoffset_y -= (($h * $this->k) - ($oh * $this->k * $svgscale_y));
+					break;
+				}
+				default:
+				case 'Mid': {
+					$svgoffset_y -= ((($h * $this->k) - ($oh * $this->k * $svgscale_y)) / 2);
+					break;
+				}
+			}
+		}
+		// store current page break mode
+		$page_break_mode = $this->AutoPageBreak;
+		$page_break_margin = $this->getBreakMargin();
+		$cell_padding = $this->cell_padding;
+		$this->setCellPadding(0);
+		$this->setAutoPageBreak(false);
+		// save the current graphic state
+		$this->_out('q'.$this->epsmarker);
+		// set initial clipping mask
+		$this->Rect($ximg, $y, $w, $h, 'CNZ', array(), array());
+		// scale and translate
+		$e = $ox * $this->k * (1 - $svgscale_x);
+		$f = ($this->h - $oy) * $this->k * (1 - $svgscale_y);
+		$this->_out(sprintf('%F %F %F %F %F %F cm', $svgscale_x, 0, 0, $svgscale_y, ($e + $svgoffset_x), ($f + $svgoffset_y)));
+		// creates a new XML parser to be used by the other XML functions
+		$parser = xml_parser_create('UTF-8');
+		// disable case-folding for this XML parser
+		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+		// sets the element handler functions for the XML parser
+		xml_set_element_handler($parser, [$this, 'startSVGElementHandler'], [$this, 'endSVGElementHandler']);
+		// sets the character data handler function for the XML parser
+		xml_set_character_data_handler($parser, [$this, 'segSVGContentHandler']);
+		// start parsing an XML document
+		if (!xml_parse($parser, $svgdata)) {
+			$error_message = sprintf('SVG Error: %s at line %d', xml_error_string(xml_get_error_code($parser)), xml_get_current_line_number($parser));
+			$this->Error($error_message);
+		}
+		// free this XML parser
+		xml_parser_free($parser);
+
+		// >= PHP 7.0.0 "explicitly unset the reference to parser to avoid memory leaks"
+		unset($parser);
+
+		// restore previous graphic state
+		$this->_out($this->epsmarker.'Q');
+		// restore graphic vars
+		$this->setGraphicVars($gvars);
+		$this->lasth = $gvars['lasth'];
+		if (!empty($border)) {
+			$bx = $this->x;
+			$by = $this->y;
+			$this->x = $ximg;
+			if ($this->rtl) {
+				$this->x += $w;
+			}
+			$this->y = $y;
+			$this->Cell($w, $h, '', $border, 0, '', 0, '', 0, true);
+			$this->x = $bx;
+			$this->y = $by;
+		}
+		if ($link) {
+			$this->Link($ximg, $y, $w, $h, $link, 0);
+		}
+		// set pointer to align the next text/objects
+		switch($align) {
+			case 'T':{
+				$this->y = $y;
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'M':{
+				$this->y = $y + round($h/2);
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'B':{
+				$this->y = $this->img_rb_y;
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'N':{
+				$this->setY($this->img_rb_y);
+				break;
+			}
+			default:{
+				// restore pointer to starting position
+				$this->x = $gvars['x'];
+				$this->y = $gvars['y'];
+				$this->page = $gvars['page'];
+				$this->current_column = $gvars['current_column'];
+				$this->tMargin = $gvars['tMargin'];
+				$this->bMargin = $gvars['bMargin'];
+				$this->w = $gvars['w'];
+				$this->h = $gvars['h'];
+				$this->wPt = $gvars['wPt'];
+				$this->hPt = $gvars['hPt'];
+				$this->fwPt = $gvars['fwPt'];
+				$this->fhPt = $gvars['fhPt'];
+				break;
+			}
+		}
+		$this->endlinex = $this->img_rb_x;
+		// restore page break
+		$this->setAutoPageBreak($page_break_mode, $page_break_margin);
+		$this->cell_padding = $cell_padding;
+	}
+
+	/**
+	 * Convert SVG transformation matrix to PDF.
+	 * @param array $tm original SVG transformation matrix
+	 * @return array transformation matrix
+	 * @protected
+	 * @since 5.0.000 (2010-05-02)
+	 */
+	protected function convertSVGtMatrix($tm) {
 		$a = $tm[0];
 		$b = -$tm[1];
 		$c = -$tm[2];
@@ -54,24 +360,21 @@ class limePDF_SVGProcessor
 		$e = ($x * (1 - $a)) - ($y * $c) + $e;
 		$f = ($y * (1 - $d)) - ($x * $b) + $f;
 		return array($a, $b, $c, $d, $e, $f);
-    }
+	}
 
-    /**
-     * Apply SVG transformation matrix
-     * MOVED FROM: protected function SVGTransform($tm)
-     */
-    public function applySVGTransform($transformation_matrix)
-    {
-		$this->Transform($this->convertapplySVGTransformMatrix($tm));
-    }
+	/**
+	 * Apply SVG graphic transformation matrix.
+	 * @param array $tm original SVG transformation matrix
+	 * @protected
+	 * @since 5.0.000 (2010-05-02)
+	 */
+	protected function SVGTransform($tm) {
+		$this->Transform($this->convertSVGtMatrix($tm));
+	}
 
-    /**
-     * Set SVG styles for current element
-     * MOVED FROM: protected function setSVGStyles($svgstyle, $prevsvgstyle, $x=0, $y=0, $w=1, $h=1, $clip_function='', $clip_params=array())
-     */
 	/**
 	 * Apply the requested SVG styles (*** TO BE COMPLETED ***)
-	 * @param array $svg_style array of SVG styles to apply
+	 * @param array $svgstyle array of SVG styles to apply
 	 * @param array $prevsvgstyle array of previous SVG style
 	 * @param int $x X origin of the bounding box
 	 * @param int $y Y origin of the bounding box
@@ -84,35 +387,35 @@ class limePDF_SVGProcessor
 	 * @since 5.0.000 (2010-05-02)
 	 * @protected
 	 */
-	protected function setSVGStyles($svg_style, $prevsvgstyle, $x=0, $y=0, $w=1, $h=1, $clip_function='', $clip_params=array()) {
+	protected function setSVGStyles($svgstyle, $prevsvgstyle, $x=0, $y=0, $w=1, $h=1, $clip_function='', $clip_params=array()) {
 		if ($this->state != 2) {
 			 return;
 		}
 		$objstyle = '';
 		$minlen = (0.01 / $this->k); // minimum acceptable length
-		if (!isset($svg_style['opacity'])) {
+		if (!isset($svgstyle['opacity'])) {
 			return $objstyle;
 		}
 		// clip-path
 		$regs = array();
-		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svg_style['clip-path'], $regs)) {
+		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svgstyle['clip-path'], $regs)) {
 			$clip_path = $this->svgclippaths[$regs[1]];
 			foreach ($clip_path as $cp) {
 				$this->startSVGElementHandler('clip-path', $cp['name'], $cp['attribs'], $cp['tm']);
 			}
 		}
 		// opacity
-		if ($svg_style['opacity'] != 1) {
-			$this->setAlpha($svg_style['opacity'], 'Normal', $svg_style['opacity'], false);
+		if ($svgstyle['opacity'] != 1) {
+			$this->setAlpha($svgstyle['opacity'], 'Normal', $svgstyle['opacity'], false);
 		}
 		// color
-		$fill_color = TCPDF_COLORS::convertHTMLColorToDec($svg_style['color'], $this->spot_colors);
+		$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
 		$this->setFillColorArray($fill_color);
 		// text color
-		$text_color = TCPDF_COLORS::convertHTMLColorToDec($svg_style['text-color'], $this->spot_colors);
+		$text_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
 		$this->setTextColorArray($text_color);
 		// clip
-		if (preg_match('/rect\(([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)\)/si', $svg_style['clip'], $regs)) {
+		if (preg_match('/rect\(([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)\)/si', $svgstyle['clip'], $regs)) {
 			$top = (isset($regs[1])?$this->getHTMLUnitToUnits($regs[1], 0, $this->svgunit, false):0);
 			$right = (isset($regs[2])?$this->getHTMLUnitToUnits($regs[2], 0, $this->svgunit, false):0);
 			$bottom = (isset($regs[3])?$this->getHTMLUnitToUnits($regs[3], 0, $this->svgunit, false):0);
@@ -121,7 +424,7 @@ class limePDF_SVGProcessor
 			$cy = $y + $top;
 			$cw = $w - $left - $right;
 			$ch = $h - $top - $bottom;
-			if ($svg_style['clip-rule'] == 'evenodd') {
+			if ($svgstyle['clip-rule'] == 'evenodd') {
 				$clip_rule = 'CNZ';
 			} else {
 				$clip_rule = 'CEO';
@@ -130,7 +433,7 @@ class limePDF_SVGProcessor
 		}
 		// fill
 		$regs = array();
-		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svg_style['fill'], $regs)) {
+		if (preg_match('/url\([\s]*\#([^\)]*)\)/si', $svgstyle['fill'], $regs)) {
 			// gradient
 			$gradient = $this->svggradients[$regs[1]];
 			if (isset($gradient['xref'])) {
@@ -232,83 +535,83 @@ class limePDF_SVGProcessor
 			if ((is_array($gradient['stops']) || $gradient['stops'] instanceof Countable) && count($gradient['stops']) > 1) {
 				$this->Gradient($gradient['type'], $gradient['coords'], $gradient['stops']);
 			}
-		} elseif ($svg_style['fill'] != 'none') {
-			$fill_color = TCPDF_COLORS::convertHTMLColorToDec($svg_style['fill'], $this->spot_colors);
-			if ($svg_style['fill-opacity'] != 1) {
-				$this->setAlpha($this->alpha['CA'], 'Normal', $svg_style['fill-opacity'], false);
-			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svg_style['fill'], $rgba_matches)) {
+		} elseif ($svgstyle['fill'] != 'none') {
+			$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
+			if ($svgstyle['fill-opacity'] != 1) {
+				$this->setAlpha($this->alpha['CA'], 'Normal', $svgstyle['fill-opacity'], false);
+			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['fill'], $rgba_matches)) {
 				$this->setAlpha($this->alpha['CA'], 'Normal', $rgba_matches[1], false);
 			}
 			$this->setFillColorArray($fill_color);
-			if ($svg_style['fill-rule'] == 'evenodd') {
+			if ($svgstyle['fill-rule'] == 'evenodd') {
 				$objstyle .= 'F*';
 			} else {
 				$objstyle .= 'F';
 			}
 		}
 		// stroke
-		if ($svg_style['stroke'] != 'none') {
-			if ($svg_style['stroke-opacity'] != 1) {
-				$this->setAlpha($svg_style['stroke-opacity'], 'Normal', $this->alpha['ca'], false);
-			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svg_style['stroke'], $rgba_matches)) {
+		if ($svgstyle['stroke'] != 'none') {
+			if ($svgstyle['stroke-opacity'] != 1) {
+				$this->setAlpha($svgstyle['stroke-opacity'], 'Normal', $this->alpha['ca'], false);
+			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['stroke'], $rgba_matches)) {
 				$this->setAlpha($rgba_matches[1], 'Normal', $this->alpha['ca'], false);
 			}
 			$stroke_style = array(
-				'color' => TCPDF_COLORS::convertHTMLColorToDec($svg_style['stroke'], $this->spot_colors),
-				'width' => $this->getHTMLUnitToUnits($svg_style['stroke-width'], 0, $this->svgunit, false),
-				'cap' => $svg_style['stroke-linecap'],
-				'join' => $svg_style['stroke-linejoin']
+				'color' => LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
+				'width' => $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false),
+				'cap' => $svgstyle['stroke-linecap'],
+				'join' => $svgstyle['stroke-linejoin']
 				);
-			if (isset($svg_style['stroke-dasharray']) AND !empty($svg_style['stroke-dasharray']) AND ($svg_style['stroke-dasharray'] != 'none')) {
-				$stroke_style['dash'] = $svg_style['stroke-dasharray'];
+			if (isset($svgstyle['stroke-dasharray']) AND !empty($svgstyle['stroke-dasharray']) AND ($svgstyle['stroke-dasharray'] != 'none')) {
+				$stroke_style['dash'] = $svgstyle['stroke-dasharray'];
 			}
 			$this->setLineStyle($stroke_style);
 			$objstyle .= 'D';
 		}
 		// font
 		$regs = array();
-		if (!empty($svg_style['font'])) {
-			if (preg_match('/font-family[\s]*:[\s]*([^\;\"]*)/si', $svg_style['font'], $regs)) {
+		if (!empty($svgstyle['font'])) {
+			if (preg_match('/font-family[\s]*:[\s]*([^\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_family = $this->getFontFamilyName($regs[1]);
 			} else {
-				$font_family = $this->getFontFamilyName($svg_style['font-family']);
+				$font_family = $this->getFontFamilyName($svgstyle['font-family']);
 			}
-			if (preg_match('/font-size[\s]*:[\s]*([^\s\;\"]*)/si', $svg_style['font'], $regs)) {
+			if (preg_match('/font-size[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_size = trim($regs[1]);
 			} else {
-				$font_size = $svg_style['font-size'];
+				$font_size = $svgstyle['font-size'];
 			}
-			if (preg_match('/font-style[\s]*:[\s]*([^\s\;\"]*)/si', $svg_style['font'], $regs)) {
+			if (preg_match('/font-style[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_style = trim($regs[1]);
 			} else {
-				$font_style = $svg_style['font-style'];
+				$font_style = $svgstyle['font-style'];
 			}
-			if (preg_match('/font-weight[\s]*:[\s]*([^\s\;\"]*)/si', $svg_style['font'], $regs)) {
+			if (preg_match('/font-weight[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_weight = trim($regs[1]);
 			} else {
-				$font_weight = $svg_style['font-weight'];
+				$font_weight = $svgstyle['font-weight'];
 			}
-			if (preg_match('/font-stretch[\s]*:[\s]*([^\s\;\"]*)/si', $svg_style['font'], $regs)) {
+			if (preg_match('/font-stretch[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_stretch = trim($regs[1]);
 			} else {
-				$font_stretch = $svg_style['font-stretch'];
+				$font_stretch = $svgstyle['font-stretch'];
 			}
-			if (preg_match('/letter-spacing[\s]*:[\s]*([^\s\;\"]*)/si', $svg_style['font'], $regs)) {
+			if (preg_match('/letter-spacing[\s]*:[\s]*([^\s\;\"]*)/si', $svgstyle['font'], $regs)) {
 				$font_spacing = trim($regs[1]);
 			} else {
-				$font_spacing = $svg_style['letter-spacing'];
+				$font_spacing = $svgstyle['letter-spacing'];
 			}
 		} else {
-			$font_family = $this->getFontFamilyName($svg_style['font-family']);
-			$font_size = $svg_style['font-size'];
-			$font_style = $svg_style['font-style'];
-			$font_weight = $svg_style['font-weight'];
-			$font_stretch = $svg_style['font-stretch'];
-			$font_spacing = $svg_style['letter-spacing'];
+			$font_family = $this->getFontFamilyName($svgstyle['font-family']);
+			$font_size = $svgstyle['font-size'];
+			$font_style = $svgstyle['font-style'];
+			$font_weight = $svgstyle['font-weight'];
+			$font_stretch = $svgstyle['font-stretch'];
+			$font_spacing = $svgstyle['letter-spacing'];
 		}
 		$font_size = $this->getHTMLFontUnits($font_size, $this->svgstyles[0]['font-size'], $prevsvgstyle['font-size'], $this->svgunit);
-		$font_stretch = $this->getCSSFontStretching($font_stretch, $svg_style['font-stretch']);
-		$font_spacing = $this->getCSSFontSpacing($font_spacing, $svg_style['letter-spacing']);
+		$font_stretch = $this->getCSSFontStretching($font_stretch, $svgstyle['font-stretch']);
+		$font_spacing = $this->getCSSFontSpacing($font_spacing, $svgstyle['letter-spacing']);
 		switch ($font_style) {
 			case 'italic': {
 				$font_style = 'I';
@@ -339,7 +642,7 @@ class limePDF_SVGProcessor
 				break;
 			}
 		}
-		switch ($svg_style['text-decoration']) {
+		switch ($svgstyle['text-decoration']) {
 			case 'underline': {
 				$font_style .= 'U';
 				break;
@@ -363,11 +666,9 @@ class limePDF_SVGProcessor
 		return $objstyle;
 	}
 
-    /**
-     * Process SVG path data
-     * MOVED FROM: protected function SVGPath($path_data, $style='')
+	/**
 	 * Draws an SVG path
-	 * @param string $path_data attribute d of the path SVG element
+	 * @param string $d attribute d of the path SVG element
 	 * @param string $style Style of rendering. Possible values are:
 	 * <ul>
 	 *	 <li>D or empty string: Draw (default).</li>
@@ -383,20 +684,19 @@ class limePDF_SVGProcessor
 	 * @since 5.0.000 (2010-05-02)
 	 * @protected
 	 */
-
-    public function processSVGPath($path_data, $style = '')  {
+	protected function SVGPath($d, $style='') {
 		if ($this->state != 2) {
 			return;
 		}
 		// set fill/stroke style
-		$op = TCPDF_STATIC::getPathPaintOperator($style, '');
+		$op = LIMEPDF_STATIC::getPathPaintOperator($style, '');
 		if (empty($op)) {
 			return;
 		}
 		$paths = array();
-		$path_data = preg_replace('/([0-9ACHLMQSTVZ])([\-\+])/si', '\\1 \\2', $path_data);
-		$path_data = preg_replace('/(\.[0-9]+)(\.)/s', '\\1 \\2', $path_data);
-		preg_match_all('/([ACHLMQSTVZ])[\s]*([^ACHLMQSTVZ\"]*)/si', $path_data, $paths, PREG_SET_ORDER);
+		$d = preg_replace('/([0-9ACHLMQSTVZ])([\-\+])/si', '\\1 \\2', $d);
+		$d = preg_replace('/(\.[0-9]+)(\.)/s', '\\1 \\2', $d);
+		preg_match_all('/([ACHLMQSTVZ])[\s]*([^ACHLMQSTVZ\"]*)/si', $d, $paths, PREG_SET_ORDER);
 		$x = 0;
 		$y = 0;
 		$x1 = 0;
@@ -690,8 +990,8 @@ class limePDF_SVGProcessor
 								$cx = ($cax * $cos_ang) - ($cay * $sin_ang) + (($x0 + $x) / 2);
 								$cy = ($cax * $sin_ang) + ($cay * $cos_ang) + (($y0 + $y) / 2);
 								// get angles
-								$angs = TCPDF_STATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
-								$dang = TCPDF_STATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
+								$angs = LIMEPDF_STATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
+								$dang = LIMEPDF_STATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
 								if (($fs == 0) AND ($dang > 0)) {
 									$dang -= (2 * M_PI);
 								} elseif (($fs == 1) AND ($dang < 0)) {
@@ -741,50 +1041,48 @@ class limePDF_SVGProcessor
 		$this->_out($op);
 		return array($xmin, $ymin, ($xmax - $xmin), ($ymax - $ymin));
 	}
-    /**
-     * Remove namespace from SVG tag name
-     * MOVED FROM: protected function removeTagNamespace($element_name)
-     */
-    public function removeTagNamespace($tag_name)
-    {
-		if(strpos($tag_name, ':') !== false) {
-			$parts = explode(':', $tag_name);
+
+	/**
+	 * Return the tag name without the namespace
+	 * @param string $name Tag name
+	 * @protected
+	 */
+	protected function removeTagNamespace($name) {
+		if(strpos($name, ':') !== false) {
+			$parts = explode(':', $name);
 			return $parts[(sizeof($parts) - 1)];
 		}
-		return $tag_name;
+		return $name;
 	}
 
-    /**
-     * Handle SVG element start tag
-     * MOVED FROM: protected function startSVGElementHandler($parser, $name, $attribs, $ctm=array())
-     *
+	/**
 	 * Sets the opening SVG element handler function for the XML parser. (*** TO BE COMPLETED ***)
 	 * @param resource|string $parser The first parameter, parser, is a reference to the XML parser calling the handler.
 	 * @param string $name The second parameter, name, contains the name of the element for which this handler is called. If case-folding is in effect for this parser, the element name will be in uppercase letters.
-	 * @param array $attributes The third parameter, attribs, contains an associative array with the element's attributes (if any). The keys of this array are the attribute names, the values are the attribute values. Attribute names are case-folded on the same criteria as element names. Attribute values are not case-folded. The original order of the attributes can be retrieved by walking through attribs the normal way, using each(). The first key in the array was the first attribute, and so on.
-	 * @param array $transformation_matrix tranformation matrix for clipping mode (starting transformation matrix).
+	 * @param array $attribs The third parameter, attribs, contains an associative array with the element's attributes (if any). The keys of this array are the attribute names, the values are the attribute values. Attribute names are case-folded on the same criteria as element names. Attribute values are not case-folded. The original order of the attributes can be retrieved by walking through attribs the normal way, using each(). The first key in the array was the first attribute, and so on.
+	 * @param array $ctm tranformation matrix for clipping mode (starting transformation matrix).
 	 * @author Nicola Asuni
 	 * @since 5.0.000 (2010-05-02)
 	 * @protected
 	 */
-	public function handleSVGElementStart($parser, $element_name, $attributes, $transformation_matrix=array()) {
+	protected function startSVGElementHandler($parser, $name, $attribs, $ctm=array()) {
 		$name = $this->removeTagNamespace($name);
 		// check if we are in clip mode
 		if ($this->svgclipmode) {
-			$this->svgclippaths[$this->svgclipid][] = array('name' => $name, 'attribs' => $attributes, 'tm' => $this->svgcliptm[$this->svgclipid]);
+			$this->svgclippaths[$this->svgclipid][] = array('name' => $name, 'attribs' => $attribs, 'tm' => $this->svgcliptm[$this->svgclipid]);
 			return;
 		}
 		if ($this->svgdefsmode AND !in_array($name, array('clipPath', 'linearGradient', 'radialGradient', 'stop'))) {
-			if (isset($attributes['id'])) {
-				$attributes['child_elements'] = array();
-				$this->svgdefs[$attributes['id']] = array('name' => $name, 'attribs' => $attributes);
+			if (isset($attribs['id'])) {
+				$attribs['child_elements'] = array();
+				$this->svgdefs[$attribs['id']] = array('name' => $name, 'attribs' => $attribs);
 				return;
 			}
 			if (end($this->svgdefs) !== FALSE) {
 				$last_svgdefs_id = key($this->svgdefs);
 				if (isset($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'])) {
-					$attributes['id'] = 'DF_'.(count($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements']) + 1);
-					$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$attributes['id']] = array('name' => $name, 'attribs' => $attributes);
+					$attribs['id'] = 'DF_'.(count($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements']) + 1);
+					$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$attribs['id']] = array('name' => $name, 'attribs' => $attribs);
 					return;
 				}
 			}
@@ -796,52 +1094,52 @@ class limePDF_SVGProcessor
 			$clipping = true;
 		}
 		// get styling properties
-		$previous_svg_style = $this->svgstyles[max(0,(count($this->svgstyles) - 1))]; // previous style
-		$svg_style = $this->svgstyles[0]; // set default style
-		if ($clipping AND !isset($attributes['fill']) AND (!isset($attributes['style']) OR (!preg_match('/[;\"\s]{1}fill[\s]*:[\s]*([^;\"]*)/si', $attributes['style'], $attrval)))) {
+		$prev_svgstyle = $this->svgstyles[max(0,(count($this->svgstyles) - 1))]; // previous style
+		$svgstyle = $this->svgstyles[0]; // set default style
+		if ($clipping AND !isset($attribs['fill']) AND (!isset($attribs['style']) OR (!preg_match('/[;\"\s]{1}fill[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval)))) {
 			// default fill attribute for clipping
-			$attributes['fill'] = 'none';
+			$attribs['fill'] = 'none';
 		}
-		if (isset($attributes['style']) AND !TCPDF_STATIC::empty_string($attributes['style']) AND ($attributes['style'][0] != ';')) {
+		if (isset($attribs['style']) AND !LIMEPDF_STATIC::empty_string($attribs['style']) AND ($attribs['style'][0] != ';')) {
 			// fix style for regular expression
-			$attributes['style'] = ';'.$attributes['style'];
+			$attribs['style'] = ';'.$attribs['style'];
 		}
-		foreach ($previous_svg_style as $key => $val) {
-			if (in_array($key, TCPDF_IMAGES::$svginheritprop)) {
+		foreach ($prev_svgstyle as $key => $val) {
+			if (in_array($key, LIMEPDF_IMAGES::$svginheritprop)) {
 				// inherit previous value
-				$svg_style[$key] = $val;
+				$svgstyle[$key] = $val;
 			}
-			if (isset($attributes[$key]) AND !TCPDF_STATIC::empty_string($attributes[$key])) {
+			if (isset($attribs[$key]) AND !LIMEPDF_STATIC::empty_string($attribs[$key])) {
 				// specific attribute settings
-				if ($attributes[$key] == 'inherit') {
-					$svg_style[$key] = $val;
+				if ($attribs[$key] == 'inherit') {
+					$svgstyle[$key] = $val;
 				} else {
-					$svg_style[$key] = $attributes[$key];
+					$svgstyle[$key] = $attribs[$key];
 				}
-			} elseif (isset($attributes['style']) AND !TCPDF_STATIC::empty_string($attributes['style'])) {
+			} elseif (isset($attribs['style']) AND !LIMEPDF_STATIC::empty_string($attribs['style'])) {
 				// CSS style syntax
 				$attrval = array();
-				if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"]*)/si', $attributes['style'], $attrval) AND isset($attrval[1])) {
+				if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval) AND isset($attrval[1])) {
 					if ($attrval[1] == 'inherit') {
-						$svg_style[$key] = $val;
+						$svgstyle[$key] = $val;
 					} else {
-						$svg_style[$key] = $attrval[1];
+						$svgstyle[$key] = $attrval[1];
 					}
 				}
 			}
 		}
 		// transformation matrix
-		if (!empty($transformation_matrix)) {
-			$tm = $transformation_matrix;
+		if (!empty($ctm)) {
+			$tm = $ctm;
 		} else {
 			$tm = array(1,0,0,1,0,0);
 		}
-		if (isset($attributes['transform']) AND !empty($attributes['transform'])) {
-			$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, TCPDF_STATIC::getapplySVGTransformMatrix($attributes['transform']));
+		if (isset($attribs['transform']) AND !empty($attribs['transform'])) {
+			$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, LIMEPDF_STATIC::getSVGTransformMatrix($attribs['transform']));
 		}
-		$svg_style['transfmatrix'] = $tm;
+		$svgstyle['transfmatrix'] = $tm;
 		$invisible = false;
-		if (($svg_style['visibility'] == 'hidden') OR ($svg_style['visibility'] == 'collapse') OR ($svg_style['display'] == 'none')) {
+		if (($svgstyle['visibility'] == 'hidden') OR ($svgstyle['visibility'] == 'collapse') OR ($svgstyle['display'] == 'none')) {
 			// the current graphics element is invisible (nothing is painted)
 			$invisible = true;
 		}
@@ -857,10 +1155,10 @@ class limePDF_SVGProcessor
 					break;
 				}
 				$this->svgclipmode = true;
-				if (!isset($attributes['id'])) {
-					$attributes['id'] = 'CP_'.(count($this->svgcliptm) + 1);
+				if (!isset($attribs['id'])) {
+					$attribs['id'] = 'CP_'.(count($this->svgcliptm) + 1);
 				}
-				$this->svgclipid = $attributes['id'];
+				$this->svgclipid = $attribs['id'];
 				$this->svgclippaths[$this->svgclipid] = array();
 				$this->svgcliptm[$this->svgclipid] = $tm;
 				break;
@@ -871,26 +1169,26 @@ class limePDF_SVGProcessor
 					break;
 				}
 				// inner SVG
-				array_push($this->svgstyles, $svg_style);
+				array_push($this->svgstyles, $svgstyle);
 				$this->StartTransform();
-				$svgX = (isset($attributes['x'])?$attributes['x']:0);
-				$svgY = (isset($attributes['y'])?$attributes['y']:0);
-				$svgW = (isset($attributes['width'])?$attributes['width']:0);
-				$svgH = (isset($attributes['height'])?$attributes['height']:0);
+				$svgX = (isset($attribs['x'])?$attribs['x']:0);
+				$svgY = (isset($attribs['y'])?$attribs['y']:0);
+				$svgW = (isset($attribs['width'])?$attribs['width']:0);
+				$svgH = (isset($attribs['height'])?$attribs['height']:0);
 				// set x, y position using transform matrix
-				$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array( 1, 0, 0, 1, $svgX, $svgY));
-				$this->applySVGTransform($tm);
+				$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array( 1, 0, 0, 1, $svgX, $svgY));
+				$this->SVGTransform($tm);
 				// set clipping for width and height
 				$x = 0;
 				$y = 0;
-				$w = (isset($attributes['width'])?$this->getHTMLUnitToUnits($attributes['width'], 0, $this->svgunit, false):$this->w);
-				$h = (isset($attributes['height'])?$this->getHTMLUnitToUnits($attributes['height'], 0, $this->svgunit, false):$this->h);
+				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):$this->w);
+				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):$this->h);
 				// draw clipping rect
 				$this->Rect($x, $y, $w, $h, 'CNZ', array(), array());
 				// parse viewbox, calculate extra transformation matrix
-				if (isset($attributes['viewBox'])) {
+				if (isset($attribs['viewBox'])) {
 					$tmp = array();
-					preg_match_all("/[0-9]+/", $attributes['viewBox'], $tmp);
+					preg_match_all("/[0-9]+/", $attribs['viewBox'], $tmp);
 					$tmp = $tmp[0];
 					if (sizeof($tmp) == 4) {
 						$vx = $tmp[0];
@@ -902,11 +1200,11 @@ class limePDF_SVGProcessor
 						$aspectX = 'xMid';
 						$aspectY = 'YMid';
 						$fit = 'meet';
-						if (isset($attributes['preserveAspectRatio'])) {
-							if($attributes['preserveAspectRatio'] == 'none') {
+						if (isset($attribs['preserveAspectRatio'])) {
+							if($attribs['preserveAspectRatio'] == 'none') {
 								$fit = 'none';
 							} else {
-								preg_match_all('/[a-zA-Z]+/', $attributes['preserveAspectRatio'], $tmp);
+								preg_match_all('/[a-zA-Z]+/', $attribs['preserveAspectRatio'], $tmp);
 								$tmp = $tmp[0];
 								if ((sizeof($tmp) == 2) AND (strlen($tmp[0]) == 8) AND (in_array($tmp[1], array('meet', 'slice', 'none')))) {
 									$aspectX = substr($tmp[0], 0, 4);
@@ -936,63 +1234,63 @@ class limePDF_SVGProcessor
 							$hr = $wr;
 						}
 						$newtm = array($wr, 0, 0, $hr, (($wr * ($ax - $vx)) - $svgX), (($hr * ($ay - $vy)) - $svgY));
-						$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, $newtm);
-						$this->applySVGTransform($tm);
+						$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, $newtm);
+						$this->SVGTransform($tm);
 					}
 				}
-				$this->setSVGStyles($svg_style, $previous_svg_style);
+				$this->setSVGStyles($svgstyle, $prev_svgstyle);
 				break;
 			}
 			case 'g': {
 				// group together related graphics elements
-				array_push($this->svgstyles, $svg_style);
+				array_push($this->svgstyles, $svgstyle);
 				$this->StartTransform();
-				$x = (isset($attributes['x'])?$attributes['x']:0);
-				$y = (isset($attributes['y'])?$attributes['y']:0);
-				$w = 1;//(isset($attributes['width'])?$attributes['width']:1);
-				$h = 1;//(isset($attributes['height'])?$attributes['height']:1);
-				$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
-				$this->applySVGTransform($tm);
-				$this->setSVGStyles($svg_style, $previous_svg_style);
+				$x = (isset($attribs['x'])?$attribs['x']:0);
+				$y = (isset($attribs['y'])?$attribs['y']:0);
+				$w = 1;//(isset($attribs['width'])?$attribs['width']:1);
+				$h = 1;//(isset($attribs['height'])?$attribs['height']:1);
+				$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
+				$this->SVGTransform($tm);
+				$this->setSVGStyles($svgstyle, $prev_svgstyle);
 				break;
 			}
 			case 'linearGradient': {
 				if ($this->pdfa_mode && $this->pdfa_version < 2) {
 					break;
 				}
-				if (!isset($attributes['id'])) {
-					$attributes['id'] = 'GR_'.(count($this->svggradients) + 1);
+				if (!isset($attribs['id'])) {
+					$attribs['id'] = 'GR_'.(count($this->svggradients) + 1);
 				}
-				$this->svggradientid = $attributes['id'];
+				$this->svggradientid = $attribs['id'];
 				$this->svggradients[$this->svggradientid] = array();
 				$this->svggradients[$this->svggradientid]['type'] = 2;
 				$this->svggradients[$this->svggradientid]['stops'] = array();
-				if (isset($attributes['gradientUnits'])) {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attributes['gradientUnits'];
+				if (isset($attribs['gradientUnits'])) {
+					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attribs['gradientUnits'];
 				} else {
 					$this->svggradients[$this->svggradientid]['gradientUnits'] = 'objectBoundingBox';
 				}
-				//$attributes['spreadMethod']
-				if (((!isset($attributes['x1'])) AND (!isset($attributes['y1'])) AND (!isset($attributes['x2'])) AND (!isset($attributes['y2'])))
-					OR ((isset($attributes['x1']) AND (substr($attributes['x1'], -1) == '%'))
-						OR (isset($attributes['y1']) AND (substr($attributes['y1'], -1) == '%'))
-						OR (isset($attributes['x2']) AND (substr($attributes['x2'], -1) == '%'))
-						OR (isset($attributes['y2']) AND (substr($attributes['y2'], -1) == '%')))) {
+				//$attribs['spreadMethod']
+				if (((!isset($attribs['x1'])) AND (!isset($attribs['y1'])) AND (!isset($attribs['x2'])) AND (!isset($attribs['y2'])))
+					OR ((isset($attribs['x1']) AND (substr($attribs['x1'], -1) == '%'))
+						OR (isset($attribs['y1']) AND (substr($attribs['y1'], -1) == '%'))
+						OR (isset($attribs['x2']) AND (substr($attribs['x2'], -1) == '%'))
+						OR (isset($attribs['y2']) AND (substr($attribs['y2'], -1) == '%')))) {
 					$this->svggradients[$this->svggradientid]['mode'] = 'percentage';
 				} else {
 					$this->svggradients[$this->svggradientid]['mode'] = 'measure';
 				}
-				$x1 = (isset($attributes['x1'])?$attributes['x1']:'0');
-				$y1 = (isset($attributes['y1'])?$attributes['y1']:'0');
-				$x2 = (isset($attributes['x2'])?$attributes['x2']:'100');
-				$y2 = (isset($attributes['y2'])?$attributes['y2']:'0');
-				if (isset($attributes['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getapplySVGTransformMatrix($attributes['gradientTransform']);
+				$x1 = (isset($attribs['x1'])?$attribs['x1']:'0');
+				$y1 = (isset($attribs['y1'])?$attribs['y1']:'0');
+				$x2 = (isset($attribs['x2'])?$attribs['x2']:'100');
+				$y2 = (isset($attribs['y2'])?$attribs['y2']:'0');
+				if (isset($attribs['gradientTransform'])) {
+					$this->svggradients[$this->svggradientid]['gradientTransform'] = LIMEPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
 				}
 				$this->svggradients[$this->svggradientid]['coords'] = array($x1, $y1, $x2, $y2);
-				if (isset($attributes['xlink:href']) AND !empty($attributes['xlink:href'])) {
+				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
 					// gradient is defined on another place
-					$this->svggradients[$this->svggradientid]['xref'] = substr($attributes['xlink:href'], 1);
+					$this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
 				}
 				break;
 			}
@@ -1000,55 +1298,55 @@ class limePDF_SVGProcessor
 				if ($this->pdfa_mode && $this->pdfa_version < 2) {
 					break;
 				}
-				if (!isset($attributes['id'])) {
-					$attributes['id'] = 'GR_'.(count($this->svggradients) + 1);
+				if (!isset($attribs['id'])) {
+					$attribs['id'] = 'GR_'.(count($this->svggradients) + 1);
 				}
-				$this->svggradientid = $attributes['id'];
+				$this->svggradientid = $attribs['id'];
 				$this->svggradients[$this->svggradientid] = array();
 				$this->svggradients[$this->svggradientid]['type'] = 3;
 				$this->svggradients[$this->svggradientid]['stops'] = array();
-				if (isset($attributes['gradientUnits'])) {
-					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attributes['gradientUnits'];
+				if (isset($attribs['gradientUnits'])) {
+					$this->svggradients[$this->svggradientid]['gradientUnits'] = $attribs['gradientUnits'];
 				} else {
 					$this->svggradients[$this->svggradientid]['gradientUnits'] = 'objectBoundingBox';
 				}
-				//$attributes['spreadMethod']
-				if (((!isset($attributes['cx'])) AND (!isset($attributes['cy'])))
-					OR ((isset($attributes['cx']) AND (substr($attributes['cx'], -1) == '%'))
-					OR (isset($attributes['cy']) AND (substr($attributes['cy'], -1) == '%')))) {
+				//$attribs['spreadMethod']
+				if (((!isset($attribs['cx'])) AND (!isset($attribs['cy'])))
+					OR ((isset($attribs['cx']) AND (substr($attribs['cx'], -1) == '%'))
+					OR (isset($attribs['cy']) AND (substr($attribs['cy'], -1) == '%')))) {
 					$this->svggradients[$this->svggradientid]['mode'] = 'percentage';
-				} elseif (isset($attributes['r']) AND is_numeric($attributes['r']) AND ($attributes['r']) <= 1) {
+				} elseif (isset($attribs['r']) AND is_numeric($attribs['r']) AND ($attribs['r']) <= 1) {
 					$this->svggradients[$this->svggradientid]['mode'] = 'ratio';
 				} else {
 					$this->svggradients[$this->svggradientid]['mode'] = 'measure';
 				}
-				$cx = (isset($attributes['cx']) ? $attributes['cx'] : 0.5);
-				$cy = (isset($attributes['cy']) ? $attributes['cy'] : 0.5);
-				$fx = (isset($attributes['fx']) ? $attributes['fx'] : $cx);
-				$fy = (isset($attributes['fy']) ? $attributes['fy'] : $cy);
-				$r = (isset($attributes['r']) ? $attributes['r'] : 0.5);
-				if (isset($attributes['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getapplySVGTransformMatrix($attributes['gradientTransform']);
+				$cx = (isset($attribs['cx']) ? $attribs['cx'] : 0.5);
+				$cy = (isset($attribs['cy']) ? $attribs['cy'] : 0.5);
+				$fx = (isset($attribs['fx']) ? $attribs['fx'] : $cx);
+				$fy = (isset($attribs['fy']) ? $attribs['fy'] : $cy);
+				$r = (isset($attribs['r']) ? $attribs['r'] : 0.5);
+				if (isset($attribs['gradientTransform'])) {
+					$this->svggradients[$this->svggradientid]['gradientTransform'] = LIMEPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
 				}
 				$this->svggradients[$this->svggradientid]['coords'] = array($cx, $cy, $fx, $fy, $r);
-				if (isset($attributes['xlink:href']) AND !empty($attributes['xlink:href'])) {
+				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
 					// gradient is defined on another place
-					$this->svggradients[$this->svggradientid]['xref'] = substr($attributes['xlink:href'], 1);
+					$this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
 				}
 				break;
 			}
 			case 'stop': {
 				// gradient stops
-				if (substr($attributes['offset'], -1) == '%') {
-					$offset = floatval(substr($attributes['offset'], 0, -1)) / 100;
+				if (substr($attribs['offset'], -1) == '%') {
+					$offset = floatval(substr($attribs['offset'], 0, -1)) / 100;
 				} else {
-					$offset = floatval($attributes['offset']);
+					$offset = floatval($attribs['offset']);
 					if ($offset > 1) {
 						$offset /= 100;
 					}
 				}
-				$stop_color = isset($svg_style['stop-color'])?TCPDF_COLORS::convertHTMLColorToDec($svg_style['stop-color'], $this->spot_colors):'black';
-				$opacity = isset($svg_style['stop-opacity'])?$svg_style['stop-opacity']:1;
+				$stop_color = isset($svgstyle['stop-color'])?LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
+				$opacity = isset($svgstyle['stop-opacity'])?$svgstyle['stop-opacity']:1;
 				$this->svggradients[$this->svggradientid]['stops'][] = array('offset' => $offset, 'color' => $stop_color, 'opacity' => $opacity);
 				break;
 			}
@@ -1057,21 +1355,21 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				if (isset($attributes['d'])) {
-					$d = trim($attributes['d']);
+				if (isset($attribs['d'])) {
+					$d = trim($attribs['d']);
 					if (!empty($d)) {
-						$x = (isset($attributes['x'])?$attributes['x']:0);
-						$y = (isset($attributes['y'])?$attributes['y']:0);
-						$w = (isset($attributes['width'])?$attributes['width']:1);
-						$h = (isset($attributes['height'])?$attributes['height']:1);
-						$tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
+						$x = (isset($attribs['x'])?$attribs['x']:0);
+						$y = (isset($attribs['y'])?$attribs['y']:0);
+						$w = (isset($attribs['width'])?$attribs['width']:1);
+						$h = (isset($attribs['height'])?$attribs['height']:1);
+						$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
 						if ($clipping) {
-							$this->applySVGTransform($tm);
+							$this->SVGTransform($tm);
 							$this->SVGPath($d, 'CNZ');
 						} else {
 							$this->StartTransform();
-							$this->applySVGTransform($tm);
-							$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'SVGPath', array($d, 'CNZ'));
+							$this->SVGTransform($tm);
+							$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'SVGPath', array($d, 'CNZ'));
 							if (!empty($obstyle)) {
 								$this->SVGPath($d, $obstyle);
 							}
@@ -1086,19 +1384,19 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				$x = (isset($attributes['x'])?$this->getHTMLUnitToUnits($attributes['x'], 0, $this->svgunit, false):0);
-				$y = (isset($attributes['y'])?$this->getHTMLUnitToUnits($attributes['y'], 0, $this->svgunit, false):0);
-				$w = (isset($attributes['width'])?$this->getHTMLUnitToUnits($attributes['width'], 0, $this->svgunit, false):0);
-				$h = (isset($attributes['height'])?$this->getHTMLUnitToUnits($attributes['height'], 0, $this->svgunit, false):0);
-				$rx = (isset($attributes['rx'])?$this->getHTMLUnitToUnits($attributes['rx'], 0, $this->svgunit, false):0);
-				$ry = (isset($attributes['ry'])?$this->getHTMLUnitToUnits($attributes['ry'], 0, $this->svgunit, false):$rx);
+				$x = (isset($attribs['x'])?$this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false):0);
+				$y = (isset($attribs['y'])?$this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false):0);
+				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):0);
+				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):0);
+				$rx = (isset($attribs['rx'])?$this->getHTMLUnitToUnits($attribs['rx'], 0, $this->svgunit, false):0);
+				$ry = (isset($attribs['ry'])?$this->getHTMLUnitToUnits($attribs['ry'], 0, $this->svgunit, false):$rx);
 				if ($clipping) {
-					$this->applySVGTransform($tm);
+					$this->SVGTransform($tm);
 					$this->RoundedRectXY($x, $y, $w, $h, $rx, $ry, '1111', 'CNZ', array(), array());
 				} else {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'RoundedRectXY', array($x, $y, $w, $h, $rx, $ry, '1111', 'CNZ'));
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'RoundedRectXY', array($x, $y, $w, $h, $rx, $ry, '1111', 'CNZ'));
 					if (!empty($obstyle)) {
 						$this->RoundedRectXY($x, $y, $w, $h, $rx, $ry, '1111', $obstyle, array(), array());
 					}
@@ -1110,20 +1408,20 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				$r = (isset($attributes['r']) ? $this->getHTMLUnitToUnits($attributes['r'], 0, $this->svgunit, false) : 0);
-				$cx = (isset($attributes['cx']) ? $this->getHTMLUnitToUnits($attributes['cx'], 0, $this->svgunit, false) : (isset($attributes['x']) ? $this->getHTMLUnitToUnits($attributes['x'], 0, $this->svgunit, false) : 0));
-				$cy = (isset($attributes['cy']) ? $this->getHTMLUnitToUnits($attributes['cy'], 0, $this->svgunit, false) : (isset($attributes['y']) ? $this->getHTMLUnitToUnits($attributes['y'], 0, $this->svgunit, false) : 0));
+				$r = (isset($attribs['r']) ? $this->getHTMLUnitToUnits($attribs['r'], 0, $this->svgunit, false) : 0);
+				$cx = (isset($attribs['cx']) ? $this->getHTMLUnitToUnits($attribs['cx'], 0, $this->svgunit, false) : (isset($attribs['x']) ? $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false) : 0));
+				$cy = (isset($attribs['cy']) ? $this->getHTMLUnitToUnits($attribs['cy'], 0, $this->svgunit, false) : (isset($attribs['y']) ? $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false) : 0));
 				$x = ($cx - $r);
 				$y = ($cy - $r);
 				$w = (2 * $r);
 				$h = $w;
 				if ($clipping) {
-					$this->applySVGTransform($tm);
+					$this->SVGTransform($tm);
 					$this->Circle($cx, $cy, $r, 0, 360, 'CNZ', array(), array(), 8);
 				} else {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'Circle', array($cx, $cy, $r, 0, 360, 'CNZ'));
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Circle', array($cx, $cy, $r, 0, 360, 'CNZ'));
 					if (!empty($obstyle)) {
 						$this->Circle($cx, $cy, $r, 0, 360, $obstyle, array(), array(), 8);
 					}
@@ -1135,21 +1433,21 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				$rx = (isset($attributes['rx']) ? $this->getHTMLUnitToUnits($attributes['rx'], 0, $this->svgunit, false) : 0);
-				$ry = (isset($attributes['ry']) ? $this->getHTMLUnitToUnits($attributes['ry'], 0, $this->svgunit, false) : 0);
-				$cx = (isset($attributes['cx']) ? $this->getHTMLUnitToUnits($attributes['cx'], 0, $this->svgunit, false) : (isset($attributes['x']) ? $this->getHTMLUnitToUnits($attributes['x'], 0, $this->svgunit, false) : 0));
-				$cy = (isset($attributes['cy']) ? $this->getHTMLUnitToUnits($attributes['cy'], 0, $this->svgunit, false) : (isset($attributes['y']) ? $this->getHTMLUnitToUnits($attributes['y'], 0, $this->svgunit, false) : 0));
+				$rx = (isset($attribs['rx']) ? $this->getHTMLUnitToUnits($attribs['rx'], 0, $this->svgunit, false) : 0);
+				$ry = (isset($attribs['ry']) ? $this->getHTMLUnitToUnits($attribs['ry'], 0, $this->svgunit, false) : 0);
+				$cx = (isset($attribs['cx']) ? $this->getHTMLUnitToUnits($attribs['cx'], 0, $this->svgunit, false) : (isset($attribs['x']) ? $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false) : 0));
+				$cy = (isset($attribs['cy']) ? $this->getHTMLUnitToUnits($attribs['cy'], 0, $this->svgunit, false) : (isset($attribs['y']) ? $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false) : 0));
 				$x = ($cx - $rx);
 				$y = ($cy - $ry);
 				$w = (2 * $rx);
 				$h = (2 * $ry);
 				if ($clipping) {
-					$this->applySVGTransform($tm);
+					$this->SVGTransform($tm);
 					$this->Ellipse($cx, $cy, $rx, $ry, 0, 0, 360, 'CNZ', array(), array(), 8);
 				} else {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'Ellipse', array($cx, $cy, $rx, $ry, 0, 0, 360, 'CNZ'));
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Ellipse', array($cx, $cy, $rx, $ry, 0, 0, 360, 'CNZ'));
 					if (!empty($obstyle)) {
 						$this->Ellipse($cx, $cy, $rx, $ry, 0, 0, 360, $obstyle, array(), array(), 8);
 					}
@@ -1161,18 +1459,18 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				$x1 = (isset($attributes['x1'])?$this->getHTMLUnitToUnits($attributes['x1'], 0, $this->svgunit, false):0);
-				$y1 = (isset($attributes['y1'])?$this->getHTMLUnitToUnits($attributes['y1'], 0, $this->svgunit, false):0);
-				$x2 = (isset($attributes['x2'])?$this->getHTMLUnitToUnits($attributes['x2'], 0, $this->svgunit, false):0);
-				$y2 = (isset($attributes['y2'])?$this->getHTMLUnitToUnits($attributes['y2'], 0, $this->svgunit, false):0);
+				$x1 = (isset($attribs['x1'])?$this->getHTMLUnitToUnits($attribs['x1'], 0, $this->svgunit, false):0);
+				$y1 = (isset($attribs['y1'])?$this->getHTMLUnitToUnits($attribs['y1'], 0, $this->svgunit, false):0);
+				$x2 = (isset($attribs['x2'])?$this->getHTMLUnitToUnits($attribs['x2'], 0, $this->svgunit, false):0);
+				$y2 = (isset($attribs['y2'])?$this->getHTMLUnitToUnits($attribs['y2'], 0, $this->svgunit, false):0);
 				$x = $x1;
 				$y = $y1;
 				$w = abs($x2 - $x1);
 				$h = abs($y2 - $y1);
 				if (!$clipping) {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'Line', array($x1, $y1, $x2, $y2));
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Line', array($x1, $y1, $x2, $y2));
 					$this->Line($x1, $y1, $x2, $y2);
 					$this->StopTransform();
 				}
@@ -1183,7 +1481,7 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				$points = (isset($attributes['points'])?$attributes['points']:'0 0');
+				$points = (isset($attribs['points'])?$attribs['points']:'0 0');
 				$points = trim($points);
 				// note that point may use a complex syntax not covered here
 				$points = preg_split('/[\,\s]+/si', $points);
@@ -1213,20 +1511,20 @@ class limePDF_SVGProcessor
 				$h = ($ymax - $ymin);
 				if ($name == 'polyline') {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'PolyLine', array($p, 'CNZ'));
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'PolyLine', array($p, 'CNZ'));
 					if (!empty($obstyle)) {
 						$this->PolyLine($p, $obstyle, array(), array());
 					}
 					$this->StopTransform();
 				} else { // polygon
 					if ($clipping) {
-						$this->applySVGTransform($tm);
+						$this->SVGTransform($tm);
 						$this->Polygon($p, 'CNZ', array(), array(), true);
 					} else {
 						$this->StartTransform();
-						$this->applySVGTransform($tm);
-						$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h, 'Polygon', array($p, 'CNZ'));
+						$this->SVGTransform($tm);
+						$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h, 'Polygon', array($p, 'CNZ'));
 						if (!empty($obstyle)) {
 							$this->Polygon($p, $obstyle, array(), array(), true);
 						}
@@ -1240,18 +1538,18 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				if (!isset($attributes['xlink:href']) OR empty($attributes['xlink:href'])) {
+				if (!isset($attribs['xlink:href']) OR empty($attribs['xlink:href'])) {
 					break;
 				}
-				$x = (isset($attributes['x'])?$this->getHTMLUnitToUnits($attributes['x'], 0, $this->svgunit, false):0);
-				$y = (isset($attributes['y'])?$this->getHTMLUnitToUnits($attributes['y'], 0, $this->svgunit, false):0);
-				$w = (isset($attributes['width'])?$this->getHTMLUnitToUnits($attributes['width'], 0, $this->svgunit, false):0);
-				$h = (isset($attributes['height'])?$this->getHTMLUnitToUnits($attributes['height'], 0, $this->svgunit, false):0);
-				$img = $attributes['xlink:href'];
+				$x = (isset($attribs['x'])?$this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false):0);
+				$y = (isset($attribs['y'])?$this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false):0);
+				$w = (isset($attribs['width'])?$this->getHTMLUnitToUnits($attribs['width'], 0, $this->svgunit, false):0);
+				$h = (isset($attribs['height'])?$this->getHTMLUnitToUnits($attribs['height'], 0, $this->svgunit, false):0);
+				$img = $attribs['xlink:href'];
 				if (!$clipping) {
 					$this->StartTransform();
-					$this->applySVGTransform($tm);
-					$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, $w, $h);
+					$this->SVGTransform($tm);
+					$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, $w, $h);
 					if (preg_match('/^data:image\/[^;]+;base64,/', $img, $m) > 0) {
 						// embedded image encoded as base64
 						$img = '@'.base64_decode(substr($img, strlen($m[0])));
@@ -1260,7 +1558,7 @@ class limePDF_SVGProcessor
 						if ($this->isRelativePath($img) || $this->hasExtForbiddenProtocol($img)) {
 							break;
 						}
-						if (!TCPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
+						if (!LIMEPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
 							// replace relative path with full server path
 							$img = $this->svgdir.'/'.$img;
 						}
@@ -1285,7 +1583,7 @@ class limePDF_SVGProcessor
 						}
 					}
 					// get image type
-					$imgtype = TCPDF_IMAGES::getImageFileType($img);
+					$imgtype = LIMEPDF_IMAGES::getImageFileType($img);
 					if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
 						$this->ImageEps($img, $x, $y, $w, $h);
 					} elseif ($imgtype == 'svg') {
@@ -1330,36 +1628,36 @@ class limePDF_SVGProcessor
 				if ($invisible) {
 					break;
 				}
-				array_push($this->svgstyles, $svg_style);
-				if (isset($attributes['x'])) {
-					$x = $this->getHTMLUnitToUnits($attributes['x'], 0, $this->svgunit, false);
+				array_push($this->svgstyles, $svgstyle);
+				if (isset($attribs['x'])) {
+					$x = $this->getHTMLUnitToUnits($attribs['x'], 0, $this->svgunit, false);
 				} elseif ($name == 'tspan') {
 					$x = $this->x;
 				} else {
 					$x = 0;
 				}
-				if (isset($attributes['dx'])) {
-					$x += $this->getHTMLUnitToUnits($attributes['dx'], 0, $this->svgunit, false);
+				if (isset($attribs['dx'])) {
+					$x += $this->getHTMLUnitToUnits($attribs['dx'], 0, $this->svgunit, false);
 				}
-				if (isset($attributes['y'])) {
-					$y = $this->getHTMLUnitToUnits($attributes['y'], 0, $this->svgunit, false);
+				if (isset($attribs['y'])) {
+					$y = $this->getHTMLUnitToUnits($attribs['y'], 0, $this->svgunit, false);
 				} elseif ($name == 'tspan') {
 					$y = $this->y;
 				} else {
 					$y = 0;
 				}
-				if (isset($attributes['dy'])) {
-					$y += $this->getHTMLUnitToUnits($attributes['dy'], 0, $this->svgunit, false);
+				if (isset($attribs['dy'])) {
+					$y += $this->getHTMLUnitToUnits($attribs['dy'], 0, $this->svgunit, false);
 				}
-				$svg_style['text-color'] = $svg_style['fill'];
+				$svgstyle['text-color'] = $svgstyle['fill'];
 				$this->svgtext = '';
-				if (isset($svg_style['text-anchor'])) {
-					$this->svgtextmode['text-anchor'] = $svg_style['text-anchor'];
+				if (isset($svgstyle['text-anchor'])) {
+					$this->svgtextmode['text-anchor'] = $svgstyle['text-anchor'];
 				} else {
 					$this->svgtextmode['text-anchor'] = 'start';
 				}
-				if (isset($svg_style['direction'])) {
-					if ($svg_style['direction'] == 'rtl') {
+				if (isset($svgstyle['direction'])) {
+					if ($svgstyle['direction'] == 'rtl') {
 						$this->svgtextmode['rtl'] = true;
 					} else {
 						$this->svgtextmode['rtl'] = false;
@@ -1367,45 +1665,45 @@ class limePDF_SVGProcessor
 				} else {
 					$this->svgtextmode['rtl'] = false;
 				}
-				if (isset($svg_style['stroke']) AND ($svg_style['stroke'] != 'none') AND isset($svg_style['stroke-width']) AND ($svg_style['stroke-width'] > 0)) {
-					$this->svgtextmode['stroke'] = $this->getHTMLUnitToUnits($svg_style['stroke-width'], 0, $this->svgunit, false);
+				if (isset($svgstyle['stroke']) AND ($svgstyle['stroke'] != 'none') AND isset($svgstyle['stroke-width']) AND ($svgstyle['stroke-width'] > 0)) {
+					$this->svgtextmode['stroke'] = $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false);
 				} else {
 					$this->svgtextmode['stroke'] = false;
 				}
 				$this->StartTransform();
-				$this->applySVGTransform($tm);
-				$obstyle = $this->setSVGStyles($svg_style, $previous_svg_style, $x, $y, 1, 1);
+				$this->SVGTransform($tm);
+				$obstyle = $this->setSVGStyles($svgstyle, $prev_svgstyle, $x, $y, 1, 1);
 				$this->x = $x;
 				$this->y = $y;
 				break;
 			}
 			// use
 			case 'use': {
-				if (isset($attributes['xlink:href']) AND !empty($attributes['xlink:href'])) {
-					$svgdefid = substr($attributes['xlink:href'], 1);
+				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
+					$svgdefid = substr($attribs['xlink:href'], 1);
 					if (isset($this->svgdefs[$svgdefid])) {
 						$use = $this->svgdefs[$svgdefid];
-						if (isset($attributes['xlink:href'])) {
-							unset($attributes['xlink:href']);
+						if (isset($attribs['xlink:href'])) {
+							unset($attribs['xlink:href']);
 						}
-						if (isset($attributes['id'])) {
-							unset($attributes['id']);
+						if (isset($attribs['id'])) {
+							unset($attribs['id']);
 						}
-						if (isset($use['attribs']['x']) AND isset($attributes['x'])) {
-							$attributes['x'] += $use['attribs']['x'];
+						if (isset($use['attribs']['x']) AND isset($attribs['x'])) {
+							$attribs['x'] += $use['attribs']['x'];
 						}
-						if (isset($use['attribs']['y']) AND isset($attributes['y'])) {
-							$attributes['y'] += $use['attribs']['y'];
+						if (isset($use['attribs']['y']) AND isset($attribs['y'])) {
+							$attribs['y'] += $use['attribs']['y'];
 						}
-						if (empty($attributes['style'])) {
-							$attributes['style'] = '';
+						if (empty($attribs['style'])) {
+							$attribs['style'] = '';
 						}
 						if (!empty($use['attribs']['style'])) {
 							// merge styles
-							$attributes['style'] = str_replace(';;',';',';'.$use['attribs']['style'].$attributes['style']);
+							$attribs['style'] = str_replace(';;',';',';'.$use['attribs']['style'].$attribs['style']);
 						}
-						$attributes = array_merge($use['attribs'], $attributes);
-						$this->handleSVGElementStart($parser, $use['name'], $attributes);
+						$attribs = array_merge($use['attribs'], $attribs);
+						$this->startSVGElementHandler($parser, $use['name'], $attribs);
 						return;
 					}
 				}
@@ -1416,12 +1714,12 @@ class limePDF_SVGProcessor
 			}
 		} // end of switch
 		// process child elements
-		if (!empty($attributes['child_elements'])) {
-			$child_elements = $attributes['child_elements'];
-			unset($attributes['child_elements']);
+		if (!empty($attribs['child_elements'])) {
+			$child_elements = $attribs['child_elements'];
+			unset($attribs['child_elements']);
 			foreach($child_elements as $child_element) {
 				if (empty($child_element['attribs']['closing_tag'])) {
-					$this->handleSVGElementStart('child-tag', $child_element['name'], $child_element['attribs']);
+					$this->startSVGElementHandler('child-tag', $child_element['name'], $child_element['attribs']);
 				} else {
 					if (isset($child_element['attribs']['content'])) {
 						$this->svgtext = $child_element['attribs']['content'];
@@ -1432,9 +1730,7 @@ class limePDF_SVGProcessor
 		}
 	}
 
-    /**
-     * Handle SVG element end tag
-     * MOVED FROM: protected function endSVGElementHandler($parser, $name)
+	/**
 	 * Sets the closing SVG element handler function for the XML parser.
 	 * @param resource|string $parser The first parameter, parser, is a reference to the XML parser calling the handler.
 	 * @param string $name The second parameter, name, contains the name of the element for which this handler is called. If case-folding is in effect for this parser, the element name will be in uppercase letters.
@@ -1442,28 +1738,27 @@ class limePDF_SVGProcessor
 	 * @since 5.0.000 (2010-05-02)
 	 * @protected
 	 */
-    public function handleSVGElementEnd($parser, $element_name)
-        {
-		$element_name = $this->removeTagNamespace($element_name);
-		if ($this->svgdefsmode AND !in_array($element_name, array('defs', 'clipPath', 'linearGradient', 'radialGradient', 'stop'))) {;
+	protected function endSVGElementHandler($parser, $name) {
+		$name = $this->removeTagNamespace($name);
+		if ($this->svgdefsmode AND !in_array($name, array('defs', 'clipPath', 'linearGradient', 'radialGradient', 'stop'))) {;
 			if (end($this->svgdefs) !== FALSE) {
 				$last_svgdefs_id = key($this->svgdefs);
 				if (isset($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'])) {
 					foreach($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'] as $child_element) {
-						if (isset($child_element['attribs']['id']) AND ($child_element['name'] == $element_name)) {
-							$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$child_element['attribs']['id'].'_CLOSE'] = array('name' => $element_name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
+						if (isset($child_element['attribs']['id']) AND ($child_element['name'] == $name)) {
+							$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$child_element['attribs']['id'].'_CLOSE'] = array('name' => $name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
 							return;
 						}
 					}
-					if ($this->svgdefs[$last_svgdefs_id]['name'] == $element_name) {
-						$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$last_svgdefs_id.'_CLOSE'] = array('name' => $element_name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
+					if ($this->svgdefs[$last_svgdefs_id]['name'] == $name) {
+						$this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'][$last_svgdefs_id.'_CLOSE'] = array('name' => $name, 'attribs' => array('closing_tag' => TRUE, 'content' => $this->svgtext));
 						return;
 					}
 				}
 			}
 			return;
 		}
-		switch($element_name) {
+		switch($name) {
 			case 'defs': {
 				$this->svgdefsmode = false;
 				break;
@@ -1514,14 +1809,14 @@ class limePDF_SVGProcessor
 				$textrendermode = $this->textrendermode;
 				$textstrokewidth = $this->textstrokewidth;
 				$this->setTextRenderingMode($this->svgtextmode['stroke'], true, false);
-				if ($element_name == 'text') {
+				if ($name == 'text') {
 					// store current coordinates
 					$tmpx = $this->x;
 					$tmpy = $this->y;
 				}
 				// print the text
 				$this->Cell($textlen, 0, $text, 0, 0, '', false, '', 0, false, 'L', 'T');
-				if ($element_name == 'text') {
+				if ($name == 'text') {
 					// restore coordinates
 					$this->x = $tmpx;
 					$this->y = $tmpy;
@@ -1542,103 +1837,17 @@ class limePDF_SVGProcessor
 		}
 	}
 
-    /**
-     * Handle SVG content/text data
-     * MOVED FROM: protected function segSVGContentHandler($parser, $data)
+	/**
 	 * Sets the character data handler function for the XML parser.
 	 * @param resource $parser The first parameter, parser, is a reference to the XML parser calling the handler.
-	 * @param string $content_dataThe second parameter, data, contains the character data as a string.
+	 * @param string $data The second parameter, data, contains the character data as a string.
 	 * @author Nicola Asuni
 	 * @since 5.0.000 (2010-05-02)
 	 * @protected
 	 */
-	protected function handleSVGContent($parser, $content_data) 
-    {
-		$this->svgtext .= $content_data;
+	protected function segSVGContentHandler($parser, $data) {
+		$this->svgtext .= $data;
 	}
 
-    /**
-     * Main entry point for processing SVG content
-     */
-    public function processSVG($svg_content, $x = 0, $y = 0, $w = 0, $h = 0)
-    {
-        // High-level method to process complete SVG
-        // This would be called from main TCPDF class
-    }
-
-    /**
-     * Initialize SVG processing state
-     */
-    private function initializeSVGState()
-    {
-        $this->svg_transform_matrix = array(1, 0, 0, 1, 0, 0);
-        $this->svg_style_stack = array();
-        $this->svg_parsing_state = array();
-    }
-
-    /**
-     * Parse SVG attributes into associative array
-     */
-    private function parseSVGAttributes($attribute_string)
-    {
-        // Helper method for attribute parsing
-    }
-
-    /**
-     * Convert SVG units to PDF units
-     */
-    private function convertSVGUnits($value, $default_unit = 'pt')
-    {
-        // Helper method for unit conversion
-    }
-
-    /**
-     * Apply SVG color to PDF context
-     */
-    private function applySVGColor($color_value)
-    {
-        // Helper method for color processing
-    }
-
-    /**
-     * Get current SVG transformation matrix
-     */
-    public function getCurrentTransformMatrix()
-    {
-        return $this->svg_transform_matrix;
-    }
-
-    /**
-     * Check if SVG processing is active
-     */
-    public function isSVGProcessingActive()
-    {
-        return !empty($this->svg_parsing_state);
-    }
+	// --- END SVG METHODS -----------------------------------------------------    
 }
-
-/*
-
-INTEGRATION POINTS:
-==================
-
-Main TCPDF class changes needed:
-- Add lazy loading property: private ?SVGProcessor $svgProcessor = null;
-- Add getter: private function getSVGProcessor(): SVGProcessor { return $this->svgProcessor ??= new SVGProcessor($this); }
-- Update SVG-related calls to use: $this->getSVGProcessor()->methodName()
-- Keep SVG-related properties in main class for backward compatibility
-
-EXAMPLE USAGE IN MAIN CLASS:
-============================
-
-// Instead of: $this->convertSVGtMatrix($tm);
-// Use: $this->getSVGProcessor()->convertSVGTransformMatrix($tm);
-
-// Instead of: $this->SVGPath($path_data, $style);  
-// Use: $this->getSVGProcessor()->processSVGPath($path_data, $style);
-
-// Public method to process SVG (triggers lazy load):
-public function ImageSVG($file, $x='', $y='', $w=0, $h=0, $link='', $align='', $palign='', $border=0, $fitonpage=false) {
-    return $this->getSVGProcessor()->processSVG($svg_content, $x, $y, $w, $h);
-}
-*/

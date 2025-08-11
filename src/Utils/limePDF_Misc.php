@@ -1,7 +1,20 @@
 <?php
 
+    namespace LimePDF\Utils;
+
+	Use LimePDF\TCPDF;
+
 class limePDF_Misc {
-    
+
+    // public static function buildBBox(\LimePDF\TCPDF $tcpdf, $data) {
+    //     return sprintf(
+    //         ' /BBox [%F %F %F %F]',
+    //         ($data['x'] * $tcpdf->k),
+    //         (-$data['y'] * $tcpdf->k),
+    //         (($data['w'] + $data['x']) * $tcpdf->k),
+    //         (($data['h'] - $data['y']) * $tcpdf->k)
+    //     );
+    // }
     /**
 	 * Output Form XObjects Templates.
 	 * @author Nicola Asuni
@@ -9,34 +22,42 @@ class limePDF_Misc {
 	 * @protected
 	 * @see startTemplate(), endTemplate(), printTemplate()
 	 */
-	protected function putXObjects() {
-		foreach ($this->xobjects as $key => $data) {
+	public static function putXObjects(\LimePDF\TCPDF $tcpdf){
+
+		$XObjects = $tcpdf->getXObjects();
+		$Epsmarker = $tcpdf->getEpsmarker();
+		$Compress = $tcpdf->getCompress();
+
+
+		foreach ($XObjects as $key => $data) {
 			if (isset($data['outdata'])) {
-				$stream = str_replace($this->epsmarker, '', trim($data['outdata']));
-				$out = $this->_getobj($data['n'])."\n";
+				$stream = str_replace($Epsmarker, '', trim($data['outdata']));
+				$out = $tcpdf->callGetObj($data['n'])."\n";
 				$out .= '<<';
 				$out .= ' /Type /XObject';
 				$out .= ' /Subtype /Form';
 				$out .= ' /FormType 1';
-				if ($this->compress) {
+				if ($Compress) {
 					$stream = gzcompress($stream);
 					$out .= ' /Filter /FlateDecode';
 				}
-				$out .= sprintf(' /BBox [%F %F %F %F]', ($data['x'] * $this->k), (-$data['y'] * $this->k), (($data['w'] + $data['x']) * $this->k), (($data['h'] - $data['y']) * $this->k));
+				//$out .= sprintf(' /BBox [%F %F %F %F]', ($data['x'] * $this->k), (-$data['y'] * $this->k), (($data['w'] + $data['x']) * $this->k), (($data['h'] - $data['y']) * $this->k));
+				//$out .= limePDF_Misc::buildBBox($this, $data); // $this is TCPDF instance
+				$out .= $tcpdf->buildBBox($data);
 				$out .= ' /Matrix [1 0 0 1 0 0]';
 				$out .= ' /Resources <<';
 				$out .= ' /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]';
-				if (!$this->pdfa_mode || $this->pdfa_version >= 2) {
+				if (!$tcpdf->getPdfa_mode() || $tcpdf->getPdfa_version() >= 2) {
 					// transparency
 					if (isset($data['extgstates']) AND !empty($data['extgstates'])) {
 						$out .= ' /ExtGState <<';
 						foreach ($data['extgstates'] as $k => $extgstate) {
-							if (isset($this->extgstates[$k]['name'])) {
-								$out .= ' /'.$this->extgstates[$k]['name'];
+							if (isset($tcpdf->getExtgstates[$k]['name'])) {
+								$out .= ' /'.$tcpdf->getExtgstatess[$k]['name'];
 							} else {
 								$out .= ' /GS'.$k;
 							}
-							$out .= ' '.$this->extgstates[$k]['n'].' 0 R';
+							$out .= ' '.$tcpdf->getExtgstates[$k]['n'].' 0 R';
 						}
 						$out .= ' >>';
 					}
@@ -53,6 +74,7 @@ class limePDF_Misc {
 						$out .= ' /Shading <<'.$gs.' >>';
 					}
 				}
+
 				// spot colors
 				if (isset($data['spot_colors']) AND !empty($data['spot_colors'])) {
 					$out .= ' /ColorSpace <<';
@@ -61,25 +83,77 @@ class limePDF_Misc {
 					}
 					$out .= ' >>';
 				}
+
 				// fonts
 				if (!empty($data['fonts'])) {
 					$out .= ' /Font <<';
 					foreach ($data['fonts'] as $fontkey => $fontid) {
-						$out .= ' /F'.$fontid.' '.$this->font_obj_ids[$fontkey].' 0 R';
+						$out .= ' /F'.$fontid.' '.$tcpdf->getFontObjId($fontkey).' 0 R';
 					}
 					$out .= ' >>';
 				}
+
 				// images or nested xobjects
 				if (!empty($data['images']) OR !empty($data['xobjects'])) {
 					$out .= ' /XObject <<';
 					foreach ($data['images'] as $imgid) {
-						$out .= ' /I'.$imgid.' '.$this->xobjects['I'.$imgid]['n'].' 0 R';
+
+						$xobjects = $tcpdf->getXObjects();
+
+						// Find matching key for this image ID
+						$foundKey = null;
+
+						foreach ($xobjects as $xname => $xdata) {
+							// only handle image-type XObjects that have 'i'
+							if (isset($xdata['i']) && $xdata['i'] === $imgid) {
+								$key = $xname; // e.g., 'I0'
+								if (isset($xdata['n'])) {
+									$out .= ' /' . $key . ' ' . $xdata['n'] . ' 0 R';
+								} else {
+									throw new RuntimeException("XObject '$key' is missing 'n' — image embedding failed earlier.");
+								}
+							}
+						}
+
+						// foreach ($xobjects as $xkey => $xdata) {
+						// 	if ($xdata['i'] === $imgid) { // 'i' is the TCPDF image index reference
+						// 		$foundKey = $xkey;
+						// 		break;
+						// 	}
+						// }
+
+						// if ($foundKey === null) {
+						// 	throw new RuntimeException("Missing XObject for image ID {$imgid}");
+						// }
+
+						// $out .= ' /' . $foundKey . ' ' . $xobjects[$foundKey]['n'] . ' 0 R';
+
+						// var_dump(array_keys($tcpdf->getXobjects()));
+						// var_dump(($imgid));
+
+						// $xobjects = $tcpdf->getXObjects();
+						// $key = 'I' . $imgid;
+
+						// if (!isset($xobjects[$key]['n'])) {
+						// 	// debug/logging to help trace root cause
+						// 	error_log("Missing XObject for {$key}. Available keys: " . implode(',', array_keys($xobjects)));
+						// 	// choose behavior: skip, throw, or add fallback
+						// 	// Option A: skip this XObject (safe)
+						// 	// $out .= ''; // nothing
+						// 	// Option B: throw informative exception
+						// 	throw new \RuntimeException("Missing XObject '{$key}' — image embedding failed earlier.");
+						// } else {
+						// 	$out .= ' /I' . $imgid . ' ' . $xobjects[$key]['n'] . ' 0 R';
+						// }
+	
+						//$out .= ' /I'.$imgid.' '.$tcpdf->getXObjects()['I'.$imgid]['n'].' 0 R';
 					}
 					foreach ($data['xobjects'] as $sub_id => $sub_objid) {
 						$out .= ' /'.$sub_id.' '.$sub_objid['n'].' 0 R';
 					}
 					$out .= ' >>';
 				}
+
 				$out .= ' >>'; //end resources
 				if (isset($data['group']) AND ($data['group'] !== false)) {
 					// set transparency group
@@ -97,17 +171,18 @@ class limePDF_Misc {
 					}
 					$out .= ' >>';
 				}
-				$stream = $this->_getrawstream($stream, $data['n']);
+
+				$stream = $tcpdf->_getrawstream($stream, $data['n']);
 				$out .= ' /Length '.strlen($stream);
 				$out .= ' >>';
 				$out .= ' stream'."\n".$stream."\n".'endstream';
 				$out .= "\n".'endobj';
-				$this->_out($out);
+				$tcpdf->_out($out);
 			}
 		}
 	}
 
-    	/**
+    /**
 	 * Output gradient shaders.
 	 * @author Nicola Asuni
 	 * @since 3.1.000 (2008-06-09)
@@ -259,7 +334,7 @@ class limePDF_Misc {
 				$this->xobjects['LX'.$oid] = array('n' => $oid);
 				$filter = '';
 				$stream = 'q /a0 gs /Pattern cs /p'.$idgs.' scn 0 0 '.$this->wPt.' '.$this->hPt.' re f Q';
-				if ($this->compress) {
+				if ($Compress) {
 					$filter = ' /Filter /FlateDecode';
 					$stream = gzcompress($stream);
 				}

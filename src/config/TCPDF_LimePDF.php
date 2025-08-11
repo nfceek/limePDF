@@ -1174,14 +1174,7 @@ class TCPDF extends \TCPDF
         $this->lisymbol = $value;
         return $this;
     }
-    public function getEpsmarker() {
-        return $this->epsmarker;
-    }
 
-    public function setEpsmarker($value) {
-        $this->epsmarker = $value;
-        return $this;
-    }
     public function getTransfmatrix() {
         return $this->transfmatrix;
     }

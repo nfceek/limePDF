@@ -3,6 +3,78 @@
 
 class limePDF_Javascript {
 
+		// --- JAVASCRIPT ------------------------------------------------------
+
+	/**
+	 * Adds a javascript
+	 * @param string $script Javascript code
+	 * @public
+	 * @author Johannes G\FCntert, Nicola Asuni
+	 * @since 2.1.002 (2008-02-12)
+	 */
+	public function IncludeJS($script) {
+		$this->javascript .= $script;
+	}
+
+	/**
+	 * Adds a javascript object and return object ID
+	 * @param string $script Javascript code
+	 * @param boolean $onload if true executes this object when opening the document
+	 * @return int internal object ID
+	 * @public
+	 * @author Nicola Asuni
+	 * @since 4.8.000 (2009-09-07)
+	 */
+	public function addJavascriptObject($script, $onload=false) {
+		if ($this->pdfa_mode) {
+			// javascript is not allowed in PDF/A mode
+			return false;
+		}
+		++$this->n;
+		$this->js_objects[$this->n] = array('n' => $this->n, 'js' => $script, 'onload' => $onload);
+		return $this->n;
+	}
+
+
+
+	/**
+	 * Adds a javascript form field.
+	 * @param string $type field type
+	 * @param string $name field name
+	 * @param int $x horizontal position
+	 * @param int $y vertical position
+	 * @param int $w width
+	 * @param int $h height
+	 * @param array $prop javascript field properties. Possible values are described on official Javascript for Acrobat API reference.
+	 * @protected
+	 * @author Denis Van Nuffelen, Nicola Asuni
+	 * @since 2.1.002 (2008-02-12)
+	 */
+	protected function _addfield($type, $name, $x, $y, $w, $h, $prop) {
+		if ($this->rtl) {
+			$x = $x - $w;
+		}
+		// the followind avoid fields duplication after saving the document
+		$this->javascript .= "if (getField('tcpdfdocsaved').value != 'saved') {";
+		$k = $this->k;
+		$this->javascript .= sprintf("f".$name."=this.addField('%s','%s',%u,[%F,%F,%F,%F]);", $name, $type, $this->PageNo()-1, $x*$k, ($this->h-$y)*$k+1, ($x+$w)*$k, ($this->h-$y-$h)*$k+1)."\n";
+		$this->javascript .= 'f'.$name.'.textSize='.$this->FontSizePt.";\n";
+		foreach($prop as $key => $val) {
+			if (strcmp(substr($key, -5), 'Color') == 0) {
+				$val = LIMEPDF_COLORS::_JScolor($val);
+			} else {
+				$val = "'".$val."'";
+			}
+			$this->javascript .= 'f'.$name.'.'.$key.'='.$val.";\n";
+		}
+		if ($this->rtl) {
+			$this->x -= $w;
+		} else {
+			$this->x += $w;
+		}
+		$this->javascript .= '}';
+	}
+
 	/**
 	 * Create a javascript PDF string.
 	 * @protected
