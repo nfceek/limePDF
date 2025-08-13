@@ -1,10 +1,9 @@
 <?php
 
-    namespace LimePDF\Utils;
 
-	Use LimePDF\TCPDF;
+namespace LimePDF;
 
-class limePDF_Templates {
+trait LIMEPDF_TEMPLATES {
 
     // /**
 	//  * Output Form XObjects Templates.

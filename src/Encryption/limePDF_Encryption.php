@@ -1,10 +1,8 @@
 <?php
-    namespace LimePDF\Encryption;
 
-	Use LimePDF\TCPDF;
+namespace LimePDF;
 
-
-class limePDF_Encryption {
+trait LIMEPDF_ENCRYPTION {
 
  	// ENCRYPTION METHODS ----------------------------------
 

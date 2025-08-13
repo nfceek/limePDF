@@ -1,7 +1,8 @@
 <?php
 
+namespace LimePDF;
 
-class limePDF_Javascript {
+trait LIMEPDF_JAVASCRIPT {
 
 		// --- JAVASCRIPT ------------------------------------------------------
 

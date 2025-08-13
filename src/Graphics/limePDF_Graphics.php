@@ -1,10 +1,8 @@
 <?php
 
-    namespace LimePDF\Graphics;
+namespace LimePDF;
 
-	Use LimePDF\TCPDF;
-
-class limePDF_Graphics {
+trait LIMEPDF_GRAPHICS {
 
 	// START GRAPHIC FUNCTIONS SECTION ---------------------
 	// The following section is based on the code provided by David Hernandez Sanz

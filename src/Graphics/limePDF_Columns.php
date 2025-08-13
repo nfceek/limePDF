@@ -1,10 +1,9 @@
 <?php
 
-    namespace LimePDF\Utils;
+namespace LimePDF;
 
-	Use LimePDF\TCPDF;
+trait LIMEPDF_COLUMNS{
 
-class limePDF_Columms{
 	// --- MULTI COLUMNS METHODS -----------------------
 
 	/**

@@ -1,10 +1,8 @@
 <?php
 
-    namespace LimePDF\Forms;
+namespace LimePDF;
 
-	Use LimePDF\TCPDF;
-
-class limePDF_Forms {
+trait LIMEPDF_FORMS {
 	/**
 	 * Creates a text field
 	 * @param string $name field name

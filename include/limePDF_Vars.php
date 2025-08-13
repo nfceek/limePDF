@@ -1,5 +1,5 @@
 <?php
-// Auto-generated from tcpdf.php
+
 namespace LimePDF;
 
 trait LIMEPDF_VARS {

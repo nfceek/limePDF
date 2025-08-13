@@ -1,10 +1,8 @@
 <?php
 
-    namespace LimePDF\Graphics;
+namespace LimePDF;
 
-	Use LimePDF\TCPDF;
-
-class limePDF_SVG {
+trait LIMEPDF_SVG {
 
 	// --- SVG METHODS ---------------------------------------------------------
 

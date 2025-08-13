@@ -1,64 +1,15 @@
 <?php
-//============================================================+
-// File name   : LIMEPDF_STATIC.php
-// Version     : 1.1.5
-// Begin       : 2002-08-03
-// Last Update : 2024-12-23
-// Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
-// License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
-// -------------------------------------------------------------------
-// Copyright (C) 2002-2025 Nicola Asuni - Tecnick.com LTD
-//
-// This file is part of TCPDF software library.
-//
-// TCPDF is free software: you can redistribute it and/or modify it
-// under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// TCPDF is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the License
-// along with TCPDF. If not, see
-// <http://www.tecnick.com/pagefiles/tcpdf/LICENSE.TXT>.
-//
-// See LICENSE.TXT file for more information.
-// -------------------------------------------------------------------
-//
-// Description :
-//   Static methods used by the TCPDF class.
-//
-//============================================================+
 
-/**
- * @file
- * This is a PHP class that contains static methods for the TCPDF class.<br>
- * @package com.tecnick.tcpdf
- * @author Nicola Asuni
- * @version 1.1.5
- */
-
-/**
- * @class LIMEPDF_STATIC
- * Static methods used by the TCPDF class.
- * @package com.tecnick.tcpdf
- * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 1.1.5
- * @author Nicola Asuni - info@tecnick.com
- */
 
 namespace LimePDF;
 
 class LIMEPDF_STATIC {
 
 	/**
-	 * Current TCPDF version.
+	 * Current limePDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '6.10.0';
+	private static $tcpdf_version = '0.0.5';
 
 	/**
 	 * String alias for total number of pages.
@@ -121,7 +72,7 @@ class LIMEPDF_STATIC {
         CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_TIMEOUT => 30,
-        CURLOPT_USERAGENT => 'tcpdf',
+        CURLOPT_USERAGENT => 'limePDF',
     ];
 
     /**
