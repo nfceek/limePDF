@@ -34,41 +34,57 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Sections.php');	
 
 
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');
+
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Forms.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
+	//require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
+	//require_once(dirname(__FILE__).'/src/Utils/limePDF_PutXObjects.php');
 
-
-	require_once(dirname(__FILE__).'/src/Model/limePDF_Page_GetterSetter.php');
 	require_once(dirname(__FILE__).'/src/Model/limePDF_Font_GetterSetter.php');	
+	require_once(dirname(__FILE__).'/src/Model/limePDF_Page_GetterSetter.php');
+	require_once(dirname(__FILE__).'/src/Model/limePDF_Text_GetterSetter.php');	
 
+	require_once(dirname(__FILE__).'/src/Text/limePDF_text.php');
 	
 class TCPDF {
 
-	use LIMEPDF_VARS;
-	use LIMEPDF_GRAPHICS;
-	use LIMEPDF_TRANSFORMATIONS;
 	use LIMEPDF_COLUMNS;
-	use LIMEPDF_SVG;
-	use LIMEPDF_ENCRYPTION;
-	use LIMEPDF_ENVIRONMENT;
-	use LIMEPDF_FORMS;
-	use LIMEPDF_JAVASCRIPT;
 
-	use LIMEPDF_XOTEMPLATES;
-	use LIMEPDF_PAGES;
-	use LIMEPDF_PAGECOLORS;	
-	use LIMEPDF_MARGINS;
-	use LIMEPDF_SECTIONS;
-	use LIMEPDF_FONTMANAGER;	
-	use LIMEPDF_FONTS;
 	use LIMEPDF_DRAW;
 
+	use LIMEPDF_ENCRYPTION;
+	use LIMEPDF_ENVIRONMENT;
+
+	use LIMEPDF_FONTMANAGER;	
+	use LIMEPDF_FONTS;
+	use LIMEPDF_FORMS;
+
+	use LIMEPDF_GRAPHICS;
+
+	use LIMEPDF_JAVASCRIPT;
+
+	use LIMEPDF_MARGINS;
+	//use LIMEPDF_MISC;
+
+	use LIMEPDF_PAGES;
+	use LIMEPDF_PAGECOLORS;	
+	//use LIMEPDF_PUTXOBJECTS;
+
+	use LIMEPDF_SECTIONS;
+	use LIMEPDF_SVG;
+
+	use LIMEPDF_TEXT;
+	use LIMEPDF_TRANSFORMATIONS;
+
+	use LIMEPDF_VARS;
+
+	use LIMEPDF_XOTEMPLATES;
 
 	// Load Getter Setters
 	USE LIMEPDF_FONT_GETTERSETTER;
 	USE LIMEPDF_PAGE_GETTERSETTER;	
+	USE LIMEPDF_TEXT_GETTERSETTER;
 
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
 
@@ -2530,67 +2546,7 @@ class TCPDF {
 		return $lines;
 	}
 
-	/**
-	 * This method return the estimated height needed for printing a simple text string using the Multicell() method.
-	 * Generally, if you want to know the exact height for a block of content you can use the following alternative technique:
-	 * @pre
-	 *  // store current object
-	 *  $pdf->startTransaction();
-	 *  // store starting values
-	 *  $start_y = $pdf->GetY();
-	 *  $start_page = $pdf->getPage();
-	 *  // call your printing functions with your parameters
-	 *  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	 *  $pdf->MultiCell($w=0, $h=0, $txt, $border=1, $align='L', $fill=false, $ln=1, $x=null, $y=null, $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0);
-	 *  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	 *  // get the new Y
-	 *  $end_y = $pdf->GetY();
-	 *  $end_page = $pdf->getPage();
-	 *  // calculate height
-	 *  $height = 0;
-	 *  if ($end_page == $start_page) {
-	 *  	$height = $end_y - $start_y;
-	 *  } else {
-	 *  	for ($page=$start_page; $page <= $end_page; ++$page) {
-	 *  		$this->setPage($page);
-	 *  		if ($page == $start_page) {
-	 *  			// first page
-	 *  			$height += $this->h - $start_y - $this->bMargin;
-	 *  		} elseif ($page == $end_page) {
-	 *  			// last page
-	 *  			$height += $end_y - $this->tMargin;
-	 *  		} else {
-	 *  			$height += $this->h - $this->tMargin - $this->bMargin;
-	 *  		}
-	 *  	}
-	 *  }
-	 *  // restore previous object
-	 *  $pdf = $pdf->rollbackTransaction();
-	 *
-	 * @param float $w Width of cells. If 0, they extend up to the right margin of the page.
-	 * @param string $txt String for calculating his height
-	 * @param boolean $reseth if true reset the last cell height (default false).
-	 * @param boolean $autopadding if true, uses internal padding and automatically adjust it to account for line width (default true).
-	 * @param array|null $cellpadding Internal cell padding, if empty uses default cell padding.
-	 * @param mixed $border Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
-	 * @return float Return the minimal height needed for multicell method for printing the $txt param.
-	 * @author Nicola Asuni, Alexander Escalona Fern\E1ndez
-	 * @public
-	 */
-	public function getStringHeight($w, $txt, $reseth=false, $autopadding=true, $cellpadding=null, $border=0) {
-		// adjust internal padding
-		$prev_cell_padding = $this->cell_padding;
-		$prev_lasth = $this->lasth;
-		if (is_array($cellpadding)) {
-			$this->cell_padding = $cellpadding;
-		}
-		$this->adjustCellPadding($border);
-		$lines = $this->getNumLines($txt, $w, $reseth, $autopadding, $cellpadding, $border);
-		$height = $this->getCellHeight(($lines * $this->FontSize), $autopadding);
-		$this->cell_padding = $prev_cell_padding;
-		$this->lasth = $prev_lasth;
-		return $height;
-	}
+
 
 	/**
 	 * This method prints text from the current position.<br />
@@ -5314,9 +5270,6 @@ class TCPDF {
 		$this->_out($s);
 	}
 
-
-
-
 	/**
 	 * Return XObjects Dictionary.
 	 * @return string XObjects dictionary
@@ -5331,242 +5284,1037 @@ class TCPDF {
 		return $out;
 	}
 
-
-
 	/**
 	 * Output Resources.
 	 * @protected
 	 * 
 	 */
-
-	 public function getImagekeys() {
-        return $this->imagekeys;
-    }
-
-    public function setImagekeys($value) {
-        $this->imagekeys = $value;
-        return $this;
-    }
-
-	public function getPdfa_mode() {
-        return $this->pdfa_mode;
-    }
-
-    public function setPdfa_mode($value) {
-        $this->pdfa_mode = $value;
-        return $this;
-    }
-
-	public function getXobjects() {
-        return $this->xobjects;
-    }
-
-    public function setXobjects($value) {
-        $this->xobjects = $value;
-        return $this;
-    }
-
-	// new	
-	// 
-	// // --- GETTERS --
-	public function &getExtGStates() {
-		return $this->extgstates;
-	}
-
-
-	public function &getPdfLayers() {
-		return $this->pdflayers;
-	}
-	public function getCurrentObjectId(): int {
-		return $this->n;
-	}
-
-	public function getObjectId(): int {
-		return $this->n;
-	}
-
-	public function getRawStream(string $data): string {
-		return $this->_getrawstream($data);
-	}
-
-	public function getDiffs(): array {
-		return $this->diffs;
-	}
-
-	public function getFontFiles(): array {
-		return $this->FontFiles;
-	}
-
-	public function getFontKeys(): array {
-		return $this->fontkeys;
-	}
-
-	public function getAnnotationFonts(): array {
-		return $this->annotation_fonts;
-	}
-
-	public function getN(): int {
-		return $this->n;
-	}
-
-	public function getFontObjId(string $key): ?int {
-		return $this->font_obj_ids[$key] ?? null;
-	}
-
-	public function getSpotColors(): array {
-		return $this->spot_colors ?? [];
-	}
-
-	public function callGetObj($n) {
-		return $this->_getobj($n); // wrapper for protected method
-	}
-
-	public function getXObjectDict(): string {
-		return $this->_getxobjectdict();
-	}
-
-	public function getPdfAVersion(): bool {
-		return $this->pdfa_version ?? false;
-	}
-
-	public function getCompress(): bool {
-		return $this->compress;
-	}
-
-
-	// public function getPdfAVersion(): bool {
-	// 	return $this->pdfa_version ?? false;
-	// }	
-
-	// --- SETTERS ---
-
-	public function setSpotColors(array $colors): void {
-		$this->spot_colors = $colors;
-	}
-
-	public function setPdfLayers($pdflayers) {
-		$this->pdflayers = $pdflayers;
-	}
-
-	public function setExtGStates($extgstates) {
-		$this->extgstates = $extgstates;
-	}
-
-	public function setDiffs(array $diffs): void {
-		$this->diffs = $diffs;
-	}
-
-	public function setFontFiles(array $fontFiles): void {
-		$this->FontFiles = $fontFiles;
-	}
-
-	public function addFontKey(string $key): void {
-		if (!in_array($key, $this->fontkeys)) {
-			$this->fontkeys[] = $key;
-		}
-	}
-
-	public function setAnnotationFont(string $key, int $value): void {
-		$this->annotation_fonts[$key] = $value;
-	}
-
-	public function setFontObjId(string $key, int $id): void {
-		$this->font_obj_ids[$key] = $id;
-	}
-
-	public function incrementN(): int {
-		return ++$this->n;
-	}
-
-	public function setFontFileN(string $file, int $n): void {
-		if (!isset($this->FontFiles[$file])) {
-			$this->FontFiles[$file] = [];
-		}
-		$this->FontFiles[$file]['n'] = $n;
-	}
-
-	public function isPdfaMode(): bool {
-		return $this->pdfa_mode ?? false;
-	}
-
-	public function getEpsmarker() {
-        return $this->epsmarker;
-    }
-
-    public function setEpsmarker($value) {
-        $this->epsmarker = $value;
-        return $this;
-    }
-
-	public function buildBBox($data) {
-        return sprintf(
-            ' /BBox [%F %F %F %F]',
-            ($data['x'] * $this->k),
-            (-$data['y'] * $this->k),
-            (($data['w'] + $data['x']) * $this->k),
-            (($data['h'] - $data['y']) * $this->k)
-        );
-    }
-
-	public function getGradients() {
-        return $this->gradients;
-    }
-
-    public function setGradients($value) {
-        $this->gradients = $value;
-        return $this;
-    }
-
-	public function getPdfa_version() {
-        return $this->pdfa_version;
-    }
-
-    public function setPdfa_version($value) {
-        $this->pdfa_version = $value;
-        return $this;
-    }
-
-	//old
 	public function _putresources() {
-		$utilsPut = new \LimePDF\Utils\limePDF_Put();
-			$utilsPut->putExtGStates($this);
-			$utilsPut->putOcg($this);
-			$utilsPut->putSpotColors($this);
-			$utilsPut->putImages($this);    
-			$utilsPut->putFonts($this);
-			$utilsPut->putResourceDict($this);
-			$utilsPut->putDests($this);		
-			//$utils->putEncryption($this);		<-- TODO needs updated		
-			//$utils->putAnnotsObjs($this);		<-- work in progress
-
-		$utilsMisc = new \LimePDF\Utils\limePDF_Misc();  
-			$utilsMisc->putXObjects($this);
-			//$utilsMisc->putBookmarks($this);	<-- TODO needs updated
-			//$utilsMisc->putShaders($this);	<-- TODO needs updated	
-		
-		//$utilsJavascript = new \limePDF_Javascript();
-			//$utilsJavacript->putJavascript($this);	<-- TODO needs updated	
-
-		// echo '<pre>';
-		// var_dump($this);
-		// echo '</pre>';
-		// exit;
-		
-		//$this->_putextgstates();
-		//$this->_putocg();
-		//$this->_putfonts();
-		//$this->_putimages();
-		//$this->_putspotcolors();
-		//$this->_putshaders();
-		//$this->_putxobjects();
-		//$this->_putresourcedict();
-		//$this->_putdests();
-		//$this->_putEmbeddedFiles();
+		$this->_putextgstates();
+		$this->_putocg();
+		$this->_putfonts();
+		$this->_putimages();
+		$this->_putspotcolors();
+		$this->_putshaders();
+		$this->_putxobjects();
+		$this->_putresourcedict();
+		$this->_putdests();
+		$this->_putEmbeddedFiles();
 		//$this->_putannotsobjs();
 		//this->_putjavascript();
-		//$this->_putbookmarks();
-		//$this->_putencryption();
+		$this->_putbookmarks();
+		$this->_putencryption();
 
+	}
+
+
+	/**
+	 * Put encryption on PDF document.
+	 * @protected
+	 * @author Nicola Asuni
+	 * @since 2.0.000 (2008-01-02)
+	 */
+	protected function _putencryption() {
+		if (!$this->encrypted) {
+			return;
+		}
+		$this->encryptdata['objid'] = $this->_newobj();
+		$out = '<<';
+		if (!isset($this->encryptdata['Filter']) OR empty($this->encryptdata['Filter'])) {
+			$this->encryptdata['Filter'] = 'Standard';
+		}
+		$out .= ' /Filter /'.$this->encryptdata['Filter'];
+		if (isset($this->encryptdata['SubFilter']) AND !empty($this->encryptdata['SubFilter'])) {
+			$out .= ' /SubFilter /'.$this->encryptdata['SubFilter'];
+		}
+		if (!isset($this->encryptdata['V']) OR empty($this->encryptdata['V'])) {
+			$this->encryptdata['V'] = 1;
+		}
+		// V is a code specifying the algorithm to be used in encrypting and decrypting the document
+		$out .= ' /V '.$this->encryptdata['V'];
+		if (isset($this->encryptdata['Length']) AND !empty($this->encryptdata['Length'])) {
+			// The length of the encryption key, in bits. The value shall be a multiple of 8, in the range 40 to 256
+			$out .= ' /Length '.$this->encryptdata['Length'];
+		} else {
+			$out .= ' /Length 40';
+		}
+		if ($this->encryptdata['V'] >= 4) {
+			if (!isset($this->encryptdata['StmF']) OR empty($this->encryptdata['StmF'])) {
+				$this->encryptdata['StmF'] = 'Identity';
+			}
+			if (!isset($this->encryptdata['StrF']) OR empty($this->encryptdata['StrF'])) {
+				// The name of the crypt filter that shall be used when decrypting all strings in the document.
+				$this->encryptdata['StrF'] = 'Identity';
+			}
+			// A dictionary whose keys shall be crypt filter names and whose values shall be the corresponding crypt filter dictionaries.
+			if (isset($this->encryptdata['CF']) AND !empty($this->encryptdata['CF'])) {
+				$out .= ' /CF <<';
+				$out .= ' /'.$this->encryptdata['StmF'].' <<';
+				$out .= ' /Type /CryptFilter';
+				if (isset($this->encryptdata['CF']['CFM']) AND !empty($this->encryptdata['CF']['CFM'])) {
+					// The method used
+					$out .= ' /CFM /'.$this->encryptdata['CF']['CFM'];
+					if ($this->encryptdata['pubkey']) {
+						$out .= ' /Recipients [';
+						foreach ($this->encryptdata['Recipients'] as $rec) {
+							$out .= ' <'.$rec.'>';
+						}
+						$out .= ' ]';
+						if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) {
+							$out .= ' /EncryptMetadata false';
+						} else {
+							$out .= ' /EncryptMetadata true';
+						}
+					}
+				} else {
+					$out .= ' /CFM /None';
+				}
+				if (isset($this->encryptdata['CF']['AuthEvent']) AND !empty($this->encryptdata['CF']['AuthEvent'])) {
+					// The event to be used to trigger the authorization that is required to access encryption keys used by this filter.
+					$out .= ' /AuthEvent /'.$this->encryptdata['CF']['AuthEvent'];
+				} else {
+					$out .= ' /AuthEvent /DocOpen';
+				}
+				if (isset($this->encryptdata['CF']['Length']) AND !empty($this->encryptdata['CF']['Length'])) {
+					// The bit length of the encryption key.
+					$out .= ' /Length '.$this->encryptdata['CF']['Length'];
+				}
+				$out .= ' >> >>';
+			}
+			// The name of the crypt filter that shall be used by default when decrypting streams.
+			$out .= ' /StmF /'.$this->encryptdata['StmF'];
+			// The name of the crypt filter that shall be used when decrypting all strings in the document.
+			$out .= ' /StrF /'.$this->encryptdata['StrF'];
+			if (isset($this->encryptdata['EFF']) AND !empty($this->encryptdata['EFF'])) {
+				// The name of the crypt filter that shall be used when encrypting embedded file streams that do not have their own crypt filter specifier.
+				$out .= ' /EFF /'.$this->encryptdata[''];
+			}
+		}
+		// Additional encryption dictionary entries for the standard security handler
+		if ($this->encryptdata['pubkey']) {
+			if (($this->encryptdata['V'] < 4) AND isset($this->encryptdata['Recipients']) AND !empty($this->encryptdata['Recipients'])) {
+				$out .= ' /Recipients [';
+				foreach ($this->encryptdata['Recipients'] as $rec) {
+					$out .= ' <'.$rec.'>';
+				}
+				$out .= ' ]';
+			}
+		} else {
+			$out .= ' /R';
+			if ($this->encryptdata['V'] == 5) { // AES-256
+				$out .= ' 5';
+				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
+				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
+				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
+			} elseif ($this->encryptdata['V'] == 4) { // AES-128
+				$out .= ' 4';
+			} elseif ($this->encryptdata['V'] < 2) { // RC-40
+				$out .= ' 2';
+			} else { // RC-128
+				$out .= ' 3';
+			}
+			$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
+			$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
+			$out .= ' /P '.$this->encryptdata['P'];
+			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
+				$out .= ' /EncryptMetadata false';
+			} else {
+				$out .= ' /EncryptMetadata true';
+			}
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$this->_out($out);
+	}
+
+	/**
+	 * Embedd the attached files.
+	 * @since 4.4.000 (2008-12-07)
+	 * @protected
+	 * @see Annotation()
+	 */
+	protected function _putEmbeddedFiles() {
+		if ($this->pdfa_mode && $this->pdfa_version != 3)  {
+			// embedded files are not allowed in PDF/A mode version 1 and 2
+			return;
+		}
+		reset($this->embeddedfiles);
+		foreach ($this->embeddedfiles as $filename => $filedata) {
+			$data = false;
+			if (isset($filedata['file']) && !empty($filedata['file'])) {
+				$data = $this->getCachedFileContents($filedata['file']);
+			} elseif ($filedata['content'] && !empty($filedata['content'])) {
+				$data = $filedata['content'];
+			}
+			if ($data !== FALSE) {
+				$rawsize = strlen($data);
+				if ($rawsize > 0) {
+					// update name tree
+					$this->efnames[$filename] = $filedata['f'].' 0 R';
+					// embedded file specification object
+					$out = $this->_getobj($filedata['f'])."\n";
+					$out .= '<</Type /Filespec /F '.$this->_datastring($filename, $filedata['f']);
+					$out .= ' /UF '.$this->_datastring($filename, $filedata['f']);
+					$out .= ' /AFRelationship /Source';
+					$out .= ' /EF <</F '.$filedata['n'].' 0 R>> >>';
+					$out .= "\n".'endobj';
+					$this->_out($out);
+					// embedded file object
+					$filter = '';
+					if ($this->compress) {
+						$data = gzcompress($data);
+						$filter = ' /Filter /FlateDecode';
+					}
+
+					if ($this->pdfa_version == 3) {
+						$filter = ' /Subtype /text#2Fxml';
+					}
+
+					$stream = $this->_getrawstream($data, $filedata['n']);
+					$out = $this->_getobj($filedata['n'])."\n";
+					$out .= '<< /Type /EmbeddedFile'.$filter.' /Length '.strlen($stream).' /Params <</Size '.$rawsize.'>> >>';
+					$out .= ' stream'."\n".$stream."\n".'endstream';
+					$out .= "\n".'endobj';
+					$this->_out($out);
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Output Spot Colors Resources.
+	 * @protected
+	 * @since 4.0.024 (2008-09-12)
+	 */
+	protected function _putspotcolors() {
+		foreach ($this->spot_colors as $name => $color) {
+			$this->_newobj();
+			$this->spot_colors[$name]['n'] = $this->n;
+			$out = '[/Separation /'.str_replace(' ', '#20', $name);
+			$out .= ' /DeviceCMYK <<';
+			$out .= ' /Range [0 1 0 1 0 1 0 1] /C0 [0 0 0 0]';
+			$out .= ' '.sprintf('/C1 [%F %F %F %F] ', ($color['C'] / 100), ($color['M'] / 100), ($color['Y'] / 100), ($color['K'] / 100));
+			$out .= ' /FunctionType 2 /Domain [0 1] /N 1>>]';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+		}
+	}
+
+	/**
+	 * Output images.
+	 * @protected
+	 */
+	protected function _putimages() {
+		$filter = ($this->compress) ? '/Filter /FlateDecode ' : '';
+		foreach ($this->imagekeys as $file) {
+			$info = $this->getImageBuffer($file);
+			// set object for alternate images array
+			$altoid = null;
+			if ((!$this->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
+				$altoid = $this->_newobj();
+				$out = '[';
+				foreach ($info['altimgs'] as $altimage) {
+					if (isset($this->xobjects['I'.$altimage[0]]['n'])) {
+						$out .= ' << /Image '.$this->xobjects['I'.$altimage[0]]['n'].' 0 R';
+						$out .= ' /DefaultForPrinting';
+						if ($altimage[1] === true) {
+							$out .= ' true';
+						} else {
+							$out .= ' false';
+						}
+						$out .= ' >>';
+					}
+				}
+				$out .= ' ]';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+			}
+			// set image object
+			$oid = $this->_newobj();
+			$this->xobjects['I'.$info['i']] = array('n' => $oid);
+			$this->setImageSubBuffer($file, 'n', $this->n);
+			$out = '<</Type /XObject';
+			$out .= ' /Subtype /Image';
+			$out .= ' /Width '.$info['w'];
+			$out .= ' /Height '.$info['h'];
+			if (array_key_exists('masked', $info)) {
+				$out .= ' /SMask '.($this->n - 1).' 0 R';
+			}
+			// set color space
+			$icc = false;
+			if (isset($info['icc']) AND ($info['icc'] !== false)) {
+				// ICC Colour Space
+				$icc = true;
+				$out .= ' /ColorSpace [/ICCBased '.($this->n + 1).' 0 R]';
+			} elseif ($info['cs'] == 'Indexed') {
+				// Indexed Colour Space
+				$out .= ' /ColorSpace [/Indexed /DeviceRGB '.((strlen($info['pal']) / 3) - 1).' '.($this->n + 1).' 0 R]';
+			} else {
+				// Device Colour Space
+				$out .= ' /ColorSpace /'.$info['cs'];
+			}
+			if ($info['cs'] == 'DeviceCMYK') {
+				$out .= ' /Decode [1 0 1 0 1 0 1 0]';
+			}
+			$out .= ' /BitsPerComponent '.$info['bpc'];
+			if ($altoid > 0) {
+				// reference to alternate images dictionary
+				$out .= ' /Alternates '.$altoid.' 0 R';
+			}
+			if (isset($info['exurl']) AND !empty($info['exurl'])) {
+				// external stream
+				$out .= ' /Length 0';
+				$out .= ' /F << /FS /URL /F '.$this->_datastring($info['exurl'], $oid).' >>';
+				if (isset($info['f'])) {
+					$out .= ' /FFilter /'.$info['f'];
+				}
+				$out .= ' >>';
+				$out .= ' stream'."\n".'endstream';
+			} else {
+				if (isset($info['f'])) {
+					$out .= ' /Filter /'.$info['f'];
+				}
+				if (isset($info['parms'])) {
+					$out .= ' '.$info['parms'];
+				}
+				if (isset($info['trns']) AND is_array($info['trns'])) {
+					$trns = '';
+					$count_info = count($info['trns']);
+					if ($info['cs'] == 'Indexed') {
+						$maxval =(pow(2, $info['bpc']) - 1);
+						for ($i = 0; $i < $count_info; ++$i) {
+							if (($info['trns'][$i] != 0) AND ($info['trns'][$i] != $maxval)) {
+								// this is not a binary type mask @TODO: create a SMask
+								$trns = '';
+								break;
+							} elseif (empty($trns) AND ($info['trns'][$i] == 0)) {
+								// store the first fully transparent value
+								$trns .= $i.' '.$i.' ';
+							}
+						}
+					} else {
+						// grayscale or RGB
+						for ($i = 0; $i < $count_info; ++$i) {
+							if ($info['trns'][$i] == 0) {
+								$trns .= $info['trns'][$i].' '.$info['trns'][$i].' ';
+							}
+						}
+					}
+					// Colour Key Masking
+					if (!empty($trns)) {
+						$out .= ' /Mask ['.$trns.']';
+					}
+				}
+				$stream = $this->_getrawstream($info['data']);
+				$out .= ' /Length '.strlen($stream).' >>';
+				$out .= ' stream'."\n".$stream."\n".'endstream';
+			}
+			$out .= "\n".'endobj';
+			$this->_out($out);
+			if ($icc) {
+				// ICC colour profile
+				$this->_newobj();
+				$icc = ($this->compress) ? gzcompress($info['icc']) : $info['icc'];
+				$icc = $this->_getrawstream($icc);
+				$this->_out('<</N '.$info['ch'].' /Alternate /'.$info['cs'].' '.$filter.'/Length '.strlen($icc).'>> stream'."\n".$icc."\n".'endstream'."\n".'endobj');
+			} elseif ($info['cs'] == 'Indexed') {
+				// colour palette
+				$this->_newobj();
+				$pal = ($this->compress) ? gzcompress($info['pal']) : $info['pal'];
+				$pal = $this->_getrawstream($pal);
+				$this->_out('<<'.$filter.'/Length '.strlen($pal).'>> stream'."\n".$pal."\n".'endstream'."\n".'endobj');
+			}
+		}
+	}
+	
+
+	/**
+	 * Output fonts.
+	 * @author Nicola Asuni
+	 * @protected
+	 */
+	protected function _putfonts() {
+		$nf = $this->n;
+		foreach ($this->diffs as $diff) {
+			//Encodings
+			$this->_newobj();
+			$this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
+		}
+		foreach ($this->FontFiles as $file => $info) {
+			// search and get font file to embedd
+			$fontfile = LIMEPDF_FONT::getFontFullPath($file, $info['fontdir']);
+			if (!LIMEPDF_STATIC::empty_string($fontfile)) {
+				$font = file_get_contents($fontfile);
+				$compressed = (substr($file, -2) == '.z');
+				if ((!$compressed) AND (isset($info['length2']))) {
+					$header = (ord($font[0]) == 128);
+					if ($header) {
+						// strip first binary header
+						$font = substr($font, 6);
+					}
+					if ($header AND (ord($font[$info['length1']]) == 128)) {
+						// strip second binary header
+						$font = substr($font, 0, $info['length1']).substr($font, ($info['length1'] + 6));
+					}
+				} elseif ($info['subset'] AND ((!$compressed) OR ($compressed AND function_exists('gzcompress')))) {
+					if ($compressed) {
+						// uncompress font
+						$font = gzuncompress($font);
+					}
+					// merge subset characters
+					$subsetchars = array(); // used chars
+					foreach ($info['fontkeys'] as $fontkey) {
+						$fontinfo = $this->getFontBuffer($fontkey);
+						$subsetchars += $fontinfo['subsetchars'];
+					}
+					// rebuild a font subset
+					$font = LIMEPDF_FONT::_getTrueTypeFontSubset($font, $subsetchars);
+					// calculate new font length
+					$info['length1'] = strlen($font);
+					if ($compressed) {
+						// recompress font
+						$font = gzcompress($font);
+					}
+				}
+				$this->_newobj();
+				$this->FontFiles[$file]['n'] = $this->n;
+				$stream = $this->_getrawstream($font);
+				$out = '<< /Length '.strlen($stream);
+				if ($compressed) {
+					$out .= ' /Filter /FlateDecode';
+				}
+				$out .= ' /Length1 '.$info['length1'];
+				if (isset($info['length2'])) {
+					$out .= ' /Length2 '.$info['length2'].' /Length3 0';
+				}
+				$out .= ' >>';
+				$out .= ' stream'."\n".$stream."\n".'endstream';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+			}
+		}
+		foreach ($this->fontkeys as $k) {
+			//Font objects
+			$font = $this->getFontBuffer($k);
+			$type = $font['type'];
+			$name = $font['name'];
+			if ($type == 'core') {
+				// standard core font
+				$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+				$out .= '<</Type /Font';
+				$out .= ' /Subtype /Type1';
+				$out .= ' /BaseFont /'.$name;
+				$out .= ' /Name /F'.$font['i'];
+				if ((strtolower($name) != 'symbol') AND (strtolower($name) != 'zapfdingbats')) {
+					$out .= ' /Encoding /WinAnsiEncoding';
+				}
+				if ($k == 'helvetica') {
+					// add default font for annotations
+					$this->annotation_fonts[$k] = $font['i'];
+				}
+				$out .= ' >>';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+			} elseif (($type == 'Type1') OR ($type == 'TrueType')) {
+				// additional Type1 or TrueType font
+				$out = $this->_getobj($this->font_obj_ids[$k])."\n";
+				$out .= '<</Type /Font';
+				$out .= ' /Subtype /'.$type;
+				$out .= ' /BaseFont /'.$name;
+				$out .= ' /Name /F'.$font['i'];
+				$out .= ' /FirstChar 32 /LastChar 255';
+				$out .= ' /Widths '.($this->n + 1).' 0 R';
+				$out .= ' /FontDescriptor '.($this->n + 2).' 0 R';
+				if ($font['enc']) {
+					if (isset($font['diff'])) {
+						$out .= ' /Encoding '.($nf + $font['diff']).' 0 R';
+					} else {
+						$out .= ' /Encoding /WinAnsiEncoding';
+					}
+				}
+				$out .= ' >>';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+				// Widths
+				$this->_newobj();
+				$s = '[';
+				for ($i = 32; $i < 256; ++$i) {
+					if (isset($font['cw'][$i])) {
+						$s .= $font['cw'][$i].' ';
+					} else {
+						$s .= $font['dw'].' ';
+					}
+				}
+				$s .= ']';
+				$s .= "\n".'endobj';
+				$this->_out($s);
+				//Descriptor
+				$this->_newobj();
+				$s = '<</Type /FontDescriptor /FontName /'.$name;
+				foreach ($font['desc'] as $fdk => $fdv) {
+					if (is_float($fdv)) {
+						$fdv = sprintf('%F', $fdv);
+					}
+					$s .= ' /'.$fdk.' '.$fdv.'';
+				}
+				if (!TCPDF_STATIC::empty_string($font['file'])) {
+					$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
+				}
+				$s .= '>>';
+				$s .= "\n".'endobj';
+				$this->_out($s);
+			} else {
+				// additional types
+				$mtd = '_put'.strtolower($type);
+				if (!method_exists($this, $mtd)) {
+					$this->Error('Unsupported font type: '.$type);
+				}
+				$this->$mtd($font);
+			}
+		}
+	}	
+	/**
+	 * Put pdf layers.
+	 * @protected
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	protected function _putocg() {
+		if (empty($this->pdflayers)) {
+			return;
+		}
+		foreach ($this->pdflayers as $key => $layer) {
+			 $this->pdflayers[$key]['objid'] = $this->_newobj();
+			 $out = '<< /Type /OCG';
+			 $out .= ' /Name '.$this->_textstring($layer['name'], $this->pdflayers[$key]['objid']);
+			 $out .= ' /Usage <<';
+			 if (isset($layer['print']) AND ($layer['print'] !== NULL)) {
+				$out .= ' /Print <</PrintState /'.($layer['print']?'ON':'OFF').'>>';
+			 }
+			 $out .= ' /View <</ViewState /'.($layer['view']?'ON':'OFF').'>>';
+			 $out .= ' >> >>';
+			 $out .= "\n".'endobj';
+			 $this->_out($out);
+		}
+	}
+
+	/**
+	 * Put extgstates for object transparency
+	 * @protected
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	protected function _putextgstates() {
+		foreach ($this->extgstates as $i => $ext) {
+			$this->extgstates[$i]['n'] = $this->_newobj();
+			$out = '<< /Type /ExtGState';
+			foreach ($ext['parms'] as $k => $v) {
+				if (is_float($v)) {
+					$v = sprintf('%F', $v);
+				} elseif ($v === true) {
+					$v = 'true';
+				} elseif ($v === false) {
+					$v = 'false';
+				}
+				$out .= ' /'.$k.' '.$v;
+			}
+			$out .= ' >>';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+		}
+	}	
+
+	/**
+	 * Output Resources Dictionary.
+	 * @protected
+	 */
+	protected function _putresourcedict() {
+		$out = $this->_getobj(2)."\n";
+		$out .= '<< /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]';
+		$out .= ' /Font <<';
+		foreach ($this->fontkeys as $fontkey) {
+			$font = $this->getFontBuffer($fontkey);
+			$out .= ' /F'.$font['i'].' '.$font['n'].' 0 R';
+		}
+		$out .= ' >>';
+		$out .= ' /XObject <<';
+		$out .= $this->_getxobjectdict();
+		$out .= ' >>';
+		// layers
+		if (!empty($this->pdflayers)) {
+			$out .= ' /Properties <<';
+			foreach ($this->pdflayers as $layer) {
+				$out .= ' /'.$layer['layer'].' '.$layer['objid'].' 0 R';
+			}
+			$out .= ' >>';
+		}
+		if (!$this->pdfa_mode || $this->pdfa_version >= 2) {
+			// transparency
+			if (isset($this->extgstates) AND !empty($this->extgstates)) {
+				$out .= ' /ExtGState <<';
+				foreach ($this->extgstates as $k => $extgstate) {
+					if (isset($extgstate['name'])) {
+						$out .= ' /'.$extgstate['name'];
+					} else {
+						$out .= ' /GS'.$k;
+					}
+					$out .= ' '.$extgstate['n'].' 0 R';
+				}
+				$out .= ' >>';
+			}
+			if (isset($this->gradients) AND !empty($this->gradients)) {
+				$gp = '';
+				$gs = '';
+				foreach ($this->gradients as $id => $grad) {
+					// gradient patterns
+					$gp .= ' /p'.$id.' '.$grad['pattern'].' 0 R';
+					// gradient shadings
+					$gs .= ' /Sh'.$id.' '.$grad['id'].' 0 R';
+				}
+				$out .= ' /Pattern <<'.$gp.' >>';
+				$out .= ' /Shading <<'.$gs.' >>';
+			}
+		}
+		// spot colors
+		if (isset($this->spot_colors) AND !empty($this->spot_colors)) {
+			$out .= ' /ColorSpace <<';
+			foreach ($this->spot_colors as $color) {
+				$out .= ' /CS'.$color['i'].' '.$color['n'].' 0 R';
+			}
+			$out .= ' >>';
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$this->_out($out);
+	}	
+
+	/**
+	 * Insert Named Destinations.
+	 * @protected
+	 * @author Johannes G\FCntert, Nicola Asuni
+	 * @since 5.9.098 (2011-06-23)
+	 */
+	protected function _putdests() {
+		if (empty($this->dests)) {
+			return;
+		}
+		$this->n_dests = $this->_newobj();
+		$out = ' <<';
+		foreach($this->dests as $name => $o) {
+			$out .= ' /'.$name.' '.sprintf('[%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
+		}
+		$out .= ' >>';
+		$out .= "\n".'endobj';
+		$this->_out($out);
+	}
+
+	/**
+	 * Create a bookmark PDF string.
+	 * @protected
+	 * @author Olivier Plathey, Nicola Asuni
+	 * @since 2.1.002 (2008-02-12)
+	 */
+	protected function _putbookmarks() {
+		$nb = count($this->outlines);
+		if ($nb == 0) {
+			return;
+		}
+		// sort bookmarks
+		$this->sortBookmarks();
+		$lru = array();
+		$level = 0;
+		foreach ($this->outlines as $i => $o) {
+			if ($o['l'] > 0) {
+				$parent = $lru[($o['l'] - 1)];
+				//Set parent and last pointers
+				$this->outlines[$i]['parent'] = $parent;
+				$this->outlines[$parent]['last'] = $i;
+				if ($o['l'] > $level) {
+					//Level increasing: set first pointer
+					$this->outlines[$parent]['first'] = $i;
+				}
+			} else {
+				$this->outlines[$i]['parent'] = $nb;
+			}
+			if (($o['l'] <= $level) AND ($i > 0)) {
+				//Set prev and next pointers
+				$prev = $lru[$o['l']];
+				$this->outlines[$prev]['next'] = $i;
+				$this->outlines[$i]['prev'] = $prev;
+			}
+			$lru[$o['l']] = $i;
+			$level = $o['l'];
+		}
+		//Outline items
+		$n = $this->n + 1;
+		$nltags = '/<br[\s]?\/>|<\/(blockquote|dd|dl|div|dt|h1|h2|h3|h4|h5|h6|hr|li|ol|p|pre|ul|tcpdf|table|tr|td)>/si';
+		foreach ($this->outlines as $i => $o) {
+			$oid = $this->_newobj();
+			// covert HTML title to string
+			$title = preg_replace($nltags, "\n", $o['t']);
+			$title = preg_replace("/[\r]+/si", '', $title);
+			$title = preg_replace("/[\n]+/si", "\n", $title);
+			$title = strip_tags($title);
+			$title = $this->stringTrim($title);
+			$out = '<</Title '.$this->_textstring($title, $oid);
+			$out .= ' /Parent '.($n + $o['parent']).' 0 R';
+			if (isset($o['prev'])) {
+				$out .= ' /Prev '.($n + $o['prev']).' 0 R';
+			}
+			if (isset($o['next'])) {
+				$out .= ' /Next '.($n + $o['next']).' 0 R';
+			}
+			if (isset($o['first'])) {
+				$out .= ' /First '.($n + $o['first']).' 0 R';
+			}
+			if (isset($o['last'])) {
+				$out .= ' /Last '.($n + $o['last']).' 0 R';
+			}
+			if (isset($o['u']) AND !empty($o['u'])) {
+				// link
+				if (is_string($o['u'])) {
+					if ($o['u'][0] == '#') {
+						// internal destination
+						$out .= ' /Dest /'.TCPDF_STATIC::encodeNameObject(substr($o['u'], 1));
+					} elseif ($o['u'][0] == '%') {
+						// embedded PDF file
+						$filename = basename(substr($o['u'], 1));
+						$out .= ' /A <</S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($o['p'] - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
+					} elseif ($o['u'][0] == '*') {
+						// embedded generic file
+						$filename = basename(substr($o['u'], 1));
+						$jsa = 'var D=event.target.doc;var MyData=D.dataObjects;for (var i in MyData) if (MyData[i].path=="'.$filename.'") D.exportDataObject( { cName : MyData[i].name, nLaunch : 2});';
+						$out .= ' /A <</S /JavaScript /JS '.$this->_textstring($jsa, $oid).'>>';
+					} else {
+						// external URI link
+						$out .= ' /A <</S /URI /URI '.$this->_datastring($this->unhtmlentities($o['u']), $oid).'>>';
+					}
+				} elseif (isset($this->links[$o['u']])) {
+					// internal link ID
+					$l = $this->links[$o['u']];
+					if (isset($this->page_obj_id[($l['p'])])) {
+						$out .= sprintf(' /Dest [%u 0 R /XYZ 0 %F null]', $this->page_obj_id[($l['p'])], ($this->pagedim[$l['p']]['h'] - ($l['y'] * $this->k)));
+					}
+				}
+			} elseif (isset($this->page_obj_id[($o['p'])])) {
+				// link to a page
+				$out .= ' '.sprintf('/Dest [%u 0 R /XYZ %F %F null]', $this->page_obj_id[($o['p'])], ($o['x'] * $this->k), ($this->pagedim[$o['p']]['h'] - ($o['y'] * $this->k)));
+			}
+			// set font style
+			$style = 0;
+			if (!empty($o['s'])) {
+				// bold
+				if (strpos($o['s'], 'B') !== false) {
+					$style |= 2;
+				}
+				// oblique
+				if (strpos($o['s'], 'I') !== false) {
+					$style |= 1;
+				}
+			}
+			$out .= sprintf(' /F %d', $style);
+			// set bookmark color
+			if (isset($o['c']) AND is_array($o['c']) AND (count($o['c']) == 3)) {
+				$color = array_values($o['c']);
+				$out .= sprintf(' /C [%F %F %F]', ($color[0] / 255), ($color[1] / 255), ($color[2] / 255));
+			} else {
+				// black
+				$out .= ' /C [0.0 0.0 0.0]';
+			}
+			$out .= ' /Count 0'; // normally closed item
+			$out .= ' >>';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+		}
+		//Outline root
+		$this->OutlineRoot = $this->_newobj();
+		$this->_out('<< /Type /Outlines /First '.$n.' 0 R /Last '.($n + $lru[0]).' 0 R >>'."\n".'endobj');
+	}
+
+	/**
+	 * Output gradient shaders.
+	 * @author Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @protected
+	 */
+	function _putshaders() {
+		if ($this->pdfa_mode && $this->pdfa_version < 2) {
+			return;
+		}
+		$idt = count($this->gradients); //index for transparency gradients
+		foreach ($this->gradients as $id => $grad) {
+			if (($grad['type'] == 2) OR ($grad['type'] == 3)) {
+				$fc = $this->_newobj();
+				$out = '<<';
+				$out .= ' /FunctionType 3';
+				$out .= ' /Domain [0 1]';
+				$functions = '';
+				$bounds = '';
+				$encode = '';
+				$i = 1;
+				$num_cols = count($grad['colors']);
+				$lastcols = $num_cols - 1;
+				for ($i = 1; $i < $num_cols; ++$i) {
+					$functions .= ($fc + $i).' 0 R ';
+					if ($i < $lastcols) {
+						$bounds .= sprintf('%F ', $grad['colors'][$i]['offset']);
+					}
+					$encode .= '0 1 ';
+				}
+				$out .= ' /Functions ['.trim($functions).']';
+				$out .= ' /Bounds ['.trim($bounds).']';
+				$out .= ' /Encode ['.trim($encode).']';
+				$out .= ' >>';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+				for ($i = 1; $i < $num_cols; ++$i) {
+					$this->_newobj();
+					$out = '<<';
+					$out .= ' /FunctionType 2';
+					$out .= ' /Domain [0 1]';
+					$out .= ' /C0 ['.$grad['colors'][($i - 1)]['color'].']';
+					$out .= ' /C1 ['.$grad['colors'][$i]['color'].']';
+					$out .= ' /N '.$grad['colors'][$i]['exponent'];
+					$out .= ' >>';
+					$out .= "\n".'endobj';
+					$this->_out($out);
+				}
+				// set transparency functions
+				if ($grad['transparency']) {
+					$ft = $this->_newobj();
+					$out = '<<';
+					$out .= ' /FunctionType 3';
+					$out .= ' /Domain [0 1]';
+					$functions = '';
+					$i = 1;
+					$num_cols = count($grad['colors']);
+					for ($i = 1; $i < $num_cols; ++$i) {
+						$functions .= ($ft + $i).' 0 R ';
+					}
+					$out .= ' /Functions ['.trim($functions).']';
+					$out .= ' /Bounds ['.trim($bounds).']';
+					$out .= ' /Encode ['.trim($encode).']';
+					$out .= ' >>';
+					$out .= "\n".'endobj';
+					$this->_out($out);
+					for ($i = 1; $i < $num_cols; ++$i) {
+						$this->_newobj();
+						$out = '<<';
+						$out .= ' /FunctionType 2';
+						$out .= ' /Domain [0 1]';
+						$out .= ' /C0 ['.$grad['colors'][($i - 1)]['opacity'].']';
+						$out .= ' /C1 ['.$grad['colors'][$i]['opacity'].']';
+						$out .= ' /N '.$grad['colors'][$i]['exponent'];
+						$out .= ' >>';
+						$out .= "\n".'endobj';
+						$this->_out($out);
+					}
+				}
+			}
+			// set shading object
+			$this->_newobj();
+			$out = '<< /ShadingType '.$grad['type'];
+			if (isset($grad['colspace'])) {
+				$out .= ' /ColorSpace /'.$grad['colspace'];
+			} else {
+				$out .= ' /ColorSpace /DeviceRGB';
+			}
+			if (isset($grad['background']) AND !empty($grad['background'])) {
+				$out .= ' /Background ['.$grad['background'].']';
+			}
+			if (isset($grad['antialias']) AND ($grad['antialias'] === true)) {
+				$out .= ' /AntiAlias true';
+			}
+			if ($grad['type'] == 2) {
+				$out .= ' '.sprintf('/Coords [%F %F %F %F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3]);
+				$out .= ' /Domain [0 1]';
+				$out .= ' /Function '.$fc.' 0 R';
+				$out .= ' /Extend [true true]';
+				$out .= ' >>';
+			} elseif ($grad['type'] == 3) {
+				//x0, y0, r0, x1, y1, r1
+				//at this this time radius of inner circle is 0
+				$out .= ' '.sprintf('/Coords [%F %F 0 %F %F %F]', $grad['coords'][0], $grad['coords'][1], $grad['coords'][2], $grad['coords'][3], $grad['coords'][4]);
+				$out .= ' /Domain [0 1]';
+				$out .= ' /Function '.$fc.' 0 R';
+				$out .= ' /Extend [true true]';
+				$out .= ' >>';
+			} elseif ($grad['type'] == 6) {
+				$out .= ' /BitsPerCoordinate 16';
+				$out .= ' /BitsPerComponent 8';
+				$out .= ' /Decode[0 1 0 1 0 1 0 1 0 1]';
+				$out .= ' /BitsPerFlag 8';
+				$stream = $this->_getrawstream($grad['stream']);
+				$out .= ' /Length '.strlen($stream);
+				$out .= ' >>';
+				$out .= ' stream'."\n".$stream."\n".'endstream';
+			}
+			$out .= "\n".'endobj';
+			$this->_out($out);
+			if ($grad['transparency']) {
+				$shading_transparency = preg_replace('/\/ColorSpace \/[^\s]+/si', '/ColorSpace /DeviceGray', $out);
+				$shading_transparency = preg_replace('/\/Function [0-9]+ /si', '/Function '.$ft.' ', $shading_transparency);
+			}
+			$this->gradients[$id]['id'] = $this->n;
+			// set pattern object
+			$this->_newobj();
+			$out = '<< /Type /Pattern /PatternType 2';
+			$out .= ' /Shading '.$this->gradients[$id]['id'].' 0 R';
+			$out .= ' >>';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+			$this->gradients[$id]['pattern'] = $this->n;
+			// set shading and pattern for transparency mask
+			if ($grad['transparency']) {
+				// luminosity pattern
+				$idgs = $id + $idt;
+				$this->_newobj();
+				$this->_out($shading_transparency);
+				$this->gradients[$idgs]['id'] = $this->n;
+				$this->_newobj();
+				$out = '<< /Type /Pattern /PatternType 2';
+				$out .= ' /Shading '.$this->gradients[$idgs]['id'].' 0 R';
+				$out .= ' >>';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+				$this->gradients[$idgs]['pattern'] = $this->n;
+				// luminosity XObject
+				$oid = $this->_newobj();
+				$this->xobjects['LX'.$oid] = array('n' => $oid);
+				$filter = '';
+				$stream = 'q /a0 gs /Pattern cs /p'.$idgs.' scn 0 0 '.$this->wPt.' '.$this->hPt.' re f Q';
+				if ($this->compress) {
+					$filter = ' /Filter /FlateDecode';
+					$stream = gzcompress($stream);
+				}
+				$stream = $this->_getrawstream($stream);
+				$out = '<< /Type /XObject /Subtype /Form /FormType 1'.$filter;
+				$out .= ' /Length '.strlen($stream);
+				$rect = sprintf('%F %F', $this->wPt, $this->hPt);
+				$out .= ' /BBox [0 0 '.$rect.']';
+				$out .= ' /Group << /Type /Group /S /Transparency /CS /DeviceGray >>';
+				$out .= ' /Resources <<';
+				$out .= ' /ExtGState << /a0 << /ca 1 /CA 1 >> >>';
+				$out .= ' /Pattern << /p'.$idgs.' '.$this->gradients[$idgs]['pattern'].' 0 R >>';
+				$out .= ' >>';
+				$out .= ' >> ';
+				$out .= ' stream'."\n".$stream."\n".'endstream';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+				// SMask
+				$this->_newobj();
+				$out = '<< /Type /Mask /S /Luminosity /G '.($this->n - 1).' 0 R >>'."\n".'endobj';
+				$this->_out($out);
+				// ExtGState
+				$this->_newobj();
+				$out = '<< /Type /ExtGState /SMask '.($this->n - 1).' 0 R /AIS false >>'."\n".'endobj';
+				$this->_out($out);
+				$this->extgstates[] = array('n' => $this->n, 'name' => 'TGS'.$id);
+			}
+		}
+	}
+	   	/**
+	 * Output Form XObjects Templates.
+	 * @author Nicola Asuni
+	 * @since 5.8.017 (2010-08-24)
+	 * @protected
+	 * @see startTemplate(), endTemplate(), printTemplate()
+	 */
+	protected function _putxobjects() {
+		foreach ($this->xobjects as $key => $data) {
+			if (isset($data['outdata'])) {
+				$stream = str_replace($this->epsmarker, '', trim($data['outdata']));
+				$out = $this->_getobj($data['n'])."\n";
+				$out .= '<<';
+				$out .= ' /Type /XObject';
+				$out .= ' /Subtype /Form';
+				$out .= ' /FormType 1';
+				if ($this->compress) {
+					$stream = gzcompress($stream);
+					$out .= ' /Filter /FlateDecode';
+				}
+				$out .= sprintf(' /BBox [%F %F %F %F]', ($data['x'] * $this->k), (-$data['y'] * $this->k), (($data['w'] + $data['x']) * $this->k), (($data['h'] - $data['y']) * $this->k));
+				$out .= ' /Matrix [1 0 0 1 0 0]';
+				$out .= ' /Resources <<';
+				$out .= ' /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]';
+				if (!$this->pdfa_mode || $this->pdfa_version >= 2) {
+					// transparency
+					if (isset($data['extgstates']) AND !empty($data['extgstates'])) {
+						$out .= ' /ExtGState <<';
+						foreach ($data['extgstates'] as $k => $extgstate) {
+							if (isset($this->extgstates[$k]['name'])) {
+								$out .= ' /'.$this->extgstates[$k]['name'];
+							} else {
+								$out .= ' /GS'.$k;
+							}
+							$out .= ' '.$this->extgstates[$k]['n'].' 0 R';
+						}
+						$out .= ' >>';
+					}
+					if (isset($data['gradients']) AND !empty($data['gradients'])) {
+						$gp = '';
+						$gs = '';
+						foreach ($data['gradients'] as $id => $grad) {
+							// gradient patterns
+							$gp .= ' /p'.$id.' '.$this->gradients[$id]['pattern'].' 0 R';
+							// gradient shadings
+							$gs .= ' /Sh'.$id.' '.$this->gradients[$id]['id'].' 0 R';
+						}
+						$out .= ' /Pattern <<'.$gp.' >>';
+						$out .= ' /Shading <<'.$gs.' >>';
+					}
+				}
+				// spot colors
+				if (isset($data['spot_colors']) AND !empty($data['spot_colors'])) {
+					$out .= ' /ColorSpace <<';
+					foreach ($data['spot_colors'] as $name => $color) {
+						$out .= ' /CS'.$color['i'].' '.$this->spot_colors[$name]['n'].' 0 R';
+					}
+					$out .= ' >>';
+				}
+				// fonts
+				if (!empty($data['fonts'])) {
+					$out .= ' /Font <<';
+					foreach ($data['fonts'] as $fontkey => $fontid) {
+						$out .= ' /F'.$fontid.' '.$this->font_obj_ids[$fontkey].' 0 R';
+					}
+					$out .= ' >>';
+				}
+				// images or nested xobjects
+				if (!empty($data['images']) OR !empty($data['xobjects'])) {
+					$out .= ' /XObject <<';
+					foreach ($data['images'] as $imgid) {
+						$out .= ' /I'.$imgid.' '.$this->xobjects['I'.$imgid]['n'].' 0 R';
+					}
+					foreach ($data['xobjects'] as $sub_id => $sub_objid) {
+						$out .= ' /'.$sub_id.' '.$sub_objid['n'].' 0 R';
+					}
+					$out .= ' >>';
+				}
+				$out .= ' >>'; //end resources
+				if (isset($data['group']) AND ($data['group'] !== false)) {
+					// set transparency group
+					$out .= ' /Group << /Type /Group /S /Transparency';
+					if (is_array($data['group'])) {
+						if (isset($data['group']['CS']) AND !empty($data['group']['CS'])) {
+							$out .= ' /CS /'.$data['group']['CS'];
+						}
+						if (isset($data['group']['I'])) {
+							$out .= ' /I /'.($data['group']['I']===true?'true':'false');
+						}
+						if (isset($data['group']['K'])) {
+							$out .= ' /K /'.($data['group']['K']===true?'true':'false');
+						}
+					}
+					$out .= ' >>';
+				}
+				$stream = $this->_getrawstream($stream, $data['n']);
+				$out .= ' /Length '.strlen($stream);
+				$out .= ' >>';
+				$out .= ' stream'."\n".$stream."\n".'endstream';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+			}
+		}
 	}
 
 	/**
@@ -14854,261 +15602,6 @@ class TCPDF {
 	}
 
 
-	/**
-	 * Set parameters for drop shadow effect for text.
-	 * @param array $params Array of parameters: enabled (boolean) set to true to enable shadow; depth_w (float) shadow width in user units; depth_h (float) shadow height in user units; color (array) shadow color or false to use the stroke color; opacity (float) Alpha value: real value from 0 (transparent) to 1 (opaque); blend_mode (string) blend mode, one of the following: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn, HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity.
-	 * @since 5.9.174 (2012-07-25)
-	 * @public
-	*/
-	public function setTextShadow($params=array('enabled'=>false, 'depth_w'=>0, 'depth_h'=>0, 'color'=>false, 'opacity'=>1, 'blend_mode'=>'Normal')) {
-		if (isset($params['enabled'])) {
-			$this->txtshadow['enabled'] = $params['enabled']?true:false;
-		} else {
-			$this->txtshadow['enabled'] = false;
-		}
-		if (isset($params['depth_w'])) {
-			$this->txtshadow['depth_w'] = floatval($params['depth_w']);
-		} else {
-			$this->txtshadow['depth_w'] = 0;
-		}
-		if (isset($params['depth_h'])) {
-			$this->txtshadow['depth_h'] = floatval($params['depth_h']);
-		} else {
-			$this->txtshadow['depth_h'] = 0;
-		}
-		if (isset($params['color']) AND ($params['color'] !== false) AND is_array($params['color'])) {
-			$this->txtshadow['color'] = $params['color'];
-		} else {
-			$this->txtshadow['color'] = $this->strokecolor;
-		}
-		if (isset($params['opacity'])) {
-			$this->txtshadow['opacity'] = min(1, max(0, floatval($params['opacity'])));
-		} else {
-			$this->txtshadow['opacity'] = 1;
-		}
-		if (isset($params['blend_mode']) AND in_array($params['blend_mode'], array('Normal', 'Multiply', 'Screen', 'Overlay', 'Darken', 'Lighten', 'ColorDodge', 'ColorBurn', 'HardLight', 'SoftLight', 'Difference', 'Exclusion', 'Hue', 'Saturation', 'Color', 'Luminosity'))) {
-			$this->txtshadow['blend_mode'] = $params['blend_mode'];
-		} else {
-			$this->txtshadow['blend_mode'] = 'Normal';
-		}
-		if ((($this->txtshadow['depth_w'] == 0) AND ($this->txtshadow['depth_h'] == 0)) OR ($this->txtshadow['opacity'] == 0)) {
-			$this->txtshadow['enabled'] = false;
-		}
-	}
-
-	/**
-	 * Return the text shadow parameters array.
-	 * @return array array of parameters.
-	 * @since 5.9.174 (2012-07-25)
-	 * @public
-	 */
-	public function getTextShadow() {
-		return $this->txtshadow;
-	}
-
-	/**
-	 * Returns an array of chars containing soft hyphens.
-	 * @param array $word array of chars
-	 * @param array $patterns Array of hypenation patterns.
-	 * @param array $dictionary Array of words to be returned without applying the hyphenation algorithm.
-	 * @param int $leftmin Minimum number of character to leave on the left of the word without applying the hyphens.
-	 * @param int $rightmin Minimum number of character to leave on the right of the word without applying the hyphens.
-	 * @param int $charmin Minimum word length to apply the hyphenation algorithm.
-	 * @param int $charmax Maximum length of broken piece of word.
-	 * @return array text with soft hyphens
-	 * @author Nicola Asuni
-	 * @since 4.9.012 (2010-04-12)
-	 * @protected
-	 */
-	protected function hyphenateWord($word, $patterns, $dictionary=array(), $leftmin=1, $rightmin=2, $charmin=1, $charmax=8) {
-		$hyphenword = array(); // hyphens positions
-		$numchars = count($word);
-		if ($numchars <= $charmin) {
-			return $word;
-		}
-		$word_string = LIMEPDF_FONT::UTF8ArrSubString($word, '', '', $this->isunicode);
-		// some words will be returned as-is
-		$pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
-		if (preg_match($pattern, $word_string) > 0) {
-			// email
-			return $word;
-		}
-		$pattern = '/(([a-zA-Z0-9\-]+\.)?)((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
-		if (preg_match($pattern, $word_string) > 0) {
-			// URL
-			return $word;
-		}
-		if (isset($dictionary[$word_string])) {
-			return LIMEPDF_FONT::UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
-		}
-		// surround word with '_' characters
-		$tmpword = array_merge(array(46), $word, array(46));
-		$tmpnumchars = $numchars + 2;
-		$maxpos = $tmpnumchars - 1;
-		for ($pos = 0; $pos < $maxpos; ++$pos) {
-			$imax = min(($tmpnumchars - $pos), $charmax);
-			for ($i = 1; $i <= $imax; ++$i) {
-				$subword = strtolower(LIMEPDF_FONT::UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
-				if (isset($patterns[$subword])) {
-					$pattern = LIMEPDF_FONT::UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
-					$pattern_length = count($pattern);
-					$digits = 1;
-					for ($j = 0; $j < $pattern_length; ++$j) {
-						// check if $pattern[$j] is a number = hyphenation level (only numbers from 1 to 5 are valid)
-						if (($pattern[$j] >= 48) AND ($pattern[$j] <= 57)) {
-							if ($j == 0) {
-								$zero = $pos - 1;
-							} else {
-								$zero = $pos + $j - $digits;
-							}
-							// get hyphenation level
-							$level = ($pattern[$j] - 48);
-							// if two levels from two different patterns match at the same point, the higher one is selected.
-							if (!isset($hyphenword[$zero]) OR ($hyphenword[$zero] < $level)) {
-								$hyphenword[$zero] = $level;
-							}
-							++$digits;
-						}
-					}
-				}
-			}
-		}
-		$inserted = 0;
-		$maxpos = $numchars - $rightmin;
-		for ($i = $leftmin; $i <= $maxpos; ++$i) {
-			// only odd levels indicate allowed hyphenation points
-			if (isset($hyphenword[$i]) AND (($hyphenword[$i] % 2) != 0)) {
-				// 173 = soft hyphen character
-				array_splice($word, $i + $inserted, 0, 173);
-				++$inserted;
-			}
-		}
-		return $word;
-	}
-
-	/**
-	 * Returns text with soft hyphens.
-	 * @param string $text text to process
-	 * @param mixed $patterns Array of hypenation patterns or a TEX file containing hypenation patterns. TEX patterns can be downloaded from http://www.ctan.org/tex-archive/language/hyph-utf8/tex/generic/hyph-utf8/patterns/
-	 * @param array $dictionary Array of words to be returned without applying the hyphenation algorithm.
-	 * @param int $leftmin Minimum number of character to leave on the left of the word without applying the hyphens.
-	 * @param int $rightmin Minimum number of character to leave on the right of the word without applying the hyphens.
-	 * @param int $charmin Minimum word length to apply the hyphenation algorithm.
-	 * @param int $charmax Maximum length of broken piece of word.
-	 * @return string text with soft hyphens
-	 * @author Nicola Asuni
-	 * @since 4.9.012 (2010-04-12)
-	 * @public
-	 */
-	public function hyphenateText($text, $patterns, $dictionary=array(), $leftmin=1, $rightmin=2, $charmin=1, $charmax=8) {
-		$text = $this->unhtmlentities($text);
-		$word = array(); // last word
-		$txtarr = array(); // text to be returned
-		$intag = false; // true if we are inside an HTML tag
-		$skip = false; // true to skip hyphenation
-		if (!is_array($patterns)) {
-			$patterns = LIMEPDF_STATIC::getHyphenPatternsFromTEX($patterns);
-		}
-		// get array of characters
-		$unichars = LIMEPDF_FONT::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
-		// for each char
-		foreach ($unichars as $char) {
-			if ((!$intag) AND (!$skip) AND LIMEPDF_FONT_DATA::$uni_type[$char] == 'L') {
-				// letter character
-				$word[] = $char;
-			} else {
-				// other type of character
-				if (!LIMEPDF_STATIC::empty_string($word)) {
-					// hypenate the word
-					$txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
-					$word = array();
-				}
-				$txtarr[] = $char;
-				if (chr($char) == '<') {
-					// we are inside an HTML tag
-					$intag = true;
-				} elseif ($intag AND (chr($char) == '>')) {
-					// end of HTML tag
-					$intag = false;
-					// check for style tag
-					$expected = array(115, 116, 121, 108, 101); // = 'style'
-					$current = array_slice($txtarr, -6, 5); // last 5 chars
-					$compare = array_diff($expected, $current);
-					if (empty($compare)) {
-						// check if it is a closing tag
-						$expected = array(47); // = '/'
-						$current = array_slice($txtarr, -7, 1);
-						$compare = array_diff($expected, $current);
-						if (empty($compare)) {
-							// closing style tag
-							$skip = false;
-						} else {
-							// opening style tag
-							$skip = true;
-						}
-					}
-				}
-			}
-		}
-		if (!LIMEPDF_STATIC::empty_string($word)) {
-			// hypenate the word
-			$txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
-		}
-		// convert char array to string and return
-		return LIMEPDF_FONT::UTF8ArrSubString($txtarr, '', '', $this->isunicode);
-	}
-
-	/**
-	 * Enable/disable rasterization of vector images using ImageMagick library.
-	 * @param boolean $mode if true enable rasterization, false otherwise.
-	 * @public
-	 * @since 5.0.000 (2010-04-27)
-	 */
-	public function setRasterizeVectorImages($mode) {
-		$this->rasterize_vector_images = $mode;
-	}
-
-
-	/**
-	 * Left trim the input string
-	 * @param string $str string to trim
-	 * @param string $replace string that replace spaces.
-	 * @return string left trimmed string
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.8.000 (2010-08-11)
-	 */
-	public function stringLeftTrim($str, $replace='') {
-		return preg_replace('/^'.$this->re_space['p'].'+/'.$this->re_space['m'], $replace, $str);
-	}
-
-	/**
-	 * Right trim the input string
-	 * @param string $str string to trim
-	 * @param string $replace string that replace spaces.
-	 * @return string right trimmed string
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.8.000 (2010-08-11)
-	 */
-	public function stringRightTrim($str, $replace='') {
-		return preg_replace('/'.$this->re_space['p'].'+$/'.$this->re_space['m'], $replace, $str);
-	}
-
-	/**
-	 * Trim the input string
-	 * @param string $str string to trim
-	 * @param string $replace string that replace spaces.
-	 * @return string trimmed string
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.8.000 (2010-08-11)
-	 */
-	public function stringTrim($str, $replace='') {
-		$str = $this->stringLeftTrim($str, $replace);
-		$str = $this->stringRightTrim($str, $replace);
-		return $str;
-	}
 
 
 

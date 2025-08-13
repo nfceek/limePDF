@@ -28,20 +28,25 @@ use LimePDF\Config\ConfigManager;
 $config = new ConfigManager();
 $config->loadFromArray([
 ]);
+//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
 
-// what is the file name to create:
-$outputFile = 'sample_001.pdf';
-// set the doc title & test text
-$pdfTitle = 'limePDF Sample 001A';
-$pdfLogo = '../images/limePDF_logo.png';
-//$pdfLogo = __DIR__ . '/images/limePDF_logo.png'; // returns false if not found
-$pdfText = 'Sample # 001<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
+/*
+*
+* ONLY EDIT THIS AREA
+* Use it to set the unique props for this page
+*
+*/
 
-
+// 1) what is the file name to create:
+    $outputFile = 'sample_001.pdf';
+// 2) set the doc title 
+    $pdfTitle = 'limePDF Sample 001A';
+// 3) set the Logo   
+    $pdfLogo = '../images/limePDF_logo.png';
+// 3) set the Text    
+    $pdfText = '<br /><br />Sample # 001<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
-
-
 
 // Change the $config array ars to be injected or used as necessary
 $cfgArray = $config->toArray();
@@ -107,8 +112,8 @@ $wtf = "images/logo_example.jpg";
 $pdf->setHeaderData(
 	$pdfLogo, 	//$pdfConfig['headerString'], 		//$pdfConfig['logo']['file'],								//<--- error here with logo
 	60,				//$pdfConfig['logo']['width'],
-	"test info",	//$pdfTitle,
-	"test"	,		//$pdfConfig['headerString'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
 	array(0,64,255),
 	array(0,64,128)
 );
