@@ -4,7 +4,7 @@ namespace LimePDF;
 
 trait LIMEPDF_JAVASCRIPT {
 
-		// --- JAVASCRIPT ------------------------------------------------------
+	// --- JAVASCRIPT ------------------------------------------------------
 
 	/**
 	 * Adds a javascript

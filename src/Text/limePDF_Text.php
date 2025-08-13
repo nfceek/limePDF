@@ -65,4 +65,109 @@ trait LIMEPDF_TEXT {
 		$this->lasth = $prev_lasth;
 		return $height;
 	}
+
+	/**
+	 * Set regular expression to detect withespaces or word separators.
+	 * The pattern delimiter must be the forward-slash character "/".
+	 * Some example patterns are:
+	 * <pre>
+	 * Non-Unicode or missing PCRE unicode support: "/[^\S\xa0]/"
+	 * Unicode and PCRE unicode support: "/(?!\xa0)[\s\p{Z}]/u"
+	 * Unicode and PCRE unicode support in Chinese mode: "/(?!\xa0)[\s\p{Z}\p{Lo}]/u"
+	 * if PCRE unicode support is turned ON ("\P" is the negate class of "\p"):
+	 *      \s     : any whitespace character
+	 *      \p{Z}  : any separator
+	 *      \p{Lo} : Unicode letter or ideograph that does not have lowercase and uppercase variants. Is used to chunk chinese words.
+	 *      \xa0   : Unicode Character 'NO-BREAK SPACE' (U+00A0)
+	 * </pre>
+	 * @param string $re regular expression (leave empty for default).
+	 * @public
+	 * @since 4.6.016 (2009-06-15)
+	 */
+	public function setSpacesRE($re='/[^\S\xa0]/') {
+		$this->re_spaces = $re;
+		$re_parts = explode('/', $re);
+		// get pattern parts
+		$this->re_space = array();
+		if (isset($re_parts[1]) AND !empty($re_parts[1])) {
+			$this->re_space['p'] = $re_parts[1];
+		} else {
+			$this->re_space['p'] = '[\s]';
+		}
+		// set pattern modifiers
+		if (isset($re_parts[2]) AND !empty($re_parts[2])) {
+			$this->re_space['m'] = $re_parts[2];
+		} else {
+			$this->re_space['m'] = '';
+		}
+	}
+
+	/**
+	 * Enable or disable Right-To-Left language mode
+	 * @param boolean $enable if true enable Right-To-Left language mode.
+	 * @param boolean $resetx if true reset the X position on direction change.
+	 * @public
+	 * @since 2.0.000 (2008-01-03)
+	 */
+	public function setRTL($enable, $resetx=true) {
+		$enable = $enable ? true : false;
+		$resetx = ($resetx AND ($enable != $this->rtl));
+		$this->rtl = $enable;
+		$this->tmprtl = false;
+		if ($resetx) {
+			$this->Ln(0);
+		}
+	}
+
+	/**
+	 * Return the RTL status
+	 * @return bool
+	 * @public
+	 * @since 4.0.012 (2008-07-24)
+	 */
+	public function getRTL() {
+		return $this->rtl;
+	}
+
+	/**
+	 * Force temporary RTL language direction
+	 * @param false|string $mode can be false, 'L' for LTR or 'R' for RTL
+	 * @public
+	 * @since 2.1.000 (2008-01-09)
+	 */
+	public function setTempRTL($mode) {
+		$newmode = false;
+		switch (strtoupper($mode)) {
+			case 'LTR':
+			case 'L': {
+				if ($this->rtl) {
+					$newmode = 'L';
+				}
+				break;
+			}
+			case 'RTL':
+			case 'R': {
+				if (!$this->rtl) {
+					$newmode = 'R';
+				}
+				break;
+			}
+			case false:
+			default: {
+				$newmode = false;
+				break;
+			}
+		}
+		$this->tmprtl = $newmode;
+	}
+
+	/**
+	 * Return the current temporary RTL status
+	 * @return bool
+	 * @public
+	 * @since 4.8.014 (2009-11-04)
+	 */
+	public function isRTLTextDir() {
+		return ($this->rtl OR ($this->tmprtl == 'R'));
+	}
 }

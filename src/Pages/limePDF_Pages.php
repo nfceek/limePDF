@@ -601,5 +601,293 @@ trait LIMEPDF_PAGES{
 		$this->setContentMark();
 	}
 
+	/**
+	 * Returns an array of page dimensions:
+	 * <ul><li>$this->pagedim[$this->page]['w'] = page width in points</li><li>$this->pagedim[$this->page]['h'] = height in points</li><li>$this->pagedim[$this->page]['wk'] = page width in user units</li><li>$this->pagedim[$this->page]['hk'] = page height in user units</li><li>$this->pagedim[$this->page]['tm'] = top margin</li><li>$this->pagedim[$this->page]['bm'] = bottom margin</li><li>$this->pagedim[$this->page]['lm'] = left margin</li><li>$this->pagedim[$this->page]['rm'] = right margin</li><li>$this->pagedim[$this->page]['pb'] = auto page break</li><li>$this->pagedim[$this->page]['or'] = page orientation</li><li>$this->pagedim[$this->page]['olm'] = original left margin</li><li>$this->pagedim[$this->page]['orm'] = original right margin</li><li>$this->pagedim[$this->page]['Rotate'] = The number of degrees by which the page shall be rotated clockwise when displayed or printed. The value shall be a multiple of 90.</li><li>$this->pagedim[$this->page]['PZ'] = The page's preferred zoom (magnification) factor.</li><li>$this->pagedim[$this->page]['trans'] : the style and duration of the visual transition to use when moving from another page to the given page during a presentation<ul><li>$this->pagedim[$this->page]['trans']['Dur'] = The page's display duration (also called its advance timing): the maximum length of time, in seconds, that the page shall be displayed during presentations before the viewer application shall automatically advance to the next page.</li><li>$this->pagedim[$this->page]['trans']['S'] = transition style : Split, Blinds, Box, Wipe, Dissolve, Glitter, R, Fly, Push, Cover, Uncover, Fade</li><li>$this->pagedim[$this->page]['trans']['D'] = The duration of the transition effect, in seconds.</li><li>$this->pagedim[$this->page]['trans']['Dm'] = (Split and Blinds transition styles only) The dimension in which the specified transition effect shall occur: H = Horizontal, V = Vertical. Default value: H.</li><li>$this->pagedim[$this->page]['trans']['M'] = (Split, Box and Fly transition styles only) The direction of motion for the specified transition effect: I = Inward from the edges of the page, O = Outward from the center of the pageDefault value: I.</li><li>$this->pagedim[$this->page]['trans']['Di'] = (Wipe, Glitter, Fly, Cover, Uncover and Push transition styles only) The direction in which the specified transition effect shall moves, expressed in degrees counterclockwise starting from a left-to-right direction. If the value is a number, it shall be one of: 0 = Left to right, 90 = Bottom to top (Wipe only), 180 = Right to left (Wipe only), 270 = Top to bottom, 315 = Top-left to bottom-right (Glitter only). If the value is a name, it shall be None, which is relevant only for the Fly transition when the value of SS is not 1.0. Default value: 0.</li><li>$this->pagedim[$this->page]['trans']['SS'] = (Fly transition style only) The starting or ending scale at which the changes shall be drawn. If M specifies an inward transition, the scale of the changes drawn shall progress from SS to 1.0 over the course of the transition. If M specifies an outward transition, the scale of the changes drawn shall progress from 1.0 to SS over the course of the transition. Default: 1.0. </li><li>$this->pagedim[$this->page]['trans']['B'] = (Fly transition style only) If true, the area that shall be flown in is rectangular and opaque. Default: false.</li></ul></li><li>$this->pagedim[$this->page]['MediaBox'] : the boundaries of the physical medium on which the page shall be displayed or printed<ul><li>$this->pagedim[$this->page]['MediaBox']['llx'] = lower-left x coordinate in points</li><li>$this->pagedim[$this->page]['MediaBox']['lly'] = lower-left y coordinate in points</li><li>$this->pagedim[$this->page]['MediaBox']['urx'] = upper-right x coordinate in points</li><li>$this->pagedim[$this->page]['MediaBox']['ury'] = upper-right y coordinate in points</li></ul></li><li>$this->pagedim[$this->page]['CropBox'] : the visible region of default user space<ul><li>$this->pagedim[$this->page]['CropBox']['llx'] = lower-left x coordinate in points</li><li>$this->pagedim[$this->page]['CropBox']['lly'] = lower-left y coordinate in points</li><li>$this->pagedim[$this->page]['CropBox']['urx'] = upper-right x coordinate in points</li><li>$this->pagedim[$this->page]['CropBox']['ury'] = upper-right y coordinate in points</li></ul></li><li>$this->pagedim[$this->page]['BleedBox'] : the region to which the contents of the page shall be clipped when output in a production environment<ul><li>$this->pagedim[$this->page]['BleedBox']['llx'] = lower-left x coordinate in points</li><li>$this->pagedim[$this->page]['BleedBox']['lly'] = lower-left y coordinate in points</li><li>$this->pagedim[$this->page]['BleedBox']['urx'] = upper-right x coordinate in points</li><li>$this->pagedim[$this->page]['BleedBox']['ury'] = upper-right y coordinate in points</li></ul></li><li>$this->pagedim[$this->page]['TrimBox'] : the intended dimensions of the finished page after trimming<ul><li>$this->pagedim[$this->page]['TrimBox']['llx'] = lower-left x coordinate in points</li><li>$this->pagedim[$this->page]['TrimBox']['lly'] = lower-left y coordinate in points</li><li>$this->pagedim[$this->page]['TrimBox']['urx'] = upper-right x coordinate in points</li><li>$this->pagedim[$this->page]['TrimBox']['ury'] = upper-right y coordinate in points</li></ul></li><li>$this->pagedim[$this->page]['ArtBox'] : the extent of the page's meaningful content<ul><li>$this->pagedim[$this->page]['ArtBox']['llx'] = lower-left x coordinate in points</li><li>$this->pagedim[$this->page]['ArtBox']['lly'] = lower-left y coordinate in points</li><li>$this->pagedim[$this->page]['ArtBox']['urx'] = upper-right x coordinate in points</li><li>$this->pagedim[$this->page]['ArtBox']['ury'] = upper-right y coordinate in points</li></ul></li></ul>
+	 * @param int|null $pagenum page number (empty = current page)
+	 * @return array of page dimensions.
+	 * @author Nicola Asuni
+	 * @public
+	 * @since 4.5.027 (2009-03-16)
+	 */
+	public function getPageDimensions($pagenum=null) {
+		if (empty($pagenum)) {
+			$pagenum = $this->page;
+		}
+		return $this->pagedim[$pagenum];
+	}
+
+	/**
+	 * Returns the page width in units.
+	 * @param int|null $pagenum page number (empty = current page)
+	 * @return int|float page width.
+	 * @author Nicola Asuni
+	 * @public
+	 * @since 1.5.2
+	 * @see getPageDimensions()
+	 */
+	public function getPageWidth($pagenum=null) {
+		if (empty($pagenum)) {
+			return $this->w;
+		}
+		return $this->pagedim[$pagenum]['w'];
+	}
+
+	/**
+	 * Returns the page height in units.
+	 * @param int|null $pagenum page number (empty = current page)
+	 * @return int|float page height.
+	 * @author Nicola Asuni
+	 * @public
+	 * @since 1.5.2
+	 * @see getPageDimensions()
+	 */
+	public function getPageHeight($pagenum=null) {
+		if (empty($pagenum)) {
+			return $this->h;
+		}
+		return $this->pagedim[$pagenum]['h'];
+	}
+
+	/**
+	 * Returns the page break margin.
+	 * @param int|null $pagenum page number (empty = current page)
+	 * @return int|float page break margin.
+	 * @author Nicola Asuni
+	 * @public
+	 * @since 1.5.2
+	 * @see getPageDimensions()
+	 */
+	public function getBreakMargin($pagenum=null) {
+		if (empty($pagenum)) {
+			return $this->bMargin;
+		}
+		return $this->pagedim[$pagenum]['bm'];
+	}
+
+	/**
+	 * Returns the scale factor (number of points in user unit).
+	 * @return int scale factor.
+	 * @author Nicola Asuni
+	 * @public
+	 * @since 1.5.2
+	 */
+	public function getScaleFactor() {
+		return $this->k;
+	}
+
+
+	/**
+	 * Set the same internal Cell padding for top, right, bottom, left-
+	 * @param int|float $pad internal padding.
+	 * @public
+	 * @since 2.1.000 (2008-01-09)
+	 * @see getCellPaddings(), setCellPaddings()
+	 */
+	public function setCellPadding($pad) {
+		if ($pad >= 0) {
+			$this->cell_padding['L'] = $pad;
+			$this->cell_padding['T'] = $pad;
+			$this->cell_padding['R'] = $pad;
+			$this->cell_padding['B'] = $pad;
+		}
+	}
+
+	/**
+	 * Set the internal Cell paddings.
+	 * @param int|float|null $left left padding
+	 * @param int|float|null $top top padding
+	 * @param int|float|null $right right padding
+	 * @param int|float|null $bottom bottom padding
+	 * @public
+	 * @since 5.9.000 (2010-10-03)
+	 * @see getCellPaddings(), SetCellPadding()
+	 */
+	public function setCellPaddings($left=null, $top=null, $right=null, $bottom=null) {
+		if (!LIMEPDF_STATIC::empty_string($left) AND ($left >= 0)) {
+			$this->cell_padding['L'] = $left;
+		}
+		if (!LIMEPDF_STATIC::empty_string($top) AND ($top >= 0)) {
+			$this->cell_padding['T'] = $top;
+		}
+		if (!LIMEPDF_STATIC::empty_string($right) AND ($right >= 0)) {
+			$this->cell_padding['R'] = $right;
+		}
+		if (!LIMEPDF_STATIC::empty_string($bottom) AND ($bottom >= 0)) {
+			$this->cell_padding['B'] = $bottom;
+		}
+	}
+
+	/**
+	 * Get the internal Cell padding array.
+	 * @return array of padding values
+	 * @public
+	 * @since 5.9.000 (2010-10-03)
+	 * @see setCellPaddings(), SetCellPadding()
+	 */
+	public function getCellPaddings() {
+		return $this->cell_padding;
+	}
+
+	/**
+	 * Set the internal Cell margins.
+	 * @param int|float|null $left left margin
+	 * @param int|float|null $top top margin
+	 * @param int|float|null $right right margin
+	 * @param int|float|null $bottom bottom margin
+	 * @public
+	 * @since 5.9.000 (2010-10-03)
+	 * @see getCellMargins()
+	 */
+	public function setCellMargins($left=null, $top=null, $right=null, $bottom=null) {
+		if (!LIMEPDF_STATIC::empty_string($left) AND ($left >= 0)) {
+			$this->cell_margin['L'] = $left;
+		}
+		if (!LIMEPDF_STATIC::empty_string($top) AND ($top >= 0)) {
+			$this->cell_margin['T'] = $top;
+		}
+		if (!LIMEPDF_STATIC::empty_string($right) AND ($right >= 0)) {
+			$this->cell_margin['R'] = $right;
+		}
+		if (!LIMEPDF_STATIC::empty_string($bottom) AND ($bottom >= 0)) {
+			$this->cell_margin['B'] = $bottom;
+		}
+	}
+
+	/**
+	 * Get the internal Cell margin array.
+	 * @return array of margin values
+	 * @public
+	 * @since 5.9.000 (2010-10-03)
+	 * @see setCellMargins()
+	 */
+	public function getCellMargins() {
+		return $this->cell_margin;
+	}
+
+	/**
+	 * Adjust the internal Cell padding array to take account of the line width.
+	 * @param string|array|int|bool $brd Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
+	 * @return void|array array of adjustments
+	 * @public
+	 * @since 5.9.000 (2010-10-03)
+	 */
+	protected function adjustCellPadding($brd=0) {
+		if (empty($brd)) {
+			return;
+		}
+		if (is_string($brd)) {
+			// convert string to array
+			$slen = strlen($brd);
+			$newbrd = array();
+			for ($i = 0; $i < $slen; ++$i) {
+				$newbrd[$brd[$i]] = true;
+			}
+			$brd = $newbrd;
+		} elseif (
+			($brd === 1)
+			|| ($brd === true)
+			|| (is_numeric($brd) && ((int)$brd > 0))
+		) {
+			$brd = array('LRTB' => true);
+		}
+		if (!is_array($brd)) {
+			return;
+		}
+		// store current cell padding
+		$cp = $this->cell_padding;
+		// select border mode
+		if (isset($brd['mode'])) {
+			$mode = $brd['mode'];
+			unset($brd['mode']);
+		} else {
+			$mode = 'normal';
+		}
+		// process borders
+		foreach ($brd as $border => $style) {
+			$line_width = $this->LineWidth;
+			if (is_array($style) && isset($style['width'])) {
+				// get border width
+				$line_width = $style['width'];
+			}
+			$adj = 0; // line width inside the cell
+			switch ($mode) {
+				case 'ext': {
+					$adj = 0;
+					break;
+				}
+				case 'int': {
+					$adj = $line_width;
+					break;
+				}
+				case 'normal':
+				default: {
+					$adj = ($line_width / 2);
+					break;
+				}
+			}
+			// correct internal cell padding if required to avoid overlap between text and lines
+			if (
+				is_numeric($this->cell_padding['T'])
+				&& ($this->cell_padding['T'] < $adj)
+				&& (strpos($border, 'T') !== false)
+			) {
+				$this->cell_padding['T'] = $adj;
+			}
+			if (
+				is_numeric($this->cell_padding['R'])
+				&& ($this->cell_padding['R'] < $adj)
+				&& (strpos($border, 'R') !== false)
+			) {
+				$this->cell_padding['R'] = $adj;
+			}
+			if (
+				is_numeric($this->cell_padding['B'])
+				&& ($this->cell_padding['B'] < $adj)
+				&& (strpos($border, 'B') !== false)
+			) {
+				$this->cell_padding['B'] = $adj;
+			}
+			if (
+				is_numeric($this->cell_padding['L'])
+				&& ($this->cell_padding['L'] < $adj)
+				&& (strpos($border, 'L') !== false)
+			) {
+				$this->cell_padding['L'] = $adj;
+			}
+
+		}
+
+		return array(
+			'T' => ($this->cell_padding['T'] - $cp['T']),
+			'R' => ($this->cell_padding['R'] - $cp['R']),
+			'B' => ($this->cell_padding['B'] - $cp['B']),
+			'L' => ($this->cell_padding['L'] - $cp['L']),
+		);
+	}
+
+	/**
+	 * Enables or disables the automatic page breaking mode. When enabling, the second parameter is the distance from the bottom of the page that defines the triggering limit. By default, the mode is on and the margin is 2 cm.
+	 * @param boolean $auto Boolean indicating if mode should be on or off.
+	 * @param float $margin Distance from the bottom of the page.
+	 * @public
+	 * @since 1.0
+	 * @see Cell(), MultiCell(), AcceptPageBreak()
+	 */
+	public function setAutoPageBreak($auto, $margin=0) {
+		$this->AutoPageBreak = $auto ? true : false;
+		$this->bMargin = $margin;
+		$this->PageBreakTrigger = $this->h - $margin;
+	}
+
+	/**
+	 * Return the auto-page-break mode (true or false).
+	 * @return bool auto-page-break mode
+	 * @public
+	 * @since 5.9.088
+	 */
+	public function getAutoPageBreak() {
+		return $this->AutoPageBreak;
+	}	
 
 }
