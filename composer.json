@@ -34,7 +34,6 @@
             "include",
             "tcpdf_barcodes_1d.php",
             "tcpdf_barcodes_2d.php",
-            "src/Config/TCPDF_LimePDF.php",
             "include/limePDF_Colors.php",
             "include/limePDF_Filters.php",
             "include/limePDF_Font_Data.php",
