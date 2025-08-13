@@ -17,6 +17,7 @@ namespace LimePDF;
 
 	require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
 
+	require_once(dirname(__FILE__).'/src/Fonts/limePDF_FontManager.php');	
 	require_once(dirname(__FILE__).'/src/Fonts/limePDF_Fonts.php');
 
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_Columns.php');
@@ -60,6 +61,7 @@ class TCPDF {
 	use LIMEPDF_PAGECOLORS;	
 	use LIMEPDF_MARGINS;
 	use LIMEPDF_SECTIONS;
+	use LIMEPDF_FONTMANAGER;	
 	use LIMEPDF_FONTS;
 	use LIMEPDF_DRAW;
 
@@ -940,48 +942,6 @@ class TCPDF {
 			return array_map(array($this,'getAbsFontMeasure'), $result);
 		}
 		return false;
-	}
-
-	/**
-	 * Return the font descent value
-	 * @param string $font font name
-	 * @param string $style font style
-	 * @param float $size The size (in points)
-	 * @return int font descent
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.9.003 (2010-03-30)
-	 */
-	public function getFontDescent($font, $style='', $size=0) {
-		$fontdata = $this->AddFont($font, $style);
-		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
-		if (isset($fontinfo['desc']['Descent']) AND ($fontinfo['desc']['Descent'] <= 0)) {
-			$descent = (- $fontinfo['desc']['Descent'] * $size / 1000);
-		} else {
-			$descent = (1.219 * 0.24 * $size);
-		}
-		return ($descent / $this->k);
-	}
-
-	/**
-	 * Return the font ascent value.
-	 * @param string $font font name
-	 * @param string $style font style
-	 * @param float $size The size (in points)
-	 * @return int font ascent
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.9.003 (2010-03-30)
-	 */
-	public function getFontAscent($font, $style='', $size=0) {
-		$fontdata = $this->AddFont($font, $style);
-		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
-		if (isset($fontinfo['desc']['Ascent']) AND ($fontinfo['desc']['Ascent'] > 0)) {
-			$ascent = ($fontinfo['desc']['Ascent'] * $size / 1000);
-		} else {
-			$ascent = 1.219 * 0.76 * $size;
-		}
-		return ($ascent / $this->k);
 	}
 
 	/**
@@ -8939,46 +8899,6 @@ class TCPDF {
 	}
 
 	/**
-	 * Returns the current font size.
-	 * @return float current font size
-	 * @public
-	 * @since 3.2.000 (2008-06-23)
-	 */
-	public function getFontSize() {
-		return $this->FontSize;
-	}
-
-	/**
-	 * Returns the current font size in points unit.
-	 * @return int current font size in points unit
-	 * @public
-	 * @since 3.2.000 (2008-06-23)
-	 */
-	public function getFontSizePt() {
-		return $this->FontSizePt;
-	}
-
-	/**
-	 * Returns the current font family name.
-	 * @return string current font family name
-	 * @public
-	 * @since 4.3.008 (2008-12-05)
-	 */
-	public function getFontFamily() {
-		return $this->FontFamily;
-	}
-
-	/**
-	 * Returns the current font style.
-	 * @return string current font style
-	 * @public
-	 * @since 4.3.008 (2008-12-05)
-	 */
-	public function getFontStyle() {
-		return $this->FontStyle;
-	}
-
-	/**
 	 * Cleanup HTML code (requires HTML Tidy library).
 	 * @param string $html htmlcode to fix
 	 * @param string $default_css CSS commands to add
@@ -15190,54 +15110,6 @@ class TCPDF {
 		return $str;
 	}
 
-	/**
-	 * Return true if the current font is unicode type.
-	 * @return bool true for unicode font, false otherwise.
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.8.002 (2010-08-14)
-	 */
-	public function isUnicodeFont() {
-		return (($this->CurrentFont['type'] == 'TrueTypeUnicode') OR ($this->CurrentFont['type'] == 'cidfont0'));
-	}
-
-	/**
-	 * Return normalized font name
-	 * @param string $fontfamily property string containing font family names
-	 * @return string normalized font name
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.8.004 (2010-08-17)
-	 */
-	public function getFontFamilyName($fontfamily) {
-		// remove spaces and symbols
-		$fontfamily = preg_replace('/[^a-z0-9_\,]/', '', strtolower($fontfamily));
-		// extract all font names
-		$fontslist = preg_split('/[,]/', $fontfamily);
-		// find first valid font name
-		foreach ($fontslist as $font) {
-			// replace font variations
-			$font = preg_replace('/regular$/', '', $font);
-			$font = preg_replace('/italic$/', 'I', $font);
-			$font = preg_replace('/oblique$/', 'I', $font);
-			$font = preg_replace('/bold([I]?)$/', 'B\\1', $font);
-			// replace common family names and core fonts
-			$pattern = array();
-			$replacement = array();
-			$pattern[] = '/^serif|^cursive|^fantasy|^timesnewroman/';
-			$replacement[] = 'times';
-			$pattern[] = '/^sansserif/';
-			$replacement[] = 'helvetica';
-			$pattern[] = '/^monospace/';
-			$replacement[] = 'courier';
-			$font = preg_replace($pattern, $replacement, $font);
-			if (in_array(strtolower($font), $this->fontlist) OR in_array($font, $this->fontkeys)) {
-				return $font;
-			}
-		}
-		// return current font as default
-		return $this->CurrentFont['fontkey'];
-	}
 
 
 } // END OF TCPDF CLASS

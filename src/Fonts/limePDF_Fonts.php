@@ -2,8 +2,7 @@
 
 namespace LimePDF;
 
-trait LIMEPDF_FONTS {
-
+trait LIMEPDF_FONTS {	
 
 	/**
 	 * Imports a TrueType, Type1, core, or CID0 font and makes it available.
