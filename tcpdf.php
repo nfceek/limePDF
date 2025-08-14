@@ -17,6 +17,8 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/include/limePDF_Static.php');
 
 	// src files
+	require_once(dirname(__FILE__).'/src/Barcode/limePDF_Barcode.php');
+
 	require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
 
 	require_once(dirname(__FILE__).'/src/Fonts/limePDF_FontManager.php');	
@@ -39,18 +41,24 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Forms.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
-	//require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
+	require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
 	//require_once(dirname(__FILE__).'/src/Utils/limePDF_PutXObjects.php');
+	require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
 
+	require_once(dirname(__FILE__).'/src/Model/limePDF_Barcode_GetterSetter.php');
 	require_once(dirname(__FILE__).'/src/Model/limePDF_Font_GetterSetter.php');	
+	require_once(dirname(__FILE__).'/src/Model/limePDF_Image_GetterSetter.php');		
 	require_once(dirname(__FILE__).'/src/Model/limePDF_Page_GetterSetter.php');
 	require_once(dirname(__FILE__).'/src/Model/limePDF_Text_GetterSetter.php');	
+	require_once(dirname(__FILE__).'/src/Model/limePDF_Util_GetterSetter.php');
 
 	require_once(dirname(__FILE__).'/src/Text/limePDF_text.php');
 	
 class TCPDF {
 
 	use LIMEPDF_ANNOTATIONS;
+
+	use LIMEPDF_BARCODE;
 
 	use LIMEPDF_COLUMNS;
 
@@ -68,13 +76,14 @@ class TCPDF {
 	use LIMEPDF_JAVASCRIPT;
 
 	use LIMEPDF_MARGINS;
-	//use LIMEPDF_MISC;
+	use LIMEPDF_MISC;
 
 	use LIMEPDF_PAGES;
 	use LIMEPDF_PAGECOLORS;	
 	//use LIMEPDF_PUTXOBJECTS;
 
 	use LIMEPDF_SECTIONS;
+	use LIMEPDF_SIGNATURE;
 	use LIMEPDF_SVG;
 
 	use LIMEPDF_TEXT;
@@ -85,9 +94,12 @@ class TCPDF {
 	use LIMEPDF_XOTEMPLATES;
 
 	// Load Getter Setters
+	USE LIMEPDF_BARCODE_GETTERSETTER;	
 	USE LIMEPDF_FONT_GETTERSETTER;
+	USE LIMEPDF_IMAGE_GETTERSETTER;	
 	USE LIMEPDF_PAGE_GETTERSETTER;	
 	USE LIMEPDF_TEXT_GETTERSETTER;
+	USE LIMEPDF_UTIL_GETTERSETTER;	
 
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
 
@@ -255,34 +267,6 @@ class TCPDF {
 		$this->_destroy(true);
 	}
 
-
-
-	/**
-	 * Set the last cell height.
-	 * @param float $h cell height.
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 1.53.0.TC034
-	 */
-	public function setLastH($h) {
-		$this->lasth = $h;
-	}
-
-	/**
-	 * Return the cell height
-	 * @param int $fontsize Font size in internal units
-	 * @param boolean $padding If true add cell padding
-	 * @public
-	 * @return float
-	 */
-	public function getCellHeight($fontsize, $padding=TRUE) {
-		$height = ($fontsize * $this->cell_height_ratio);
-		if ($padding && !empty($this->cell_padding)) {
-			$height += ($this->cell_padding['T'] + $this->cell_padding['B']);
-		}
-		return round($height, 6);
-	}
-
 	/**
 	 * Reset the last cell height.
 	 * @public
@@ -292,40 +276,7 @@ class TCPDF {
 		$this->lasth = $this->getCellHeight($this->FontSize);
 	}
 
-	/**
-	 * Get the last cell height.
-	 * @return float last cell height
-	 * @public
-	 * @since 4.0.017 (2008-08-05)
-	 */
-	public function getLastH() {
-		return $this->lasth;
-	}
-
-	/**
-	 * Set the adjusting factor to convert pixels to user units.
-	 * @param float $scale adjusting factor to convert pixels to user units.
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 1.5.2
-	 */
-	public function setImageScale($scale) {
-		$this->imgscale = $scale;
-	}
-
-	/**
-	 * Returns the adjusting factor to convert pixels to user units.
-	 * @return float adjusting factor to convert pixels to user units.
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 1.5.2
-	 */
-	public function getImageScale() {
-		return $this->imgscale;
-	}
-
-
-
+	
 	/**
 	 * Defines the way the document is to be displayed by the viewer.
 	 * @param mixed $zoom The zoom to use. It can be one of the following string values or a number indicating the zooming factor to use. <ul><li>fullpage: displays the entire page on screen </li><li>fullwidth: uses maximum width of window</li><li>real: uses real size (equivalent to 100% zoom)</li><li>default: uses viewer default mode</li></ul>
@@ -523,55 +474,7 @@ class TCPDF {
 		$this->_destroy(false);
 	}
 
-	/**
-	 * Set start-writing mark on selected page.
-	 * Borders and fills are always created after content and inserted on the position marked by this method.
-	 * @param int $page page number (default is the current page)
-	 * @protected
-	 * @since 4.6.021 (2009-07-20)
-	 */	
-	protected function setContentMark($page=0) {
-		if ($page <= 0) {
-			$page = $this->page;
-		}
-		if (isset($this->footerlen[$page])) {
-			$this->cntmrk[$page] = $this->pagelen[$page] - $this->footerlen[$page];
-		} else {
-			$this->cntmrk[$page] = $this->pagelen[$page];
-		}
-	}
-
-
-
-
-	/**
-	 * Convert a relative font measure into absolute value.
-	 * @param int $s Font measure.
-	 * @return float Absolute measure.
-	 * @since 5.9.186 (2012-09-13)
-	 */
-	public function getAbsFontMeasure($s) {
-		return ($s * $this->FontSize / 1000);
-	}
-
-	/**
-	 * Returns the glyph bounding box of the specified character in the current font in user units.
-	 * @param int $char Input character code.
-	 * @return false|array array(xMin, yMin, xMax, yMax) or FALSE if not defined.
-	 * @since 5.9.186 (2012-09-13)
-	 */
-	public function getCharBBox($char) {
-		$c = intval($char);
-		if (isset($this->CurrentFont['cw'][$c])) {
-			// glyph is defined ... use zero width & height for glyphs without outlines
-			$result = array(0,0,0,0);
-			if (isset($this->CurrentFont['cbbox'][$c])) {
-				$result = $this->CurrentFont['cbbox'][$c];
-			}
-			return array_map(array($this,'getAbsFontMeasure'), $result);
-		}
-		return false;
-	}
+	
 
 	/**
 	 * Return true in the character is present in the specified font.
@@ -1004,486 +907,7 @@ class TCPDF {
 		$this->cell_margin = $prev_cell_margin;
 	}
 
-	/**
-	 * Returns the PDF string code to print a cell (rectangular area) with optional borders, background color and character string. The upper-left corner of the cell corresponds to the current position. The text can be aligned or centered. After the call, the current position moves to the right or to the next line. It is possible to put a link on the text.<br />
-	 * If automatic page breaking is enabled and the cell goes beyond the limit, a page break is done before outputting.
-	 * @param float $w Cell width. If 0, the cell extends up to the right margin.
-	 * @param float $h Cell height. Default value: 0.
-	 * @param string $txt String to print. Default value: empty string.
-	 * @param mixed $border Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
-	 * @param int $ln Indicates where the current position should go after the call. Possible values are:<ul><li>0: to the right (or left for RTL languages)</li><li>1: to the beginning of the next line</li><li>2: below</li></ul>Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value: 0.
-	 * @param string $align Allows to center or align the text. Possible values are:<ul><li>L or empty string: left align (default value)</li><li>C: center</li><li>R: right align</li><li>J: justify</li></ul>
-	 * @param boolean $fill Indicates if the cell background must be painted (true) or transparent (false).
-	 * @param mixed $link URL or identifier returned by AddLink().
-	 * @param int $stretch font stretch mode: <ul><li>0 = disabled</li><li>1 = horizontal scaling only if text is larger than cell width</li><li>2 = forced horizontal scaling to fit cell width</li><li>3 = character spacing only if text is larger than cell width</li><li>4 = forced character spacing to fit cell width</li></ul> General font stretching and scaling values will be preserved when possible.
-	 * @param boolean $ignore_min_height if true ignore automatic minimum height value.
-	 * @param string $calign cell vertical alignment relative to the specified Y value. Possible values are:<ul><li>T : cell top</li><li>C : center</li><li>B : cell bottom</li><li>A : font top</li><li>L : font baseline</li><li>D : font bottom</li></ul>
-	 * @param string $valign text vertical alignment inside the cell. Possible values are:<ul><li>T : top</li><li>M : middle</li><li>B : bottom</li></ul>
-	 * @return string containing cell code
-	 * @protected
-	 * @since 1.0
-	 * @see Cell()
-	 */
-	protected function getCellCode($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M') {
-		// replace 'NO-BREAK SPACE' (U+00A0) character with a simple space
-		$txt = is_null($txt) ? '' : $txt;
-		$txt = str_replace(LIMEPDF_FONT::unichr(160, $this->isunicode), ' ', $txt);
-		$prev_cell_margin = $this->cell_margin;
-		$prev_cell_padding = $this->cell_padding;
-		$txt = LIMEPDF_STATIC::removeSHY($txt, $this->isunicode);
-		$rs = ''; //string to be returned
-		$this->adjustCellPadding($border);
-		if (!$ignore_min_height) {
-			$min_cell_height = $this->getCellHeight($this->FontSize);
-			if ($h < $min_cell_height) {
-				$h = $min_cell_height;
-			}
-		}
-		$k = $this->k;
-		// check page for no-write regions and adapt page margins if necessary
-		list($this->x, $this->y) = $this->checkPageRegions($h, $this->x, $this->y);
-		if ($this->rtl) {
-			$x = $this->x - $this->cell_margin['R'];
-		} else {
-			$x = $this->x + $this->cell_margin['L'];
-		}
-		$y = $this->y + $this->cell_margin['T'];
-		$prev_font_stretching = $this->font_stretching;
-		$prev_font_spacing = $this->font_spacing;
-		// cell vertical alignment
-		switch ($calign) {
-			case 'A': {
-				// font top
-				switch ($valign) {
-					case 'T': {
-						// top
-						$y -= $this->cell_padding['T'];
-						break;
-					}
-					case 'B': {
-						// bottom
-						$y -= ($h - $this->cell_padding['B'] - $this->FontAscent - $this->FontDescent);
-						break;
-					}
-					default:
-					case 'C':
-					case 'M': {
-						// center
-						$y -= (($h - $this->FontAscent - $this->FontDescent) / 2);
-						break;
-					}
-				}
-				break;
-			}
-			case 'L': {
-				// font baseline
-				switch ($valign) {
-					case 'T': {
-						// top
-						$y -= ($this->cell_padding['T'] + $this->FontAscent);
-						break;
-					}
-					case 'B': {
-						// bottom
-						$y -= ($h - $this->cell_padding['B'] - $this->FontDescent);
-						break;
-					}
-					default:
-					case 'C':
-					case 'M': {
-						// center
-						$y -= (($h + $this->FontAscent - $this->FontDescent) / 2);
-						break;
-					}
-				}
-				break;
-			}
-			case 'D': {
-				// font bottom
-				switch ($valign) {
-					case 'T': {
-						// top
-						$y -= ($this->cell_padding['T'] + $this->FontAscent + $this->FontDescent);
-						break;
-					}
-					case 'B': {
-						// bottom
-						$y -= ($h - $this->cell_padding['B']);
-						break;
-					}
-					default:
-					case 'C':
-					case 'M': {
-						// center
-						$y -= (($h + $this->FontAscent + $this->FontDescent) / 2);
-						break;
-					}
-				}
-				break;
-			}
-			case 'B': {
-				// cell bottom
-				$y -= $h;
-				break;
-			}
-			case 'C':
-			case 'M': {
-				// cell center
-				$y -= ($h / 2);
-				break;
-			}
-			default:
-			case 'T': {
-				// cell top
-				break;
-			}
-		}
-		// text vertical alignment
-		switch ($valign) {
-			case 'T': {
-				// top
-				$yt = $y + $this->cell_padding['T'];
-				break;
-			}
-			case 'B': {
-				// bottom
-				$yt = $y + $h - $this->cell_padding['B'] - $this->FontAscent - $this->FontDescent;
-				break;
-			}
-			default:
-			case 'C':
-			case 'M': {
-				// center
-				$yt = $y + (($h - $this->FontAscent - $this->FontDescent) / 2);
-				break;
-			}
-		}
-		$basefonty = $yt + $this->FontAscent;
-		if (LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) {
-			if ($this->rtl) {
-				$w = $x - $this->lMargin;
-			} else {
-				$w = $this->w - $this->rMargin - $x;
-			}
-		}
-		$s = '';
-		// fill and borders
-		if (is_string($border) AND (strlen($border) == 4)) {
-			// full border
-			$border = 1;
-		}
-		if ($fill OR ($border == 1)) {
-			if ($fill) {
-				$op = ($border == 1) ? 'B' : 'f';
-			} else {
-				$op = 'S';
-			}
-			if ($this->rtl) {
-				$xk = (($x - $w) * $k);
-			} else {
-				$xk = ($x * $k);
-			}
-			$s .= sprintf('%F %F %F %F re %s ', $xk, (($this->h - $y) * $k), ($w * $k), (-$h * $k), $op);
-		}
-		// draw borders
-		$s .= $this->getCellBorder($x, $y, $w, $h, $border);
-		if ($txt != '') {
-			$txt2 = $txt;
-			if ($this->isunicode) {
-				if (($this->CurrentFont['type'] == 'core') OR ($this->CurrentFont['type'] == 'TrueType') OR ($this->CurrentFont['type'] == 'Type1')) {
-					$txt2 = LIMEPDF_FONT::UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
-				} else {
-					$unicode = LIMEPDF_FONT::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
-					$unicode = LIMEPDF_FONT::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
-					// replace thai chars (if any)
-					if (defined('K_THAI_TOPCHARS') AND (K_THAI_TOPCHARS == true)) {
-						// number of chars
-						$numchars = count($unicode);
-						// po pla, for far, for fan
-						$longtail = array(0x0e1b, 0x0e1d, 0x0e1f);
-						// do chada, to patak
-						$lowtail = array(0x0e0e, 0x0e0f);
-						// mai hun arkad, sara i, sara ii, sara ue, sara uee
-						$upvowel = array(0x0e31, 0x0e34, 0x0e35, 0x0e36, 0x0e37);
-						// mai ek, mai tho, mai tri, mai chattawa, karan
-						$tonemark = array(0x0e48, 0x0e49, 0x0e4a, 0x0e4b, 0x0e4c);
-						// sara u, sara uu, pinthu
-						$lowvowel = array(0x0e38, 0x0e39, 0x0e3a);
-						$output = array();
-						for ($i = 0; $i < $numchars; $i++) {
-							if (($unicode[$i] >= 0x0e00) && ($unicode[$i] <= 0x0e5b)) {
-								$ch0 = $unicode[$i];
-								$ch1 = ($i > 0) ? $unicode[($i - 1)] : 0;
-								$ch2 = ($i > 1) ? $unicode[($i - 2)] : 0;
-								$chn = ($i < ($numchars - 1)) ? $unicode[($i + 1)] : 0;
-								if (in_array($ch0, $tonemark)) {
-									if ($chn == 0x0e33) {
-										// sara um
-										if (in_array($ch1, $longtail)) {
-											// tonemark at upper left
-											$output[] = $this->replaceChar($ch0, (0xf713 + $ch0 - 0x0e48));
-										} else {
-											// tonemark at upper right (normal position)
-											$output[] = $ch0;
-										}
-									} elseif (in_array($ch1, $longtail) OR (in_array($ch2, $longtail) AND in_array($ch1, $lowvowel))) {
-										// tonemark at lower left
-										$output[] = $this->replaceChar($ch0, (0xf705 + $ch0 - 0x0e48));
-									} elseif (in_array($ch1, $upvowel)) {
-										if (in_array($ch2, $longtail)) {
-											// tonemark at upper left
-											$output[] = $this->replaceChar($ch0, (0xf713 + $ch0 - 0x0e48));
-										} else {
-											// tonemark at upper right (normal position)
-											$output[] = $ch0;
-										}
-									} else {
-										// tonemark at lower right
-										$output[] = $this->replaceChar($ch0, (0xf70a + $ch0 - 0x0e48));
-									}
-								} elseif (($ch0 == 0x0e33) AND (in_array($ch1, $longtail) OR (in_array($ch2, $longtail) AND in_array($ch1, $tonemark)))) {
-									// add lower left nikhahit and sara aa
-									if ($this->isCharDefined(0xf711) AND $this->isCharDefined(0x0e32)) {
-										$output[] = 0xf711;
-										$this->CurrentFont['subsetchars'][0xf711] = true;
-										$output[] = 0x0e32;
-										$this->CurrentFont['subsetchars'][0x0e32] = true;
-									} else {
-										$output[] = $ch0;
-									}
-								} elseif (in_array($ch1, $longtail)) {
-									if ($ch0 == 0x0e31) {
-										// lower left mai hun arkad
-										$output[] = $this->replaceChar($ch0, 0xf710);
-									} elseif (in_array($ch0, $upvowel)) {
-										// lower left
-										$output[] = $this->replaceChar($ch0, (0xf701 + $ch0 - 0x0e34));
-									} elseif ($ch0 == 0x0e47) {
-										// lower left mai tai koo
-										$output[] = $this->replaceChar($ch0, 0xf712);
-									} else {
-										// normal character
-										$output[] = $ch0;
-									}
-								} elseif (in_array($ch1, $lowtail) AND in_array($ch0, $lowvowel)) {
-									// lower vowel
-									$output[] = $this->replaceChar($ch0, (0xf718 + $ch0 - 0x0e38));
-								} elseif (($ch0 == 0x0e0d) AND in_array($chn, $lowvowel)) {
-									// yo ying without lower part
-									$output[] = $this->replaceChar($ch0, 0xf70f);
-								} elseif (($ch0 == 0x0e10) AND in_array($chn, $lowvowel)) {
-									// tho santan without lower part
-									$output[] = $this->replaceChar($ch0, 0xf700);
-								} else {
-									$output[] = $ch0;
-								}
-							} else {
-								// non-thai character
-								$output[] = $unicode[$i];
-							}
-						}
-						$unicode = $output;
-						// update font subsetchars
-						$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
-					} // end of K_THAI_TOPCHARS
-					$txt2 = LIMEPDF_FONT::arrUTF8ToUTF16BE($unicode, false);
-				}
-			}
-			$txt2 = LIMEPDF_STATIC::_escape($txt2);
-			// get current text width (considering general font stretching and spacing)
-			$txwidth = $this->GetStringWidth($txt);
-			$width = $txwidth;
-			// check for stretch mode
-			if ($stretch > 0) {
-				// calculate ratio between cell width and text width
-				if ($width <= 0) {
-					$ratio = 1;
-				} else {
-					$ratio = (($w - $this->cell_padding['L'] - $this->cell_padding['R']) / $width);
-				}
-				// check if stretching is required
-				if (($ratio < 1) OR (($ratio > 1) AND (($stretch % 2) == 0))) {
-					// the text will be stretched to fit cell width
-					if ($stretch > 2) {
-						// set new character spacing
-						$this->font_spacing += ($w - $this->cell_padding['L'] - $this->cell_padding['R'] - $width) / (max(($this->GetNumChars($txt) - 1), 1) * ($this->font_stretching / 100));
-					} else {
-						// set new horizontal stretching
-						$this->font_stretching *= $ratio;
-					}
-					// recalculate text width (the text fills the entire cell)
-					$width = $w - $this->cell_padding['L'] - $this->cell_padding['R'];
-					// reset alignment
-					$align = '';
-				}
-			}
-			if ($this->font_stretching != 100) {
-				// apply font stretching
-				$rs .= sprintf('BT %F Tz ET ', $this->font_stretching);
-			}
-			if ($this->font_spacing != 0) {
-				// increase/decrease font spacing
-				$rs .= sprintf('BT %F Tc ET ', ($this->font_spacing * $this->k));
-			}
-			if ($this->ColorFlag AND ($this->textrendermode < 4)) {
-				$s .= 'q '.$this->TextColor.' ';
-			}
-			// rendering mode
-			$s .= sprintf('BT %d Tr %F w ET ', $this->textrendermode, ($this->textstrokewidth * $this->k));
-			// count number of spaces
-			$ns = substr_count($txt, chr(32));
-			// Justification
-			$spacewidth = 0;
-			if (($align == 'J') AND ($ns > 0)) {
-				if ($this->isUnicodeFont()) {
-					// get string width without spaces
-					$width = $this->GetStringWidth(str_replace(' ', '', $txt));
-					// calculate average space width
-					$spacewidth = -1000 * ($w - $width - $this->cell_padding['L'] - $this->cell_padding['R']) / ($ns?$ns:1) / ($this->FontSize?$this->FontSize:1);
-					if ($this->font_stretching != 100) {
-						// word spacing is affected by stretching
-						$spacewidth /= ($this->font_stretching / 100);
-					}
-					// set word position to be used with TJ operator
-					$txt2 = str_replace(chr(0).chr(32), ') '.sprintf('%F', $spacewidth).' (', $txt2);
-					$unicode_justification = true;
-				} else {
-					// get string width
-					$width = $txwidth;
-					// new space width
-					$spacewidth = (($w - $width - $this->cell_padding['L'] - $this->cell_padding['R']) / ($ns?$ns:1)) * $this->k;
-					if ($this->font_stretching != 100) {
-						// word spacing (Tw) is affected by stretching
-						$spacewidth /= ($this->font_stretching / 100);
-					}
-					// set word spacing
-					$rs .= sprintf('BT %F Tw ET ', $spacewidth);
-				}
-				$width = $w - $this->cell_padding['L'] - $this->cell_padding['R'];
-			}
-			// replace carriage return characters
-			$txt2 = str_replace("\r", ' ', $txt2);
-			switch ($align) {
-				case 'C': {
-					$dx = ($w - $width) / 2;
-					break;
-				}
-				case 'R': {
-					if ($this->rtl) {
-						$dx = $this->cell_padding['R'];
-					} else {
-						$dx = $w - $width - $this->cell_padding['R'];
-					}
-					break;
-				}
-				case 'L': {
-					if ($this->rtl) {
-						$dx = $w - $width - $this->cell_padding['L'];
-					} else {
-						$dx = $this->cell_padding['L'];
-					}
-					break;
-				}
-				case 'J':
-				default: {
-					if ($this->rtl) {
-						$dx = $this->cell_padding['R'];
-					} else {
-						$dx = $this->cell_padding['L'];
-					}
-					break;
-				}
-			}
-			if ($this->rtl) {
-				$xdx = $x - $dx - $width;
-			} else {
-				$xdx = $x + $dx;
-			}
-			$xdk = $xdx * $k;
-			// print text
-			$s .= sprintf('BT %F %F Td [(%s)] TJ ET', $xdk, (($this->h - $basefonty) * $k), $txt2);
-			if (isset($uniblock)) { // @phpstan-ignore-line
-				// print overlapping characters as separate string
-				$xshift = 0; // horizontal shift
-				$ty = (($this->h - $basefonty + (0.2 * $this->FontSize)) * $k);
-				$spw = (($w - $txwidth - $this->cell_padding['L'] - $this->cell_padding['R']) / ($ns?$ns:1));
-				foreach ($uniblock as $uk => $uniarr) { // @phpstan-ignore-line
-					if (($uk % 2) == 0) {
-						// x space to skip
-						if ($spacewidth != 0) {
-							// justification shift
-							$xshift += (count(array_keys($uniarr, 32)) * $spw);
-						}
-						$xshift += $this->GetArrStringWidth($uniarr); // + shift justification
-					} else {
-						// character to print
-						$topchr = LIMEPDF_FONT::arrUTF8ToUTF16BE($uniarr, false);
-						$topchr = LIMEPDF_STATIC::_escape($topchr);
-						$s .= sprintf(' BT %F %F Td [(%s)] TJ ET', ($xdk + ($xshift * $k)), $ty, $topchr);
-					}
-				}
-			}
-			if ($this->underline) {
-				$s .= ' '.$this->_dounderlinew($xdx, $basefonty, $width);
-			}
-			if ($this->linethrough) {
-				$s .= ' '.$this->_dolinethroughw($xdx, $basefonty, $width);
-			}
-			if ($this->overline) {
-				$s .= ' '.$this->_dooverlinew($xdx, $basefonty, $width);
-			}
-			if ($this->ColorFlag AND ($this->textrendermode < 4)) {
-				$s .= ' Q';
-			}
-			if ($link) {
-				$this->Link($xdx, $yt, $width, ($this->FontAscent + $this->FontDescent), $link, $ns);
-			}
-		}
-		// output cell
-		if ($s) {
-			// output cell
-			$rs .= $s;
-			if ($this->font_spacing != 0) {
-				// reset font spacing mode
-				$rs .= ' BT 0 Tc ET';
-			}
-			if ($this->font_stretching != 100) {
-				// reset font stretching mode
-				$rs .= ' BT 100 Tz ET';
-			}
-		}
-		// reset word spacing
-		if (!$this->isUnicodeFont() AND ($align == 'J')) {
-			$rs .= ' BT 0 Tw ET';
-		}
-		// reset stretching and spacing
-		$this->font_stretching = $prev_font_stretching;
-		$this->font_spacing = $prev_font_spacing;
-		$this->lasth = $h;
-		if ($ln > 0) {
-			//Go to the beginning of the next line
-			$this->y = $y + $h + $this->cell_margin['B'];
-			if ($ln == 1) {
-				if ($this->rtl) {
-					$this->x = $this->w - $this->rMargin;
-				} else {
-					$this->x = $this->lMargin;
-				}
-			}
-		} else {
-			// go left or right by case
-			if ($this->rtl) {
-				$this->x = $x - $w - $this->cell_margin['L'];
-			} else {
-				$this->x = $x + $w + $this->cell_margin['R'];
-			}
-		}
-		$gstyles = ''.$this->linestyleWidth.' '.$this->linestyleCap.' '.$this->linestyleJoin.' '.$this->linestyleDash.' '.$this->DrawColor.' '.$this->FillColor."\n";
-		$rs = $gstyles.$rs;
-		$this->cell_padding = $prev_cell_padding;
-		$this->cell_margin = $prev_cell_margin;
-		return $rs;
-	}
+
 
 	/**
 	 * Replace a char if is defined on the current font.
@@ -1504,195 +928,7 @@ class TCPDF {
 		return $oldchar;
 	}
 
-	/**
-	 * Returns the code to draw the cell border
-	 * @param float $x X coordinate.
-	 * @param float $y Y coordinate.
-	 * @param float $w Cell width.
-	 * @param float $h Cell height.
-	 * @param string|array|int $brd Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
-	 * @return string containing cell border code
-	 * @protected
-	 * @see SetLineStyle()
-	 * @since 5.7.000 (2010-08-02)
-	 */
-	protected function getCellBorder($x, $y, $w, $h, $brd) {
-		$s = ''; // string to be returned
-		if (empty($brd)) {
-			return $s;
-		}
-		if ($brd == 1) {
-			$brd = array('LRTB' => true);
-		}
-		// calculate coordinates for border
-		$k = $this->k;
-		if ($this->rtl) {
-			$xeL = ($x - $w) * $k;
-			$xeR = $x * $k;
-		} else {
-			$xeL = $x * $k;
-			$xeR = ($x + $w) * $k;
-		}
-		$yeL = (($this->h - ($y + $h)) * $k);
-		$yeT = (($this->h - $y) * $k);
-		$xeT = $xeL;
-		$xeB = $xeR;
-		$yeR = $yeT;
-		$yeB = $yeL;
-		if (is_string($brd)) {
-			// convert string to array
-			$slen = strlen($brd);
-			$newbrd = array();
-			for ($i = 0; $i < $slen; ++$i) {
-				$newbrd[$brd[$i]] = array('cap' => 'square', 'join' => 'miter');
-			}
-			$brd = $newbrd;
-		}
-		if (isset($brd['mode'])) {
-			$mode = $brd['mode'];
-			unset($brd['mode']);
-		} else {
-			$mode = 'normal';
-		}
-		foreach ($brd as $border => $style) {
-			if (is_array($style) AND !empty($style)) {
-				// apply border style
-				$prev_style = $this->linestyleWidth.' '.$this->linestyleCap.' '.$this->linestyleJoin.' '.$this->linestyleDash.' '.$this->DrawColor.' ';
-				$s .= $this->setLineStyle($style, true)."\n";
-			}
-			switch ($mode) {
-				case 'ext': {
-					$off = (($this->LineWidth / 2) * $k);
-					$xL = $xeL - $off;
-					$xR = $xeR + $off;
-					$yT = $yeT + $off;
-					$yL = $yeL - $off;
-					$xT = $xL;
-					$xB = $xR;
-					$yR = $yT;
-					$yB = $yL;
-					$w += $this->LineWidth;
-					$h += $this->LineWidth;
-					break;
-				}
-				case 'int': {
-					$off = ($this->LineWidth / 2) * $k;
-					$xL = $xeL + $off;
-					$xR = $xeR - $off;
-					$yT = $yeT - $off;
-					$yL = $yeL + $off;
-					$xT = $xL;
-					$xB = $xR;
-					$yR = $yT;
-					$yB = $yL;
-					$w -= $this->LineWidth;
-					$h -= $this->LineWidth;
-					break;
-				}
-				case 'normal':
-				default: {
-					$xL = $xeL;
-					$xT = $xeT;
-					$xB = $xeB;
-					$xR = $xeR;
-					$yL = $yeL;
-					$yT = $yeT;
-					$yB = $yeB;
-					$yR = $yeR;
-					break;
-				}
-			}
-			// draw borders by case
-			if (strlen($border) == 4) {
-				$s .= sprintf('%F %F %F %F re S ', $xT, $yT, ($w * $k), (-$h * $k));
-			} elseif (strlen($border) == 3) {
-				if (strpos($border,'B') === false) { // LTR
-					$s .= sprintf('%F %F m ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= 'S ';
-				} elseif (strpos($border,'L') === false) { // TRB
-					$s .= sprintf('%F %F m ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= 'S ';
-				} elseif (strpos($border,'T') === false) { // RBL
-					$s .= sprintf('%F %F m ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= 'S ';
-				} elseif (strpos($border,'R') === false) { // BLT
-					$s .= sprintf('%F %F m ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= 'S ';
-				}
-			} elseif (strlen($border) == 2) {
-				if ((strpos($border,'L') !== false) AND (strpos($border,'T') !== false)) { // LT
-					$s .= sprintf('%F %F m ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= 'S ';
-				} elseif ((strpos($border,'T') !== false) AND (strpos($border,'R') !== false)) { // TR
-					$s .= sprintf('%F %F m ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= 'S ';
-				} elseif ((strpos($border,'R') !== false) AND (strpos($border,'B') !== false)) { // RB
-					$s .= sprintf('%F %F m ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= 'S ';
-				} elseif ((strpos($border,'B') !== false) AND (strpos($border,'L') !== false)) { // BL
-					$s .= sprintf('%F %F m ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= 'S ';
-				} elseif ((strpos($border,'L') !== false) AND (strpos($border,'R') !== false)) { // LR
-					$s .= sprintf('%F %F m ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= 'S ';
-					$s .= sprintf('%F %F m ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= 'S ';
-				} elseif ((strpos($border,'T') !== false) AND (strpos($border,'B') !== false)) { // TB
-					$s .= sprintf('%F %F m ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= 'S ';
-					$s .= sprintf('%F %F m ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= 'S ';
-				}
-			} else { // strlen($border) == 1
-				if (strpos($border,'L') !== false) { // L
-					$s .= sprintf('%F %F m ', $xL, $yL);
-					$s .= sprintf('%F %F l ', $xT, $yT);
-					$s .= 'S ';
-				} elseif (strpos($border,'T') !== false) { // T
-					$s .= sprintf('%F %F m ', $xT, $yT);
-					$s .= sprintf('%F %F l ', $xR, $yR);
-					$s .= 'S ';
-				} elseif (strpos($border,'R') !== false) { // R
-					$s .= sprintf('%F %F m ', $xR, $yR);
-					$s .= sprintf('%F %F l ', $xB, $yB);
-					$s .= 'S ';
-				} elseif (strpos($border,'B') !== false) { // B
-					$s .= sprintf('%F %F m ', $xB, $yB);
-					$s .= sprintf('%F %F l ', $xL, $yL);
-					$s .= 'S ';
-				}
-			}
-			if (is_array($style) AND !empty($style)) {
-				// reset border style to previous value
-				$s .= "\n".$this->linestyleWidth.' '.$this->linestyleCap.' '.$this->linestyleJoin.' '.$this->linestyleDash.' '.$this->DrawColor."\n";
-			}
-		}
-		return $s;
-	}
+
 
 	/**
 	 * This method allows printing text with line breaks.
@@ -2604,19 +1840,7 @@ class TCPDF {
 		return $nl;
 	}
 
-	/**
-	 * Returns the remaining width between the current position and margins.
-	 * @return float Return the remaining width
-	 * @protected
-	 */
-	protected function getRemainingWidth() {
-		list($this->x, $this->y) = $this->checkPageRegions(0, $this->x, $this->y);
-		if ($this->rtl) {
-			return ($this->x - $this->lMargin);
-		} else {
-			return ($this->w - $this->rMargin - $this->x);
-		}
-	}
+	
 
 	/**
 	 * Set the block dimensions accounting for page breaks and page/column fitting
@@ -3217,28 +2441,7 @@ class TCPDF {
 		$this->Image($tempfile_plain, $x, $y, $w, $h, $type, $link, $align, $resize, $dpi, $palign, false, $imgmask);
 	}
 
-	/**
-	 * Get the GD-corrected PNG gamma value from alpha color
-	 * @param resource $img GD image Resource ID.
-	 * @param int $c alpha color
-	 * @protected
-	 * @since 4.3.007 (2008-12-04)
-	 */
-	protected function getGDgamma($img, $c) {
-		if (!isset($this->gdgammacache['#'.$c])) {
-			$colors = imagecolorsforindex($img, $c);
-			// GD alpha is only 7 bit (0 -> 127)
-			$this->gdgammacache['#'.$c] = (int) (((127 - $colors['alpha']) / 127) * 255);
-			// correct gamma
-			$this->gdgammacache['#'.$c] = (int) (pow(($this->gdgammacache['#'.$c] / 255), 2.2) * 255);
-			// store the latest values on cache to improve performances
-			if (count($this->gdgammacache) > 8) {
-				// remove one element from the cache array
-				array_shift($this->gdgammacache);
-			}
-		}
-		return $this->gdgammacache['#'.$c];
-	}
+	
 
 	/**
 	 * Performs a line break.
@@ -3273,160 +2476,6 @@ class TCPDF {
 		}
 		$this->y += $h;
 		$this->newline = true;
-	}
-
-	/**
-	 * Returns the relative X value of current position.
-	 * The value is relative to the left border for LTR languages and to the right border for RTL languages.
-	 * @return float
-	 * @public
-	 * @since 1.2
-	 * @see SetX(), GetY(), SetY()
-	 */
-	public function GetX() {
-		//Get x position
-		if ($this->rtl) {
-			return ($this->w - $this->x);
-		} else {
-			return $this->x;
-		}
-	}
-
-	/**
-	 * Returns the absolute X value of current position.
-	 * @return float
-	 * @public
-	 * @since 1.2
-	 * @see SetX(), GetY(), SetY()
-	 */
-	public function GetAbsX() {
-		return $this->x;
-	}
-
-	/**
-	 * Returns the ordinate of the current position.
-	 * @return float
-	 * @public
-	 * @since 1.0
-	 * @see SetY(), GetX(), SetX()
-	 */
-	public function GetY() {
-		return $this->y;
-	}
-
-	/**
-	 * Defines the abscissa of the current position.
-	 * If the passed value is negative, it is relative to the right of the page (or left if language is RTL).
-	 * @param float $x The value of the abscissa in user units.
-	 * @param boolean $rtloff if true always uses the page top-left corner as origin of axis.
-	 * @public
-	 * @since 1.2
-	 * @see GetX(), GetY(), SetY(), SetXY()
-	 */
-	public function setX($x, $rtloff=false) {
-		$x = floatval($x);
-		if (!$rtloff AND $this->rtl) {
-			if ($x >= 0) {
-				$this->x = $this->w - $x;
-			} else {
-				$this->x = abs($x);
-			}
-		} else {
-			if ($x >= 0) {
-				$this->x = $x;
-			} else {
-				$this->x = $this->w + $x;
-			}
-		}
-		if ($this->x < 0) {
-			$this->x = 0;
-		}
-		if ($this->x > $this->w) {
-			$this->x = $this->w;
-		}
-	}
-
-	/**
-	 * Moves the current abscissa back to the left margin and sets the ordinate.
-	 * If the passed value is negative, it is relative to the bottom of the page.
-	 * @param float $y The value of the ordinate in user units.
-	 * @param bool $resetx if true (default) reset the X position.
-	 * @param boolean $rtloff if true always uses the page top-left corner as origin of axis.
-	 * @public
-	 * @since 1.0
-	 * @see GetX(), GetY(), SetY(), SetXY()
-	 */
-	public function setY($y, $resetx=true, $rtloff=false) {
-		$y = floatval($y);
-		if ($resetx) {
-			//reset x
-			if (!$rtloff AND $this->rtl) {
-				$this->x = $this->w - $this->rMargin;
-			} else {
-				$this->x = $this->lMargin;
-			}
-		}
-		if ($y >= 0) {
-			$this->y = $y;
-		} else {
-			$this->y = $this->h + $y;
-		}
-		if ($this->y < 0) {
-			$this->y = 0;
-		}
-		if ($this->y > $this->h) {
-			$this->y = $this->h;
-		}
-	}
-
-	/**
-	 * Defines the abscissa and ordinate of the current position.
-	 * If the passed values are negative, they are relative respectively to the right and bottom of the page.
-	 * @param float $x The value of the abscissa.
-	 * @param float $y The value of the ordinate.
-	 * @param boolean $rtloff if true always uses the page top-left corner as origin of axis.
-	 * @public
-	 * @since 1.2
-	 * @see SetX(), SetY()
-	 */
-	public function setXY($x, $y, $rtloff=false) {
-		$this->setY($y, false, $rtloff);
-		$this->setX($x, $rtloff);
-	}
-
-	/**
-	 * Set the absolute X coordinate of the current pointer.
-	 * @param float $x The value of the abscissa in user units.
-	 * @public
-	 * @since 5.9.186 (2012-09-13)
-	 * @see setAbsX(), setAbsY(), SetAbsXY()
-	 */
-	public function setAbsX($x) {
-		$this->x = floatval($x);
-	}
-
-	/**
-	 * Set the absolute Y coordinate of the current pointer.
-	 * @param float $y (float) The value of the ordinate in user units.
-	 * @public
-	 * @since 5.9.186 (2012-09-13)
-	 * @see setAbsX(), setAbsY(), SetAbsXY()
-	 */
-	public function setAbsY($y) {
-		$this->y = floatval($y);
-	}
-
-	/**
-	 * Set the absolute X and Y coordinates of the current pointer.
-	 * @param float $x The value of the abscissa in user units.
-	 * @param float $y (float) The value of the ordinate in user units.
-	 * @public
-	 * @since 5.9.186 (2012-09-13)
-	 * @see setAbsX(), setAbsY(), SetAbsXY()
-	 */
-	public function setAbsXY($x, $y) {
-		$this->setAbsX($x);
-		$this->setAbsY($y);
 	}
 
 	/**
@@ -3699,42 +2748,6 @@ class TCPDF {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Return an array containing variations for the basic page number alias.
-	 * @param string $a Base alias.
-	 * @return array of page number aliases
-	 * @protected
-	 */
-	protected function getInternalPageNumberAliases($a= '') {
-		$alias = array();
-		// build array of Unicode + ASCII variants (the order is important)
-		$alias = array('u' => array(), 'a' => array());
-		$u = '{'.$a.'}';
-		$alias['u'][] = LIMEPDF_STATIC::_escape($u);
-		if ($this->isunicode) {
-			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
-			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
-		}
-		$alias['a'][] = LIMEPDF_STATIC::_escape($a);
-		return $alias;
-	}
-
-	/**
-	 * Return an array containing all internal page aliases.
-	 * @return array of page number aliases
-	 * @protected
-	 */
-	protected function getAllInternalPageNumberAliases() {
-		$basic_alias = array(LIMEPDF_STATIC::$alias_tot_pages, LIMEPDF_STATIC::$alias_num_page, LIMEPDF_STATIC::$alias_group_tot_pages, LIMEPDF_STATIC::$alias_group_num_page, LIMEPDF_STATIC::$alias_right_shift);
-		$pnalias = array();
-		foreach($basic_alias as $k => $a) {
-			$pnalias[$k] = $this->getInternalPageNumberAliases($a);
-		}
-		return $pnalias;
 	}
 
 	/**
@@ -5798,51 +4811,7 @@ class TCPDF {
 
 
 
-	/**
-	 * Set the document creation timestamp
-	 * @param mixed $time Document creation timestamp in seconds or date-time string.
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function setDocCreationTimestamp($time) {
-		if (is_string($time)) {
-			$time = LIMEPDF_STATIC::getTimestamp($time);
-		}
-		$this->doc_creation_timestamp = intval($time);
-	}
 
-	/**
-	 * Set the document modification timestamp
-	 * @param mixed $time Document modification timestamp in seconds or date-time string.
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function setDocModificationTimestamp($time) {
-		if (is_string($time)) {
-			$time = LIMEPDF_STATIC::getTimestamp($time);
-		}
-		$this->doc_modification_timestamp = intval($time);
-	}
-
-	/**
-	 * Returns document creation timestamp in seconds.
-	 * @return int Creation timestamp in seconds.
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function getDocCreationTimestamp() {
-		return $this->doc_creation_timestamp;
-	}
-
-	/**
-	 * Returns document modification timestamp in seconds.
-	 * @return int Modfication timestamp in seconds.
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function getDocModificationTimestamp() {
-		return $this->doc_modification_timestamp;
-	}
 
 	/**
 	 * Returns a formatted date for meta information
@@ -5919,75 +4888,9 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Set header font.
-	 * @param array<int,string|float|null> $font Array describing the basic font parameters: (family, style, size).
-	 * @phpstan-param array{0: string, 1: string, 2: float|null} $font
-	 * @public
-	 * @since 1.1
-	 */
-	public function setHeaderFont($font) {
-		$this->header_font = $font;
-	}
 
-	/**
-	 * Get header font.
-	 * @return array<int,string|float|null> Array describing the basic font parameters: (family, style, size).
-	 * @phpstan-return array{0: string, 1: string, 2: float|null}
-	 * @public
-	 * @since 4.0.012 (2008-07-24)
-	 */
-	public function getHeaderFont() {
-		return $this->header_font;
-	}
 
-	/**
-	 * Set footer font.
-	 * @param array<int,string|float|null> $font Array describing the basic font parameters: (family, style, size).
-	 * @phpstan-param array{0: string, 1: string, 2: float|null} $font
-	 * @public
-	 * @since 1.1
-	 */
-	public function setFooterFont($font) {
-		$this->footer_font = $font;
-	}
-
-	/**
-	 * Get Footer font.
-	 * @return array<int,string|float|null> Array describing the basic font parameters: (family, style, size).
-	 * @phpstan-return array{0: string, 1: string, 2: float|null} $font
-	 * @public
-	 * @since 4.0.012 (2008-07-24)
-	 */
-	public function getFooterFont() {
-		return $this->footer_font;
-	}
-
-	/**
-	 * Set language array.
-	 * @param array $language
-	 * @public
-	 * @since 1.1
-	 */
-	public function setLanguageArray($language) {
-		$this->l = $language;
-		if (isset($this->l['a_meta_dir'])) {
-			$this->rtl = $this->l['a_meta_dir']=='rtl' ? true : false;
-		} else {
-			$this->rtl = false;
-		}
-	}
-
-	/**
-	 * Returns the PDF data.
-	 * @public
-	 */
-	public function getPDFData() {
-		if ($this->state < 3) {
-			$this->Close();
-		}
-		return $this->buffer;
-	}
+	
 
 	/**
 	 * Output anchor link.
@@ -6060,65 +4963,7 @@ class TCPDF {
 
 
 
-	/**
-	 * Add a Named Destination.
-	 * NOTE: destination names are unique, so only last entry will be saved.
-	 * @param string $name Destination name.
-	 * @param float $y Y position in user units of the destiantion on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param float $x X position in user units of the destiantion on the selected page (default = -1 = current position;).
-	 * @return string|false Stripped named destination identifier or false in case of error.
-	 * @public
-	 * @author Christian Deligant, Nicola Asuni
-	 * @since 5.9.097 (2011-06-23)
-	 */
-	public function setDestination($name, $y=-1, $page='', $x=-1) {
-		// remove unsupported characters
-		$name = LIMEPDF_STATIC::encodeNameObject($name);
-		if (LIMEPDF_STATIC::empty_string($name)) {
-			return false;
-		}
-		if ($y == -1) {
-			$y = $this->GetY();
-		} elseif ($y < 0) {
-			$y = 0;
-		} elseif ($y > $this->h) {
-			$y = $this->h;
-		}
-		if ($x == -1) {
-			$x = $this->GetX();
-		} elseif ($x < 0) {
-			$x = 0;
-		} elseif ($x > $this->w) {
-			$x = $this->w;
-		}
-		$fixed = false;
-		if (!empty($page) AND (substr($page, 0, 1) == '*')) {
-			$page = intval(substr($page, 1));
-			// this page number will not be changed when moving/add/deleting pages
-			$fixed = true;
-		}
-		if (empty($page)) {
-			$page = $this->PageNo();
-			if (empty($page)) {
-				return;
-			}
-		}
-		$this->dests[$name] = array('x' => $x, 'y' => $y, 'p' => $page, 'f' => $fixed);
-		return $name;
-	}
-
-	/**
-	 * Return the Named Destination array.
-	 * @return array Named Destination array.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.9.097 (2011-06-23)
-	 */
-	public function getDestination() {
-		return $this->dests;
-	}
-
+	
 
 
 	/**
@@ -6211,299 +5056,9 @@ class TCPDF {
 	}
 
 
-	/**
-	 * Set default properties for form fields.
-	 * @param array $prop javascript field properties. Possible values are described on official Javascript for Acrobat API reference.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.8.000 (2009-09-06)
-	 */
-	public function setFormDefaultProp($prop=array()) {
-		$this->default_form_prop = $prop;
-	}
+	
 
-	/**
-	 * Return the default properties for form fields.
-	 * @return array $prop javascript field properties. Possible values are described on official Javascript for Acrobat API reference.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.8.000 (2009-09-06)
-	 */
-	public function getFormDefaultProp() {
-		return $this->default_form_prop;
-	}
-
-	/**
-	 * Add certification signature (DocMDP or UR3)
-	 * You can set only one signature type
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 4.6.008 (2009-05-07)
-	 */
-	protected function _putsignature() {
-		if ((!$this->sign) OR (!isset($this->signature_data['cert_type']))) {
-			return;
-		}
-		$sigobjid = ($this->sig_obj_id + 1);
-		$out = $this->_getobj($sigobjid)."\n";
-		$out .= '<< /Type /Sig';
-		$out .= ' /Filter /Adobe.PPKLite';
-		$out .= ' /SubFilter /adbe.pkcs7.detached';
-		$out .= ' '.LIMEPDF_STATIC::$byterange_string;
-		$out .= ' /Contents<'.str_repeat('0', $this->signature_max_length).'>';
-		if (empty($this->signature_data['approval']) OR ($this->signature_data['approval'] != 'A')) {
-			$out .= ' /Reference ['; // array of signature reference dictionaries
-			$out .= ' << /Type /SigRef';
-			if ($this->signature_data['cert_type'] > 0) {
-				$out .= ' /TransformMethod /DocMDP';
-				$out .= ' /TransformParams <<';
-				$out .= ' /Type /TransformParams';
-				$out .= ' /P '.$this->signature_data['cert_type'];
-				$out .= ' /V /1.2';
-			} else {
-				$out .= ' /TransformMethod /UR3';
-				$out .= ' /TransformParams <<';
-				$out .= ' /Type /TransformParams';
-				$out .= ' /V /2.2';
-				if (!LIMEPDF_STATIC::empty_string($this->ur['document'])) {
-					$out .= ' /Document['.$this->ur['document'].']';
-				}
-				if (!LIMEPDF_STATIC::empty_string($this->ur['form'])) {
-					$out .= ' /Form['.$this->ur['form'].']';
-				}
-				if (!LIMEPDF_STATIC::empty_string($this->ur['signature'])) {
-					$out .= ' /Signature['.$this->ur['signature'].']';
-				}
-				if (!LIMEPDF_STATIC::empty_string($this->ur['annots'])) {
-					$out .= ' /Annots['.$this->ur['annots'].']';
-				}
-				if (!LIMEPDF_STATIC::empty_string($this->ur['ef'])) {
-					$out .= ' /EF['.$this->ur['ef'].']';
-				}
-				if (!LIMEPDF_STATIC::empty_string($this->ur['formex'])) {
-					$out .= ' /FormEX['.$this->ur['formex'].']';
-				}
-			}
-			$out .= ' >>'; // close TransformParams
-			// optional digest data (values must be calculated and replaced later)
-			//$out .= ' /Data ********** 0 R';
-			//$out .= ' /DigestMethod/MD5';
-			//$out .= ' /DigestLocation[********** 34]';
-			//$out .= ' /DigestValue<********************************>';
-			$out .= ' >>';
-			$out .= ' ]'; // end of reference
-		}
-		if (isset($this->signature_data['info']['Name']) AND !LIMEPDF_STATIC::empty_string($this->signature_data['info']['Name'])) {
-			$out .= ' /Name '.$this->_textstring($this->signature_data['info']['Name'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['Location']) AND !LIMEPDF_STATIC::empty_string($this->signature_data['info']['Location'])) {
-			$out .= ' /Location '.$this->_textstring($this->signature_data['info']['Location'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['Reason']) AND !LIMEPDF_STATIC::empty_string($this->signature_data['info']['Reason'])) {
-			$out .= ' /Reason '.$this->_textstring($this->signature_data['info']['Reason'], $sigobjid);
-		}
-		if (isset($this->signature_data['info']['ContactInfo']) AND !LIMEPDF_STATIC::empty_string($this->signature_data['info']['ContactInfo'])) {
-			$out .= ' /ContactInfo '.$this->_textstring($this->signature_data['info']['ContactInfo'], $sigobjid);
-		}
-		$out .= ' /M '.$this->_datestring($sigobjid, $this->doc_modification_timestamp);
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-	}
-
-	/**
-	 * Set User's Rights for PDF Reader
-	 * WARNING: This is experimental and currently do not work.
-	 * Check the PDF Reference 8.7.1 Transform Methods,
-	 * Table 8.105 Entries in the UR transform parameters dictionary
-	 * @param boolean $enable if true enable user's rights on PDF reader
-	 * @param string $document Names specifying additional document-wide usage rights for the document. The only defined value is "/FullSave", which permits a user to save the document along with modified form and/or annotation data.
-	 * @param string $annots Names specifying additional annotation-related usage rights for the document. Valid names in PDF 1.5 and later are /Create/Delete/Modify/Copy/Import/Export, which permit the user to perform the named operation on annotations.
-	 * @param string $form Names specifying additional form-field-related usage rights for the document. Valid names are: /Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate
-	 * @param string $signature Names specifying additional signature-related usage rights for the document. The only defined value is /Modify, which permits a user to apply a digital signature to an existing signature form field or clear a signed signature form field.
-	 * @param string $ef Names specifying additional usage rights for named embedded files in the document. Valid names are /Create/Delete/Modify/Import, which permit the user to perform the named operation on named embedded files
-	 * Names specifying additional embedded-files-related usage rights for the document.
-	 * @param string $formex Names specifying additional form-field-related usage rights. The only valid name is BarcodePlaintext, which permits text form field data to be encoded as a plaintext two-dimensional barcode.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 2.9.000 (2008-03-26)
-	 */
-	public function setUserRights(
-			$enable=true,
-			$document='/FullSave',
-			$annots='/Create/Delete/Modify/Copy/Import/Export',
-			$form='/Add/Delete/FillIn/Import/Export/SubmitStandalone/SpawnTemplate',
-			$signature='/Modify',
-			$ef='/Create/Delete/Modify/Import',
-			$formex='') {
-		$this->ur['enabled'] = $enable;
-		$this->ur['document'] = $document;
-		$this->ur['annots'] = $annots;
-		$this->ur['form'] = $form;
-		$this->ur['signature'] = $signature;
-		$this->ur['ef'] = $ef;
-		$this->ur['formex'] = $formex;
-		if (!$this->sign) {
-			$this->setSignature('', '', '', '', 0, array());
-		}
-	}
-
-	/**
-	 * Enable document signature (requires the OpenSSL Library).
-	 * The digital signature improve document authenticity and integrity and allows o enable extra features on Acrobat Reader.
-	 * To create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
-	 * To export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
-	 * To convert pfx certificate to pem: openssl pkcs12 -in tcpdf.pfx -out tcpdf.crt -nodes
-	 * @param mixed $signing_cert signing certificate (string or filename prefixed with 'file://')
-	 * @param mixed $private_key private key (string or filename prefixed with 'file://')
-	 * @param string $private_key_password password
-	 * @param string $extracerts specifies the name of a file containing a bunch of extra certificates to include in the signature which can for example be used to help the recipient to verify the certificate that you used.
-	 * @param int $cert_type The access permissions granted for this document. Valid values shall be: 1 = No changes to the document shall be permitted; any change to the document shall invalidate the signature; 2 = Permitted changes shall be filling in forms, instantiating page templates, and signing; other changes shall invalidate the signature; 3 = Permitted changes shall be the same as for 2, as well as annotation creation, deletion, and modification; other changes shall invalidate the signature.
-	 * @param array $info array of option information: Name, Location, Reason, ContactInfo.
-	 * @param string $approval Enable approval signature eg. for PDF incremental update
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 4.6.005 (2009-04-24)
-	 */
-	public function setSignature($signing_cert='', $private_key='', $private_key_password='', $extracerts='', $cert_type=2, $info=array(), $approval='') {
-		// to create self-signed signature: openssl req -x509 -nodes -days 365000 -newkey rsa:1024 -keyout tcpdf.crt -out tcpdf.crt
-		// to export crt to p12: openssl pkcs12 -export -in tcpdf.crt -out tcpdf.p12
-		// to convert pfx certificate to pem: openssl
-		//     OpenSSL> pkcs12 -in <cert.pfx> -out <cert.crt> -nodes
-		$this->sign = true;
-		++$this->n;
-		$this->sig_obj_id = $this->n; // signature widget
-		++$this->n; // signature object ($this->sig_obj_id + 1)
-		$this->signature_data = array();
-		if (strlen($signing_cert) == 0) {
-			$this->Error('Please provide a certificate file and password!');
-		}
-		if (strlen($private_key) == 0) {
-			$private_key = $signing_cert;
-		}
-		$this->signature_data['signcert'] = $signing_cert;
-		$this->signature_data['privkey'] = $private_key;
-		$this->signature_data['password'] = $private_key_password;
-		$this->signature_data['extracerts'] = $extracerts;
-		$this->signature_data['cert_type'] = $cert_type;
-		$this->signature_data['info'] = $info;
-		$this->signature_data['approval'] = $approval;
-	}
-
-	/**
-	 * Set the digital signature appearance (a cliccable rectangle area to get signature properties)
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.3.011 (2010-06-17)
-	 */
-	public function setSignatureAppearance($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		$this->signature_appearance = $this->getSignatureAppearanceArray($x, $y, $w, $h, $page, $name);
-	}
-
-	/**
-	 * Add an empty digital signature appearance (a cliccable rectangle area to get signature properties)
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @public
-	 * @author Nicola Asuni
-	 * @since 5.9.101 (2011-07-06)
-	 */
-	public function addEmptySignatureAppearance($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		++$this->n;
-		$this->empty_signature_appearance[] = array('objid' => $this->n) + $this->getSignatureAppearanceArray($x, $y, $w, $h, $page, $name);
-	}
-
-	/**
-	 * Get the array that defines the signature appearance (page and rectangle coordinates).
-	 * @param float $x Abscissa of the upper-left corner.
-	 * @param float $y Ordinate of the upper-left corner.
-	 * @param float $w Width of the signature area.
-	 * @param float $h Height of the signature area.
-	 * @param int $page option page number (if < 0 the current page is used).
-	 * @param string $name Name of the signature.
-	 * @return array Array defining page and rectangle coordinates of signature appearance.
-	 * @protected
-	 * @author Nicola Asuni
-	 * @since 5.9.101 (2011-07-06)
-	 */
-	protected function getSignatureAppearanceArray($x=0, $y=0, $w=0, $h=0, $page=-1, $name='') {
-		$sigapp = array();
-		if (($page < 1) OR ($page > $this->numpages)) {
-			$sigapp['page'] = $this->page;
-		} else {
-			$sigapp['page'] = intval($page);
-		}
-		if (empty($name)) {
-			$sigapp['name'] = 'Signature';
-		} else {
-			$sigapp['name'] = $name;
-		}
-		$a = $x * $this->k;
-		$b = $this->pagedim[($sigapp['page'])]['h'] - (($y + $h) * $this->k);
-		$c = $w * $this->k;
-		$d = $h * $this->k;
-		$sigapp['rect'] = sprintf('%F %F %F %F', $a, $b, ($a + $c), ($b + $d));
-		return $sigapp;
-	}
-
-	/**
-	 * Enable document timestamping (requires the OpenSSL Library).
-	 * The trusted timestamping improve document security that means that no one should be able to change the document once it has been recorded.
-	 * Use with digital signature only!
-	 * @param string $tsa_host Time Stamping Authority (TSA) server (prefixed with 'https://')
-	 * @param string $tsa_username Specifies the username for TSA authorization (optional) OR specifies the TSA authorization PEM file (see: example_66.php, optional)
-	 * @param string $tsa_password Specifies the password for TSA authorization (optional)
-	 * @param string $tsa_cert Specifies the location of TSA certificate for authorization (optional for cURL)
-	 * @public
-	 * @author Richard Stockinger
-	 * @since 6.0.090 (2014-06-16)
-	 */
-	public function setTimeStamp($tsa_host='', $tsa_username='', $tsa_password='', $tsa_cert='') {
-		$this->tsa_data = array();
-		if (!function_exists('curl_init')) {
-			$this->Error('Please enable cURL PHP extension!');
-		}
-		if (strlen($tsa_host) == 0) {
-			$this->Error('Please specify the host of Time Stamping Authority (TSA)!');
-		}
-		$this->tsa_data['tsa_host'] = $tsa_host;
-		if (is_file($tsa_username)) {
-			$this->tsa_data['tsa_auth'] = $tsa_username;
-		} else {
-			$this->tsa_data['tsa_username'] = $tsa_username;
-		}
-		$this->tsa_data['tsa_password'] = $tsa_password;
-		$this->tsa_data['tsa_cert'] = $tsa_cert;
-		$this->tsa_timestamp = true;
-	}
-
-	/**
-	 * NOT YET IMPLEMENTED
-	 * Request TSA for a timestamp
-	 * @param string $signature Digital signature as binary string
-	 * @return string Timestamped digital signature
-	 * @protected
-	 * @author Richard Stockinger
-	 * @since 6.0.090 (2014-06-16)
-	 */
-	protected function applyTSA($signature) {
-		if (!$this->tsa_timestamp) {
-			return $signature;
-		}
-		//@TODO: implement this feature
-		return $signature;
-	}
-
+	
 	/**
 	 * Create a new page group.
 	 * NOTE: call this function before calling AddPage()
@@ -6526,111 +5081,6 @@ class TCPDF {
 	 */
 	public function setStartingPageNumber($num=1) {
 		$this->starting_page_number = max(0, intval($num));
-	}
-
-	/**
-	 * Returns the string alias used right align page numbers.
-	 * If the current font is unicode type, the returned string wil contain an additional open curly brace.
-	 * @return string
-	 * @since 5.9.099 (2011-06-27)
-	 * @public
-	 */
-	public function getAliasRightShift() {
-		// calculate aproximatively the ratio between widths of aliases and replacements.
-		$ref = '{'.LIMEPDF_STATIC::$alias_right_shift.'}{'.LIMEPDF_STATIC::$alias_tot_pages.'}{'.LIMEPDF_STATIC::$alias_num_page.'}';
-		$rep = str_repeat(' ', $this->GetNumChars($ref));
-		$wrep = $this->GetStringWidth($rep);
-		if ($wrep > 0) {
-			$wdiff = max(1, ($this->GetStringWidth($ref) / $wrep));
-		} else {
-			$wdiff = 1;
-		}
-		$sdiff = sprintf('%F', $wdiff);
-		$alias = LIMEPDF_STATIC::$alias_right_shift.$sdiff.'}';
-		if ($this->isUnicodeFont()) {
-			$alias = '{'.$alias;
-		}
-		return $alias;
-	}
-
-	/**
-	 * Returns the string alias used for the total number of pages.
-	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
-	 * This alias will be replaced by the total number of pages in the document.
-	 * @return string
-	 * @since 4.0.018 (2008-08-08)
-	 * @public
-	 */
-	public function getAliasNbPages() {
-		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_tot_pages.'}';
-		}
-		return LIMEPDF_STATIC::$alias_tot_pages;
-	}
-
-	/**
-	 * Returns the string alias used for the page number.
-	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
-	 * This alias will be replaced by the page number.
-	 * @return string
-	 * @since 4.5.000 (2009-01-02)
-	 * @public
-	 */
-	public function getAliasNumPage() {
-		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_num_page.'}';
-		}
-		return LIMEPDF_STATIC::$alias_num_page;
-	}
-
-	/**
-	 * Return the alias for the total number of pages in the current page group.
-	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
-	 * This alias will be replaced by the total number of pages in this group.
-	 * @return string alias of the current page group
-	 * @public
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	public function getPageGroupAlias() {
-		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_group_tot_pages.'}';
-		}
-		return LIMEPDF_STATIC::$alias_group_tot_pages;
-	}
-
-	/**
-	 * Return the alias for the page number on the current page group.
-	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
-	 * This alias will be replaced by the page number (relative to the belonging group).
-	 * @return string alias of the current page group
-	 * @public
-	 * @since 4.5.000 (2009-01-02)
-	 */
-	public function getPageNumGroupAlias() {
-		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_group_num_page.'}';
-		}
-		return LIMEPDF_STATIC::$alias_group_num_page;
-	}
-
-	/**
-	 * Return the current page in the group.
-	 * @return int current page in the group
-	 * @public
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	public function getGroupPageNo() {
-		return $this->pagegroups[$this->currpagegroup];
-	}
-
-	/**
-	 * Returns the current group page number formatted as a string.
-	 * @public
-	 * @since 4.3.003 (2008-11-18)
-	 * @see PaneNo(), formatPageNumber()
-	 */
-	public function getGroupPageNoFormatted() {
-		return LIMEPDF_STATIC::formatPageNumber($this->getGroupPageNo());
 	}
 
 	/**
@@ -6803,124 +5253,7 @@ class TCPDF {
 		return $this->overprint;
 	}
 
-	/**
-	 * Set alpha for stroking (CA) and non-stroking (ca) operations.
-	 * @param float $stroking Alpha value for stroking operations: real value from 0 (transparent) to 1 (opaque).
-	 * @param string $bm blend mode, one of the following: Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn, HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
-	 * @param float|null $nonstroking Alpha value for non-stroking operations: real value from 0 (transparent) to 1 (opaque).
-	 * @param boolean $ais
-	 * @public
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	public function setAlpha($stroking=1, $bm='Normal', $nonstroking=null, $ais=false) {
-		if ($this->pdfa_mode && $this->pdfa_version < 2) {
-			// transparency is not allowed in PDF/A-1 mode
-			return;
-		}
-		$stroking = floatval($stroking);
-		if (LIMEPDF_STATIC::empty_string($nonstroking)) {
-			// default value if not set
-			$nonstroking = $stroking;
-		} else {
-			$nonstroking = floatval($nonstroking);
-		}
-		if ($bm[0] == '/') {
-			// remove trailing slash
-			$bm = substr($bm, 1);
-		}
-		if (!in_array($bm, array('Normal', 'Multiply', 'Screen', 'Overlay', 'Darken', 'Lighten', 'ColorDodge', 'ColorBurn', 'HardLight', 'SoftLight', 'Difference', 'Exclusion', 'Hue', 'Saturation', 'Color', 'Luminosity'))) {
-			$bm = 'Normal';
-		}
-		$ais = $ais ? true : false;
-		$this->alpha = array('CA' => $stroking, 'ca' => $nonstroking, 'BM' => '/'.$bm, 'AIS' => $ais);
-		$gs = $this->addExtGState($this->alpha);
-		$this->setExtGState($gs);
-	}
-
-	/**
-	 * Get the alpha mode array (CA, ca, BM, AIS).
-	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
-	 * @return array<string,bool|string>
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function getAlpha() {
-		return $this->alpha;
-	}
-
-	/**
-	 * Set the default JPEG compression quality (1-100)
-	 * @param int $quality JPEG quality, integer between 1 and 100
-	 * @public
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	public function setJPEGQuality($quality) {
-		if (($quality < 1) OR ($quality > 100)) {
-			$quality = 75;
-		}
-		$this->jpeg_quality = intval($quality);
-	}
-
-	/**
-	 * Set the default number of columns in a row for HTML tables.
-	 * @param int $cols number of columns
-	 * @public
-	 * @since 3.0.014 (2008-06-04)
-	 */
-	public function setDefaultTableColumns($cols=4) {
-		$this->default_table_columns = intval($cols);
-	}
-
-	/**
-	 * Set the height of the cell (line height) respect the font height.
-	 * @param float $h cell proportion respect font height (typical value = 1.25).
-	 * @public
-	 * @since 3.0.014 (2008-06-04)
-	 */
-	public function setCellHeightRatio($h) {
-		$this->cell_height_ratio = $h;
-	}
-
-	/**
-	 * return the height of cell repect font height.
-	 * @public
-	 * @return float
-	 * @since 4.0.012 (2008-07-24)
-	 */
-	public function getCellHeightRatio() {
-		return $this->cell_height_ratio;
-	}
-
-	/**
-	 * Set the PDF version (check PDF reference for valid values).
-	 * @param string $version PDF document version.
-	 * @public
-	 * @since 3.1.000 (2008-06-09)
-	 */
-	public function setPDFVersion($version='1.7') {
-		if ($this->pdfa_mode && $this->pdfa_version == 1 ) {
-			// PDF/A-1 mode
-			$this->PDFVersion = '1.4';
-		} elseif ($this->pdfa_mode && $this->pdfa_version >= 2 ) {
-            // PDF/A-2 mode
-            $this->PDFVersion = '1.7';
-        } else {
-			$this->PDFVersion = $version;
-		}
-	}
-
-	/**
-	 * Set the viewer preferences dictionary controlling the way the document is to be presented on the screen or in print.
-	 * (see Section 8.1 of PDF reference, "Viewer Preferences").
-	 * <ul><li>HideToolbar boolean (Optional) A flag specifying whether to hide the viewer application's tool bars when the document is active. Default value: false.</li><li>HideMenubar boolean (Optional) A flag specifying whether to hide the viewer application's menu bar when the document is active. Default value: false.</li><li>HideWindowUI boolean (Optional) A flag specifying whether to hide user interface elements in the document's window (such as scroll bars and navigation controls), leaving only the document's contents displayed. Default value: false.</li><li>FitWindow boolean (Optional) A flag specifying whether to resize the document's window to fit the size of the first displayed page. Default value: false.</li><li>CenterWindow boolean (Optional) A flag specifying whether to position the document's window in the center of the screen. Default value: false.</li><li>DisplayDocTitle boolean (Optional; PDF 1.4) A flag specifying whether the window's title bar should display the document title taken from the Title entry of the document information dictionary (see Section 10.2.1, "Document Information Dictionary"). If false, the title bar should instead display the name of the PDF file containing the document. Default value: false.</li><li>NonFullScreenPageMode name (Optional) The document's page mode, specifying how to display the document on exiting full-screen mode:<ul><li>UseNone Neither document outline nor thumbnail images visible</li><li>UseOutlines Document outline visible</li><li>UseThumbs Thumbnail images visible</li><li>UseOC Optional content group panel visible</li></ul>This entry is meaningful only if the value of the PageMode entry in the catalog dictionary (see Section 3.6.1, "Document Catalog") is FullScreen; it is ignored otherwise. Default value: UseNone.</li><li>ViewArea name (Optional; PDF 1.4) The name of the page boundary representing the area of a page to be displayed when viewing the document on the screen. Valid values are (see Section 10.10.1, "Page Boundaries").:<ul><li>MediaBox</li><li>CropBox (default)</li><li>BleedBox</li><li>TrimBox</li><li>ArtBox</li></ul></li><li>ViewClip name (Optional; PDF 1.4) The name of the page boundary to which the contents of a page are to be clipped when viewing the document on the screen. Valid values are (see Section 10.10.1, "Page Boundaries").:<ul><li>MediaBox</li><li>CropBox (default)</li><li>BleedBox</li><li>TrimBox</li><li>ArtBox</li></ul></li><li>PrintArea name (Optional; PDF 1.4) The name of the page boundary representing the area of a page to be rendered when printing the document. Valid values are (see Section 10.10.1, "Page Boundaries").:<ul><li>MediaBox</li><li>CropBox (default)</li><li>BleedBox</li><li>TrimBox</li><li>ArtBox</li></ul></li><li>PrintClip name (Optional; PDF 1.4) The name of the page boundary to which the contents of a page are to be clipped when printing the document. Valid values are (see Section 10.10.1, "Page Boundaries").:<ul><li>MediaBox</li><li>CropBox (default)</li><li>BleedBox</li><li>TrimBox</li><li>ArtBox</li></ul></li><li>PrintScaling name (Optional; PDF 1.6) The page scaling option to be selected when a print dialog is displayed for this document. Valid values are: <ul><li>None, which indicates that the print dialog should reflect no page scaling</li><li>AppDefault (default), which indicates that applications should use the current print scaling</li></ul></li><li>Duplex name (Optional; PDF 1.7) The paper handling option to use when printing the file from the print dialog. The following values are valid:<ul><li>Simplex - Print single-sided</li><li>DuplexFlipShortEdge - Duplex and flip on the short edge of the sheet</li><li>DuplexFlipLongEdge - Duplex and flip on the long edge of the sheet</li></ul>Default value: none</li><li>PickTrayByPDFSize boolean (Optional; PDF 1.7) A flag specifying whether the PDF page size is used to select the input paper tray. This setting influences only the preset values used to populate the print dialog presented by a PDF viewer application. If PickTrayByPDFSize is true, the check box in the print dialog associated with input paper tray is checked. Note: This setting has no effect on Mac OS systems, which do not provide the ability to pick the input tray by size.</li><li>PrintPageRange array (Optional; PDF 1.7) The page numbers used to initialize the print dialog box when the file is printed. The first page of the PDF file is denoted by 1. Each pair consists of the first and last pages in the sub-range. An odd number of integers causes this entry to be ignored. Negative numbers cause the entire array to be ignored. Default value: as defined by PDF viewer application</li><li>NumCopies integer (Optional; PDF 1.7) The number of copies to be printed when the print dialog is opened for this file. Supported values are the integers 2 through 5. Values outside this range are ignored. Default value: as defined by PDF viewer application, but typically 1</li></ul>
-	 * @param array $preferences array of options.
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 3.1.000 (2008-06-09)
-	 */
-	public function setViewerPreferences($preferences) {
-		$this->viewer_preferences = $preferences;
-	}
+	
 
 	/**
 	 * Paints color transition registration bars
@@ -7871,24 +6204,7 @@ class TCPDF {
 		$this->endlinex = $this->img_rb_x;
 	}
 
-	/**
-	 * Set document barcode.
-	 * @param string $bc barcode
-	 * @public
-	 */
-	public function setBarcode($bc='') {
-		$this->barcode = $bc;
-	}
 
-	/**
-	 * Get current barcode.
-	 * @return string
-	 * @public
-	 * @since 4.0.012 (2008-07-24)
-	 */
-	public function getBarcode() {
-		return $this->barcode;
-	}
 
 	/**
 	 * Print a Linear Barcode.
@@ -13563,54 +11879,6 @@ class TCPDF {
 		return false;
 	}
 
-	/**
-	 * Set image buffer content.
-	 * @param string $image image key
-	 * @param array $data image data
-	 * @return int image index number
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	protected function setImageBuffer($image, $data) {
-		if (($data['i'] = array_search($image, $this->imagekeys)) === FALSE) {
-			$this->imagekeys[$this->numimages] = $image;
-			$data['i'] = $this->numimages;
-			++$this->numimages;
-		}
-		$this->images[$image] = $data;
-		return $data['i'];
-	}
-
-	/**
-	 * Set image buffer content for a specified sub-key.
-	 * @param string $image image key
-	 * @param string $key image sub-key
-	 * @param array $data image data
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	//protected function setImageSubBuffer($image, $key, $data) {
-	public function setImageSubBuffer($image, $key, $data) {
-		if (!isset($this->images[$image])) {
-			$this->setImageBuffer($image, array());
-		}
-		$this->images[$image][$key] = $data;
-	}
-
-	/**
-	 * Get image buffer content.
-	 * @param string $image image key
-	 * @return string|false image buffer content or false in case of error
-	 * @protected
-	 * @since 4.5.000 (2008-12-31)
-	 */
-	// protected function getImageBuffer($image) {
-	public function getImageBuffer($image) {
-		if (isset($this->images[$image])) {
-			return $this->images[$image];
-		}
-		return false;
-	}
 
 
 

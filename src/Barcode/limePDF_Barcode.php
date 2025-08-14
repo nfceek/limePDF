@@ -1,6 +1,8 @@
 <?php
 
-    class limePDF_Barcode {
+namespace LimePDF;
+
+trait LIMEPDF_BARCODE {
 
         
     }

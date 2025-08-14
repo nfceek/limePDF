@@ -279,4 +279,18 @@ trait LIMEPDF_FONT_GETTERSETTER {
 		return $this->CurrentFont['fontkey'];
 	}
  
+	/**
+	 * Return the cell height
+	 * @param int $fontsize Font size in internal units
+	 * @param boolean $padding If true add cell padding
+	 * @public
+	 * @return float
+	 */
+	public function getCellHeight($fontsize, $padding=TRUE) {
+		$height = ($fontsize * $this->cell_height_ratio);
+		if ($padding && !empty($this->cell_padding)) {
+			$height += ($this->cell_padding['T'] + $this->cell_padding['B']);
+		}
+		return round($height, 6);
+	}
 }

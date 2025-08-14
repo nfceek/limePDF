@@ -144,4 +144,145 @@ trait LIMEPDF_PAGE_GETTERSETTER {
 		$this->header_xobj_autoreset = $val ? true : false;
 	}
 
+	/**
+	 * Returns the string alias used right align page numbers.
+	 * If the current font is unicode type, the returned string wil contain an additional open curly brace.
+	 * @return string
+	 * @since 5.9.099 (2011-06-27)
+	 * @public
+	 */
+	public function getAliasRightShift() {
+		// calculate aproximatively the ratio between widths of aliases and replacements.
+		$ref = '{'.LIMEPDF_STATIC::$alias_right_shift.'}{'.LIMEPDF_STATIC::$alias_tot_pages.'}{'.LIMEPDF_STATIC::$alias_num_page.'}';
+		$rep = str_repeat(' ', $this->GetNumChars($ref));
+		$wrep = $this->GetStringWidth($rep);
+		if ($wrep > 0) {
+			$wdiff = max(1, ($this->GetStringWidth($ref) / $wrep));
+		} else {
+			$wdiff = 1;
+		}
+		$sdiff = sprintf('%F', $wdiff);
+		$alias = LIMEPDF_STATIC::$alias_right_shift.$sdiff.'}';
+		if ($this->isUnicodeFont()) {
+			$alias = '{'.$alias;
+		}
+		return $alias;
+	}
+
+	/**
+	 * Returns the string alias used for the total number of pages.
+	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
+	 * This alias will be replaced by the total number of pages in the document.
+	 * @return string
+	 * @since 4.0.018 (2008-08-08)
+	 * @public
+	 */
+	public function getAliasNbPages() {
+		if ($this->isUnicodeFont()) {
+			return '{'.LIMEPDF_STATIC::$alias_tot_pages.'}';
+		}
+		return LIMEPDF_STATIC::$alias_tot_pages;
+	}
+
+	/**
+	 * Returns the string alias used for the page number.
+	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
+	 * This alias will be replaced by the page number.
+	 * @return string
+	 * @since 4.5.000 (2009-01-02)
+	 * @public
+	 */
+	public function getAliasNumPage() {
+		if ($this->isUnicodeFont()) {
+			return '{'.LIMEPDF_STATIC::$alias_num_page.'}';
+		}
+		return LIMEPDF_STATIC::$alias_num_page;
+	}
+
+	/**
+	 * Return the alias for the total number of pages in the current page group.
+	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
+	 * This alias will be replaced by the total number of pages in this group.
+	 * @return string alias of the current page group
+	 * @public
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	public function getPageGroupAlias() {
+		if ($this->isUnicodeFont()) {
+			return '{'.LIMEPDF_STATIC::$alias_group_tot_pages.'}';
+		}
+		return LIMEPDF_STATIC::$alias_group_tot_pages;
+	}
+
+	/**
+	 * Return the alias for the page number on the current page group.
+	 * If the current font is unicode type, the returned string is surrounded by additional curly braces.
+	 * This alias will be replaced by the page number (relative to the belonging group).
+	 * @return string alias of the current page group
+	 * @public
+	 * @since 4.5.000 (2009-01-02)
+	 */
+	public function getPageNumGroupAlias() {
+		if ($this->isUnicodeFont()) {
+			return '{'.LIMEPDF_STATIC::$alias_group_num_page.'}';
+		}
+		return LIMEPDF_STATIC::$alias_group_num_page;
+	}
+
+	/**
+	 * Return the current page in the group.
+	 * @return int current page in the group
+	 * @public
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	public function getGroupPageNo() {
+		return $this->pagegroups[$this->currpagegroup];
+	}
+
+	/**
+	 * Returns the current group page number formatted as a string.
+	 * @public
+	 * @since 4.3.003 (2008-11-18)
+	 * @see PaneNo(), formatPageNumber()
+	 */
+	public function getGroupPageNoFormatted() {
+		return LIMEPDF_STATIC::formatPageNumber($this->getGroupPageNo());
+	}
+
+	/**
+	 * Return an array containing variations for the basic page number alias.
+	 * @param string $a Base alias.
+	 * @return array of page number aliases
+	 * @protected
+	 */
+	protected function getInternalPageNumberAliases($a= '') {
+		$alias = array();
+		// build array of Unicode + ASCII variants (the order is important)
+		$alias = array('u' => array(), 'a' => array());
+		$u = '{'.$a.'}';
+		$alias['u'][] = LIMEPDF_STATIC::_escape($u);
+		if ($this->isunicode) {
+			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
+			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+		}
+		$alias['a'][] = LIMEPDF_STATIC::_escape($a);
+		return $alias;
+	}
+
+	/**
+	 * Return an array containing all internal page aliases.
+	 * @return array of page number aliases
+	 * @protected
+	 */
+	protected function getAllInternalPageNumberAliases() {
+		$basic_alias = array(LIMEPDF_STATIC::$alias_tot_pages, LIMEPDF_STATIC::$alias_num_page, LIMEPDF_STATIC::$alias_group_tot_pages, LIMEPDF_STATIC::$alias_group_num_page, LIMEPDF_STATIC::$alias_right_shift);
+		$pnalias = array();
+		foreach($basic_alias as $k => $a) {
+			$pnalias[$k] = $this->getInternalPageNumberAliases($a);
+		}
+		return $pnalias;
+	}
+
 }
