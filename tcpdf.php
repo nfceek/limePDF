@@ -34,6 +34,7 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_XObjects_Templates.php');
 
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Annotations.php');
+	require_once(dirname(__FILE__).'/src/Pages/limePDF_Bookmarks.php');	
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Pages.php');
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_PageManager.php');	
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Margins.php');
@@ -64,6 +65,7 @@ class TCPDF {
 
 	use LIMEPDF_ANNOTATIONS;
 
+	use LIMEPDF_BOOKMARKS;
 	use LIMEPDF_BARCODE;
 
 	use LIMEPDF_COLUMNS;
@@ -1427,19 +1429,7 @@ class TCPDF {
 		return $page;
 	}
 
-	/**
-	 * Set page boxes to be included on page descriptions.
-	 * @param array $boxes Array of page boxes to set on document: ('MediaBox', 'CropBox', 'BleedBox', 'TrimBox', 'ArtBox').
-	 * @protected
-	 */
-	protected function setPageBoxTypes($boxes) {
-		$this->page_boxes = array();
-		foreach ($boxes as $box) {
-			if (in_array($box, LIMEPDF_STATIC::$pageboxes)) {
-				$this->page_boxes[] = $box;
-			}
-		}
-	}
+	
 
 	/**
 	 * Output pages (and replace page number aliases).
@@ -2872,38 +2862,9 @@ class TCPDF {
 		return $oid;
 	}
 
-	/**
-	 * Set additional XMP data to be added on the default XMP data just before the end of "x:xmpmeta" tag.
-	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
-	 * @param string $xmp Custom XMP data.
-	 * @since 5.9.128 (2011-10-06)
-	 * @public
-	 */
-	public function setExtraXMP($xmp) {
-		$this->custom_xmp = $xmp;
-	}
+	
 
-	/**
-	 * Set additional XMP data to be added on the default XMP data just before the end of "rdf:RDF" tag.
-	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
-	 * @param string $xmp Custom XMP RDF data.
-	 * @since 6.3.0 (2019-09-19)
-	 * @public
-	 */
-	public function setExtraXMPRDF($xmp) {
-		$this->custom_xmp_rdf = $xmp;
-	}
-
-	/**
-	 * Set additional XMP data to be added to the default XMP data for PDF/A extensions.
-	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
-	 * @param string $xmp Custom XMP RDF data.
-	 * @since 6.9.0 (2025-02-14)
-	 * @public
-	 */
-	public function setExtraXMPPdfaextension($xmp) {
-		$this->custom_xmp_rdf_pdfaExtension = $xmp;
-	}
+	
 
 	/**
 	 * Put XMP data object and return ID.
@@ -3524,123 +3485,12 @@ class TCPDF {
 
 	
 
-	/**
-	 * Adds a bookmark - alias for Bookmark().
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 */
-	public function setBookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		$this->Bookmark($txt, $level, $y, $page, $style, $color, $x, $link);
-	}
-
-	/**
-	 * Adds a bookmark.
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	public function Bookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		if ($level < 0) {
-			$level = 0;
-		}
-		if (isset($this->outlines[0])) {
-			$lastoutline = end($this->outlines);
-			$maxlevel = $lastoutline['l'] + 1;
-		} else {
-			$maxlevel = 0;
-		}
-		if ($level > $maxlevel) {
-			$level = $maxlevel;
-		}
-		if ($y == -1) {
-			$y = $this->GetY();
-		} elseif ($y < 0) {
-			$y = 0;
-		} elseif ($y > $this->h) {
-			$y = $this->h;
-		}
-		if ($x == -1) {
-			$x = $this->GetX();
-		} elseif ($x < 0) {
-			$x = 0;
-		} elseif ($x > $this->w) {
-			$x = $this->w;
-		}
-		$fixed = false;
-		$pageAsString = (string) $page;
-		if ($pageAsString && $pageAsString[0] == '*') {
-			$page = intval(substr($page, 1));
-			// this page number will not be changed when moving/add/deleting pages
-			$fixed = true;
-		}
-		if (empty($page)) {
-			$page = $this->PageNo();
-			if (empty($page)) {
-				return;
-			}
-		}
-		$this->outlines[] = array('t' => $txt, 'l' => $level, 'x' => $x, 'y' => $y, 'p' => $page, 'f' => $fixed, 's' => strtoupper($style), 'c' => $color, 'u' => $link);
-	}
-
-	/**
-	 * Sort bookmarks for page and key.
-	 * @protected
-	 * @since 5.9.119 (2011-09-19)
-	 */
-	protected function sortBookmarks() {
-		// get sorting columns
-		$outline_p = array();
-		$outline_y = array();
-		foreach ($this->outlines as $key => $row) {
-			$outline_p[$key] = $row['p'];
-			$outline_k[$key] = $key;
-		}
-		// sort outlines by page and original position
-		array_multisort($outline_p, SORT_NUMERIC, SORT_ASC, $outline_k, SORT_NUMERIC, SORT_ASC, $this->outlines);
-	}
+	
 
 	
 
 	
-	/**
-	 * Create a new page group.
-	 * NOTE: call this function before calling AddPage()
-	 * @param int|null $page starting group page (leave empty for next page).
-	 * @public
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	public function startPageGroup($page=null) {
-		if (empty($page)) {
-			$page = $this->page + 1;
-		}
-		$this->newpagegroup[$page] = sizeof($this->newpagegroup) + 1;
-	}
-
 	
-
-	/**
-	 * Returns the current page number formatted as a string.
-	 * @public
-	 * @since 4.2.005 (2008-11-06)
-	 * @see PaneNo(), formatPageNumber()
-	 */
-	public function PageNoFormatted() {
-		return LIMEPDF_STATIC::formatPageNumber($this->PageNo());
-	}
 
 	/**
 	 * Start a new pdf layer.
@@ -3748,47 +3598,9 @@ class TCPDF {
 		return $n;
 	}
 
-	/**
-	 * Add an extgstate
-	 * @param int $gs extgstate
-	 * @protected
-	 * @since 3.0.000 (2008-03-27)
-	 */
-	protected function setExtGState($gs) {
-		if (($this->pdfa_mode && $this->pdfa_version < 2) OR ($this->state != 2)) {
-			// transparency is not allowed in PDF/A-1 mode
-			return;
-		}
-		$this->_out(sprintf('/GS%d gs', $gs));
-	}
+	
 
-	/**
-	 * Set overprint mode for stroking (OP) and non-stroking (op) painting operations.
-	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
-	 * @param boolean $stroking If true apply overprint for stroking operations.
-	 * @param boolean|null $nonstroking If true apply overprint for painting operations other than stroking.
-	 * @param integer $mode Overprint mode: (0 = each source colour component value replaces the value previously painted for the corresponding device colorant; 1 = a tint value of 0.0 for a source colour component shall leave the corresponding component of the previously painted colour unchanged).
-	 * @public
-	 * @since 5.9.152 (2012-03-23)
-	 */
-	public function setOverprint($stroking=true, $nonstroking=null, $mode=0) {
-		if ($this->state != 2) {
-			return;
-		}
-		$stroking = $stroking ? true : false;
-		if (LIMEPDF_STATIC::empty_string($nonstroking)) {
-			// default value if not set
-			$nonstroking = $stroking;
-		} else {
-			$nonstroking = $nonstroking ? true : false;
-		}
-		if (($mode != 0) AND ($mode != 1)) {
-			$mode = 0;
-		}
-		$this->overprint = array('OP' => $stroking, 'op' => $nonstroking, 'OPM' => $mode);
-		$gs = $this->addExtGState($this->overprint);
-		$this->setExtGState($gs);
-	}
+	
 
 	/**
 	 * Paints color transition registration bars
@@ -5354,44 +5166,9 @@ class TCPDF {
 	
 	
 
-	/**
-	 * Set the default bullet to be used as LI bullet symbol
-	 * @param string $symbol character or string to be used (legal values are: '' = automatic, '!' = auto bullet, '#' = auto numbering, 'disc', 'disc', 'circle', 'square', '1', 'decimal', 'decimal-leading-zero', 'i', 'lower-roman', 'I', 'upper-roman', 'a', 'lower-alpha', 'lower-latin', 'A', 'upper-alpha', 'upper-latin', 'lower-greek', 'img|type|width|height|image.ext')
-	 * @public
-	 * @since 4.0.028 (2008-09-26)
-	 */
-	public function setLIsymbol($symbol='!') {
-		// check for custom image symbol
-		if (substr($symbol, 0, 4) == 'img|') {
-			$this->lisymbol = $symbol;
-			return;
-		}
-		$symbol = strtolower($symbol);
-		$valid_symbols = array('!', '#', 'disc', 'circle', 'square', '1', 'decimal', 'decimal-leading-zero', 'i', 'lower-roman', 'I', 'upper-roman', 'a', 'lower-alpha', 'lower-latin', 'A', 'upper-alpha', 'upper-latin', 'lower-greek');
-		if (in_array($symbol, $valid_symbols)) {
-			$this->lisymbol = $symbol;
-		} else {
-			$this->lisymbol = '';
-		}
-	}
+	
 
-	/**
-	 * Set the booklet mode for double-sided pages.
-	 * @param boolean $booklet true set the booklet mode on, false otherwise.
-	 * @param float $inner Inner page margin.
-	 * @param float $outer Outer page margin.
-	 * @public
-	 * @since 4.2.000 (2008-10-29)
-	 */
-	public function setBooklet($booklet=true, $inner=-1, $outer=-1) {
-		$this->booklet = $booklet;
-		if ($inner >= 0) {
-			$this->lMargin = $inner;
-		}
-		if ($outer >= 0) {
-			$this->rMargin = $outer;
-		}
-	}
+	
 
 	/**
 	 * Swap the left and right margins.
@@ -5411,15 +5188,7 @@ class TCPDF {
 		}
 	}
 
-	/**
-	 * Set custom width for list indentation.
-	 * @param float $width width of the indentation. Use negative value to disable it.
-	 * @public
-	 * @since 4.2.007 (2008-11-12)
-	 */
-	public function setListIndentWidth($width) {
-		return $this->customlistindent = floatval($width);
-	}
+	
 
 
 

@@ -611,6 +611,47 @@ trait LIMEPDF_PAGEMANAGER {
 		return $ret;
 	}
 
+	/**
+	 * Create a new page group.
+	 * NOTE: call this function before calling AddPage()
+	 * @param int|null $page starting group page (leave empty for next page).
+	 * @public
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	public function startPageGroup($page=null) {
+		if (empty($page)) {
+			$page = $this->page + 1;
+		}
+		$this->newpagegroup[$page] = sizeof($this->newpagegroup) + 1;
+	}
+
+	/**
+	 * Returns the current page number formatted as a string.
+	 * @public
+	 * @since 4.2.005 (2008-11-06)
+	 * @see PaneNo(), formatPageNumber()
+	 */
+	public function PageNoFormatted() {
+		return LIMEPDF_STATIC::formatPageNumber($this->PageNo());
+	}
+
+	/**
+	 * Set the booklet mode for double-sided pages.
+	 * @param boolean $booklet true set the booklet mode on, false otherwise.
+	 * @param float $inner Inner page margin.
+	 * @param float $outer Outer page margin.
+	 * @public
+	 * @since 4.2.000 (2008-10-29)
+	 */
+	public function setBooklet($booklet=true, $inner=-1, $outer=-1) {
+		$this->booklet = $booklet;
+		if ($inner >= 0) {
+			$this->lMargin = $inner;
+		}
+		if ($outer >= 0) {
+			$this->rMargin = $outer;
+		}
+	}
 
     
 }

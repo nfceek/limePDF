@@ -1,29 +1,87 @@
 <?php
 
-/**
- * TCPDF BookMark Manager
- * 
- * Handles bookmarks, forms, JavaScript, signatures, and other BookMark PDF features.
- * This class is LAZY LOADED - only instantiated when BookMark features are used.
- */
-class BookMark
-{
-    /**
-     * Reference to main TCPDF instance for accessing core properties
-     */
-    private $tcpdf2;
-    
-    /**
-     * Bookmarks data structure
-     */
-    private $bookmarks = array();
+namespace LimePDF;
 
-        /**
-     * Sort bookmarks by page and position
-     * MOVED FROM: protected function sortBookmarks()
-     */
-    public function sortBookmarks()
-    {
+trait LIMEPDF_BOOKMARKS {
+
+    /**
+	 * Adds a bookmark - alias for Bookmark().
+	 * @param string $txt Bookmark description.
+	 * @param int $level Bookmark level (minimum value is 0).
+	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
+	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
+	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
+	 * @param array $color RGB color array (values from 0 to 255).
+	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
+	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
+	 * @public
+	 */
+	public function setBookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
+		$this->Bookmark($txt, $level, $y, $page, $style, $color, $x, $link);
+	}
+
+	/**
+	 * Adds a bookmark.
+	 * @param string $txt Bookmark description.
+	 * @param int $level Bookmark level (minimum value is 0).
+	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
+	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
+	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
+	 * @param array $color RGB color array (values from 0 to 255).
+	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
+	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
+	 * @public
+	 * @since 2.1.002 (2008-02-12)
+	 */
+	public function Bookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
+		if ($level < 0) {
+			$level = 0;
+		}
+		if (isset($this->outlines[0])) {
+			$lastoutline = end($this->outlines);
+			$maxlevel = $lastoutline['l'] + 1;
+		} else {
+			$maxlevel = 0;
+		}
+		if ($level > $maxlevel) {
+			$level = $maxlevel;
+		}
+		if ($y == -1) {
+			$y = $this->GetY();
+		} elseif ($y < 0) {
+			$y = 0;
+		} elseif ($y > $this->h) {
+			$y = $this->h;
+		}
+		if ($x == -1) {
+			$x = $this->GetX();
+		} elseif ($x < 0) {
+			$x = 0;
+		} elseif ($x > $this->w) {
+			$x = $this->w;
+		}
+		$fixed = false;
+		$pageAsString = (string) $page;
+		if ($pageAsString && $pageAsString[0] == '*') {
+			$page = intval(substr($page, 1));
+			// this page number will not be changed when moving/add/deleting pages
+			$fixed = true;
+		}
+		if (empty($page)) {
+			$page = $this->PageNo();
+			if (empty($page)) {
+				return;
+			}
+		}
+		$this->outlines[] = array('t' => $txt, 'l' => $level, 'x' => $x, 'y' => $y, 'p' => $page, 'f' => $fixed, 's' => strtoupper($style), 'c' => $color, 'u' => $link);
+	}
+
+	/**
+	 * Sort bookmarks for page and key.
+	 * @protected
+	 * @since 5.9.119 (2011-09-19)
+	 */
+	protected function sortBookmarks() {
 		// get sorting columns
 		$outline_p = array();
 		$outline_y = array();
@@ -33,7 +91,7 @@ class BookMark
 		}
 		// sort outlines by page and original position
 		array_multisort($outline_p, SORT_NUMERIC, SORT_ASC, $outline_k, SORT_NUMERIC, SORT_ASC, $this->outlines);
-    }
+	}
 
     /**
      * Put bookmarks in PDF output
@@ -160,78 +218,4 @@ class BookMark
 		$this->OutlineRoot = $this->_newobj();
 		$this->_out('<< /Type /Outlines /First '.$n.' 0 R /Last '.($n + $lru[0]).' 0 R >>'."\n".'endobj');
     }
-
-
-	/**
-	 * Adds a bookmark - alias for Bookmark().
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 */
-	public function setBookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		$this->Bookmark($txt, $level, $y, $page, $style, $color, $x, $link);
-	}
-
-	/**
-	 * Adds a bookmark.
-	 * @param string $txt Bookmark description.
-	 * @param int $level Bookmark level (minimum value is 0).
-	 * @param float $y Y position in user units of the bookmark on the selected page (default = -1 = current position; 0 = page start;).
-	 * @param int|string $page Target page number (leave empty for current page). If you prefix a page number with the * character, then this page will not be changed when adding/deleting/moving pages.
-	 * @param string $style Font style: B = Bold, I = Italic, BI = Bold + Italic.
-	 * @param array $color RGB color array (values from 0 to 255).
-	 * @param float $x X position in user units of the bookmark on the selected page (default = -1 = current position;).
-	 * @param mixed $link URL, or numerical link ID, or named destination (# character followed by the destination name), or embedded file (* character followed by the file name).
-	 * @public
-	 * @since 2.1.002 (2008-02-12)
-	 */
-	public function Bookmark($txt, $level=0, $y=-1, $page='', $style='', $color=array(0,0,0), $x=-1, $link='') {
-		if ($level < 0) {
-			$level = 0;
-		}
-		if (isset($this->outlines[0])) {
-			$lastoutline = end($this->outlines);
-			$maxlevel = $lastoutline['l'] + 1;
-		} else {
-			$maxlevel = 0;
-		}
-		if ($level > $maxlevel) {
-			$level = $maxlevel;
-		}
-		if ($y == -1) {
-			$y = $this->GetY();
-		} elseif ($y < 0) {
-			$y = 0;
-		} elseif ($y > $this->h) {
-			$y = $this->h;
-		}
-		if ($x == -1) {
-			$x = $this->GetX();
-		} elseif ($x < 0) {
-			$x = 0;
-		} elseif ($x > $this->w) {
-			$x = $this->w;
-		}
-		$fixed = false;
-		$pageAsString = (string) $page;
-		if ($pageAsString && $pageAsString[0] == '*') {
-			$page = intval(substr($page, 1));
-			// this page number will not be changed when moving/add/deleting pages
-			$fixed = true;
-		}
-		if (empty($page)) {
-			$page = $this->PageNo();
-			if (empty($page)) {
-				return;
-			}
-		}
-		$this->outlines[] = array('t' => $txt, 'l' => $level, 'x' => $x, 'y' => $y, 'p' => $page, 'f' => $fixed, 's' => strtoupper($style), 'c' => $color, 'u' => $link);
-	}
-
 }

@@ -908,4 +908,124 @@ trait LIMEPDF_UTIL_GETTERSETTER {
 	protected function getBuffer() {
 		return $this->buffer;
 	}
+
+	/**
+	 * Set custom width for list indentation.
+	 * @param float $width width of the indentation. Use negative value to disable it.
+	 * @public
+	 * @since 4.2.007 (2008-11-12)
+	 */
+	public function setListIndentWidth($width) {
+		return $this->customlistindent = floatval($width);
+	}
+
+	/**
+	 * Set page boxes to be included on page descriptions.
+	 * @param array $boxes Array of page boxes to set on document: ('MediaBox', 'CropBox', 'BleedBox', 'TrimBox', 'ArtBox').
+	 * @protected
+	 */
+	protected function setPageBoxTypes($boxes) {
+		$this->page_boxes = array();
+		foreach ($boxes as $box) {
+			if (in_array($box, LIMEPDF_STATIC::$pageboxes)) {
+				$this->page_boxes[] = $box;
+			}
+		}
+	}
+
+	/**
+	 * Set additional XMP data to be added on the default XMP data just before the end of "x:xmpmeta" tag.
+	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
+	 * @param string $xmp Custom XMP data.
+	 * @since 5.9.128 (2011-10-06)
+	 * @public
+	 */
+	public function setExtraXMP($xmp) {
+		$this->custom_xmp = $xmp;
+	}
+
+	/**
+	 * Set additional XMP data to be added on the default XMP data just before the end of "rdf:RDF" tag.
+	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
+	 * @param string $xmp Custom XMP RDF data.
+	 * @since 6.3.0 (2019-09-19)
+	 * @public
+	 */
+	public function setExtraXMPRDF($xmp) {
+		$this->custom_xmp_rdf = $xmp;
+	}
+
+	/**
+	 * Set additional XMP data to be added to the default XMP data for PDF/A extensions.
+	 * IMPORTANT: This data is added as-is without controls, so you have to validate your data before using this method!
+	 * @param string $xmp Custom XMP RDF data.
+	 * @since 6.9.0 (2025-02-14)
+	 * @public
+	 */
+	public function setExtraXMPPdfaextension($xmp) {
+		$this->custom_xmp_rdf_pdfaExtension = $xmp;
+	}
+
+	/**
+	 * Add an extgstate
+	 * @param int $gs extgstate
+	 * @protected
+	 * @since 3.0.000 (2008-03-27)
+	 */
+	protected function setExtGState($gs) {
+		if (($this->pdfa_mode && $this->pdfa_version < 2) OR ($this->state != 2)) {
+			// transparency is not allowed in PDF/A-1 mode
+			return;
+		}
+		$this->_out(sprintf('/GS%d gs', $gs));
+	}
+
+	/**
+	 * Set overprint mode for stroking (OP) and non-stroking (op) painting operations.
+	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
+	 * @param boolean $stroking If true apply overprint for stroking operations.
+	 * @param boolean|null $nonstroking If true apply overprint for painting operations other than stroking.
+	 * @param integer $mode Overprint mode: (0 = each source colour component value replaces the value previously painted for the corresponding device colorant; 1 = a tint value of 0.0 for a source colour component shall leave the corresponding component of the previously painted colour unchanged).
+	 * @public
+	 * @since 5.9.152 (2012-03-23)
+	 */
+	public function setOverprint($stroking=true, $nonstroking=null, $mode=0) {
+		if ($this->state != 2) {
+			return;
+		}
+		$stroking = $stroking ? true : false;
+		if (LIMEPDF_STATIC::empty_string($nonstroking)) {
+			// default value if not set
+			$nonstroking = $stroking;
+		} else {
+			$nonstroking = $nonstroking ? true : false;
+		}
+		if (($mode != 0) AND ($mode != 1)) {
+			$mode = 0;
+		}
+		$this->overprint = array('OP' => $stroking, 'op' => $nonstroking, 'OPM' => $mode);
+		$gs = $this->addExtGState($this->overprint);
+		$this->setExtGState($gs);
+	}
+
+	/**
+	 * Set the default bullet to be used as LI bullet symbol
+	 * @param string $symbol character or string to be used (legal values are: '' = automatic, '!' = auto bullet, '#' = auto numbering, 'disc', 'disc', 'circle', 'square', '1', 'decimal', 'decimal-leading-zero', 'i', 'lower-roman', 'I', 'upper-roman', 'a', 'lower-alpha', 'lower-latin', 'A', 'upper-alpha', 'upper-latin', 'lower-greek', 'img|type|width|height|image.ext')
+	 * @public
+	 * @since 4.0.028 (2008-09-26)
+	 */
+	public function setLIsymbol($symbol='!') {
+		// check for custom image symbol
+		if (substr($symbol, 0, 4) == 'img|') {
+			$this->lisymbol = $symbol;
+			return;
+		}
+		$symbol = strtolower($symbol);
+		$valid_symbols = array('!', '#', 'disc', 'circle', 'square', '1', 'decimal', 'decimal-leading-zero', 'i', 'lower-roman', 'I', 'upper-roman', 'a', 'lower-alpha', 'lower-latin', 'A', 'upper-alpha', 'upper-latin', 'lower-greek');
+		if (in_array($symbol, $valid_symbols)) {
+			$this->lisymbol = $symbol;
+		} else {
+			$this->lisymbol = '';
+		}
+	}
 }
