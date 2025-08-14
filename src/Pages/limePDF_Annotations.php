@@ -3,6 +3,130 @@
 namespace LimePDF;
 
 trait LIMEPDF_ANNOTATIONS{
+
+	/**
+	 * Puts a markup annotation on a rectangular area of the page.
+	 * !!!!THE ANNOTATION SUPPORT IS NOT YET FULLY IMPLEMENTED !!!!
+	 * @param float $x Abscissa of the upper-left corner of the rectangle
+	 * @param float $y Ordinate of the upper-left corner of the rectangle
+	 * @param float $w Width of the rectangle
+	 * @param float $h Height of the rectangle
+	 * @param string $text annotation text or alternate content
+	 * @param array $opt array of options (see section 8.4 of PDF reference 1.7).
+	 * @param int $spaces number of spaces on the text to link
+	 * @public
+	 * @since 4.0.018 (2008-08-06)
+	 */
+	public function Annotation($x, $y, $w, $h, $text, $opt=array('Subtype'=>'Text'), $spaces=0) {
+		if ($this->inxobj) {
+			// store parameters for later use on template
+			$this->xobjects[$this->xobjid]['annotations'][] = array('x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'text' => $text, 'opt' => $opt, 'spaces' => $spaces);
+			return;
+		}
+		if ($x === '') {
+			$x = $this->x;
+		}
+		if ($y === '') {
+			$y = $this->y;
+		}
+		// check page for no-write regions and adapt page margins if necessary
+		list($x, $y) = $this->checkPageRegions($h, $x, $y);
+		// recalculate coordinates to account for graphic transformations
+		if (isset($this->transfmatrix) AND !empty($this->transfmatrix)) {
+			for ($i=$this->transfmatrix_key; $i > 0; --$i) {
+				$maxid = count($this->transfmatrix[$i]) - 1;
+				for ($j=$maxid; $j >= 0; --$j) {
+					$ctm = $this->transfmatrix[$i][$j];
+					if (isset($ctm['a'])) {
+						$x = $x * $this->k;
+						$y = ($this->h - $y) * $this->k;
+						$w = $w * $this->k;
+						$h = $h * $this->k;
+						// top left
+						$xt = $x;
+						$yt = $y;
+						$x1 = ($ctm['a'] * $xt) + ($ctm['c'] * $yt) + $ctm['e'];
+						$y1 = ($ctm['b'] * $xt) + ($ctm['d'] * $yt) + $ctm['f'];
+						// top right
+						$xt = $x + $w;
+						$yt = $y;
+						$x2 = ($ctm['a'] * $xt) + ($ctm['c'] * $yt) + $ctm['e'];
+						$y2 = ($ctm['b'] * $xt) + ($ctm['d'] * $yt) + $ctm['f'];
+						// bottom left
+						$xt = $x;
+						$yt = $y - $h;
+						$x3 = ($ctm['a'] * $xt) + ($ctm['c'] * $yt) + $ctm['e'];
+						$y3 = ($ctm['b'] * $xt) + ($ctm['d'] * $yt) + $ctm['f'];
+						// bottom right
+						$xt = $x + $w;
+						$yt = $y - $h;
+						$x4 = ($ctm['a'] * $xt) + ($ctm['c'] * $yt) + $ctm['e'];
+						$y4 = ($ctm['b'] * $xt) + ($ctm['d'] * $yt) + $ctm['f'];
+						// new coordinates (rectangle area)
+						$x = min($x1, $x2, $x3, $x4);
+						$y = max($y1, $y2, $y3, $y4);
+						$w = (max($x1, $x2, $x3, $x4) - $x) / $this->k;
+						$h = ($y - min($y1, $y2, $y3, $y4)) / $this->k;
+						$x = $x / $this->k;
+						$y = $this->h - ($y / $this->k);
+					}
+				}
+			}
+		}
+		if ($this->page <= 0) {
+			$page = 1;
+		} else {
+			$page = $this->page;
+		}
+		if (!isset($this->PageAnnots[$page])) {
+			$this->PageAnnots[$page] = array();
+		}
+		$this->PageAnnots[$page][] = array('n' => ++$this->n, 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'txt' => $text, 'opt' => $opt, 'numspaces' => $spaces);
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
+			if ((($opt['Subtype'] == 'FileAttachment') OR ($opt['Subtype'] == 'Sound')) AND (!LIMEPDF_STATIC::empty_string($opt['FS']))
+				AND (@LIMEPDF_STATIC::file_exists($opt['FS']) OR LIMEPDF_STATIC::isValidURL($opt['FS']))
+				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
+				$this->embeddedfiles[basename($opt['FS'])] = array('f' => ++$this->n, 'n' => ++$this->n, 'file' => $opt['FS']);
+			}
+		}
+		// Add widgets annotation's icons
+		if (isset($opt['mk']['i']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['i'])) {
+			$this->Image($opt['mk']['i'], '', '', 10, 10, '', '', '', false, 300, '', false, false, 0, false, true);
+		}
+		if (isset($opt['mk']['ri']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['ri'])) {
+			$this->Image($opt['mk']['ri'], '', '', 0, 0, '', '', '', false, 300, '', false, false, 0, false, true);
+		}
+		if (isset($opt['mk']['ix']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['ix'])) {
+			$this->Image($opt['mk']['ix'], '', '', 0, 0, '', '', '', false, 300, '', false, false, 0, false, true);
+		}
+	}
+
+	/**
+	 * Embed the attached files.
+	 * @since 6.9.000 (2025-02-11)
+	 * @public
+	 */
+	public function EmbedFile($opt) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
+			if ((($opt['Subtype'] == 'FileAttachment')) AND (!LIMEPDF_STATIC::empty_string($opt['FS']))
+				AND (@LIMEPDF_STATIC::file_exists($opt['FS']) OR LIMEPDF_STATIC::isValidURL($opt['FS']))
+				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
+				$this->embeddedfiles[basename($opt['FS'])] = array('f' => ++$this->n, 'n' => ++$this->n, 'file' => $opt['FS']);
+			}
+		}
+	}
+
+	/**
+	 * Embed the attached files.
+	 * @since 6.9.000 (2025-02-11)
+	 * @public
+	 */
+	public function EmbedFileFromString($filename, $content) {
+		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
+			$this->embeddedfiles[$filename] = array('f' => ++$this->n, 'n' => ++$this->n, 'content' => $content );
+		}
+	}
+	
 	// /**
 	//  * Output annotations objects for all pages.
 	//  * !!! THIS METHOD IS NOT YET COMPLETED !!!

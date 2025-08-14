@@ -5,6 +5,72 @@ namespace LimePDF;
 trait LIMEPDF_PAGE_GETTERSETTER {
 
 	/**
+	 * Defines the title of the document.
+	 * @param string $title The title.
+	 * @public
+	 * @since 1.2
+	 * @see SetAuthor(), SetCreator(), SetKeywords(), SetSubject()
+	 */
+	public function setTitle($title) {
+		$this->title = $title;
+	}
+
+	/**
+	 * Defines the subject of the document.
+	 * @param string $subject The subject.
+	 * @public
+	 * @since 1.2
+	 * @see SetAuthor(), SetCreator(), SetKeywords(), SetTitle()
+	 */
+	public function setSubject($subject) {
+		$this->subject = $subject;
+	}
+
+	/**
+	 * Defines the author of the document.
+	 * @param string $author The name of the author.
+	 * @public
+	 * @since 1.2
+	 * @see SetCreator(), SetKeywords(), SetSubject(), SetTitle()
+	 */
+	public function setAuthor($author) {
+		$this->author = $author;
+	}
+
+	/**
+	 * Associates keywords with the document, generally in the form 'keyword1 keyword2 ...'.
+	 * @param string $keywords The list of keywords.
+	 * @public
+	 * @since 1.2
+	 * @see SetAuthor(), SetCreator(), SetSubject(), SetTitle()
+	 */
+	public function setKeywords($keywords) {
+		$this->keywords = $keywords;
+	}
+
+	/**
+	 * Defines the creator of the document. This is typically the name of the application that generates the PDF.
+	 * @param string $creator The name of the creator.
+	 * @public
+	 * @since 1.2
+	 * @see SetAuthor(), SetKeywords(), SetSubject(), SetTitle()
+	 */
+	public function setCreator($creator) {
+		$this->creator = $creator;
+	}
+
+	/**
+	 * Whether to allow local file path in image html tags, when prefixed with file://
+	 *
+	 * @param bool $allowLocalFiles true, when local files should be allowed. Otherwise false.
+	 * @public
+	 * @since 6.4
+	 */
+	public function setAllowLocalFiles($allowLocalFiles) {
+		$this->allowLocalFiles = (bool) $allowLocalFiles;
+	}
+
+	/**
 	 * Set header data.
 	 * @param string $ln header image logo
 	 * @param int $lw header image logo width in mm
@@ -283,6 +349,51 @@ trait LIMEPDF_PAGE_GETTERSETTER {
 			$pnalias[$k] = $this->getInternalPageNumberAliases($a);
 		}
 		return $pnalias;
+	}
+
+	/**
+	 * Set the starting page number.
+	 * @param int $num Starting page number.
+	 * @since 5.9.093 (2011-06-16)
+	 * @public
+	 */
+	public function setStartingPageNumber($num=1) {
+		$this->starting_page_number = max(0, intval($num));
+	}
+
+	/**
+	 * Set page buffer content.
+	 * @param int $page page number
+	 * @param string $data page data
+	 * @param boolean $append if true append data, false replace.
+	 * @protected
+	 * @since 4.5.000 (2008-12-31)
+	 */
+	protected function setPageBuffer($page, $data, $append=false) {
+		if ($append) {
+			$this->pages[$page] .= $data;
+		} else {
+			$this->pages[$page] = $data;
+		}
+		if ($append AND isset($this->pagelen[$page])) {
+			$this->pagelen[$page] += strlen($data);
+		} else {
+			$this->pagelen[$page] = strlen($data);
+		}
+	}
+
+	/**
+	 * Get page buffer content.
+	 * @param int $page page number
+	 * @return string page buffer content or false in case of error
+	 * @protected
+	 * @since 4.5.000 (2008-12-31)
+	 */
+	protected function getPageBuffer($page) {
+		if (isset($this->pages[$page])) {
+			return $this->pages[$page];
+		}
+		return false;
 	}
 
 }

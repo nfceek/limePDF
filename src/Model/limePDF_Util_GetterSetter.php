@@ -805,5 +805,107 @@ trait LIMEPDF_UTIL_GETTERSETTER {
 		}
 	}
 
+	/**
+	 * Defines the way the document is to be displayed by the viewer.
+	 * @param mixed $zoom The zoom to use. It can be one of the following string values or a number indicating the zooming factor to use. <ul><li>fullpage: displays the entire page on screen </li><li>fullwidth: uses maximum width of window</li><li>real: uses real size (equivalent to 100% zoom)</li><li>default: uses viewer default mode</li></ul>
+	 * @param string $layout The page layout. Possible values are:<ul><li>SinglePage Display one page at a time</li><li>OneColumn Display the pages in one column</li><li>TwoColumnLeft Display the pages in two columns, with odd-numbered pages on the left</li><li>TwoColumnRight Display the pages in two columns, with odd-numbered pages on the right</li><li>TwoPageLeft (PDF 1.5) Display the pages two at a time, with odd-numbered pages on the left</li><li>TwoPageRight (PDF 1.5) Display the pages two at a time, with odd-numbered pages on the right</li></ul>
+	 * @param string $mode A name object specifying how the document should be displayed when opened:<ul><li>UseNone Neither document outline nor thumbnail images visible</li><li>UseOutlines Document outline visible</li><li>UseThumbs Thumbnail images visible</li><li>FullScreen Full-screen mode, with no menu bar, window controls, or any other window visible</li><li>UseOC (PDF 1.5) Optional content group panel visible</li><li>UseAttachments (PDF 1.6) Attachments panel visible</li></ul>
+	 * @public
+	 * @since 1.2
+	 */
+	public function setDisplayMode($zoom, $layout='SinglePage', $mode='UseNone') {
+		if (($zoom == 'fullpage') OR ($zoom == 'fullwidth') OR ($zoom == 'real') OR ($zoom == 'default') OR (!is_string($zoom))) {
+			$this->ZoomMode = $zoom;
+		} else {
+			$this->Error('Incorrect zoom display mode: '.$zoom);
+		}
+		$this->LayoutMode = LIMEPDF_STATIC::getPageLayoutMode($layout);
+		$this->PageMode = LIMEPDF_STATIC::getPageMode($mode);
+	}
 
+	/**
+	 * Activates or deactivates page compression. When activated, the internal representation of each page is compressed, which leads to a compression ratio of about 2 for the resulting document. Compression is on by default.
+	 * Note: the Zlib extension is required for this feature. If not present, compression will be turned off.
+	 * @param boolean $compress Boolean indicating if compression must be enabled.
+	 * @public
+	 * @since 1.4
+	 */
+	public function setCompression($compress=true) {
+		$this->compress = false;
+		if (function_exists('gzcompress')) {
+			if ($compress) {
+				if ( !$this->pdfa_mode) {
+					$this->compress = true;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Set flag to force sRGB_IEC61966-2.1 black scaled ICC color profile for the whole document.
+	 * @param boolean $mode If true force sRGB output intent.
+	 * @public
+	 * @since 5.9.121 (2011-09-28)
+	 */
+	public function setSRGBmode($mode=false) {
+		$this->force_srgb = $mode ? true : false;
+	}
+
+	/**
+	 * Turn on/off Unicode mode for document information dictionary (meta tags).
+	 * This has effect only when unicode mode is set to false.
+	 * @param boolean $unicode if true set the meta information in Unicode
+	 * @since 5.9.027 (2010-12-01)
+	 * @public
+	 */
+	public function setDocInfoUnicode($unicode=true) {
+		$this->docinfounicode = $unicode ? true : false;
+	}
+
+	/**
+	 * Get the overprint mode array (OP, op, OPM).
+	 * (Check the "Entries in a Graphics State Parameter Dictionary" on PDF 32000-1:2008).
+	 * @return array<string,bool|int>
+	 * @public
+	 * @since 5.9.152 (2012-03-23)
+	 */
+	public function getOverprint() {
+		return $this->overprint;
+	}
+
+	/**
+	 * Returns the string used to find spaces
+	 * @return string
+	 * @protected
+	 * @author Nicola Asuni
+	 * @since 4.8.024 (2010-01-15)
+	 */
+	protected function getSpaceString() {
+		$spacestr = chr(32);
+		if ($this->isUnicodeFont()) {
+			$spacestr = chr(0).chr(32);
+		}
+		return $spacestr;
+	}
+
+	/**
+	 * Set buffer content (always append data).
+	 * @param string $data data
+	 * @protected
+	 * @since 4.5.000 (2009-01-02)
+	 */
+	protected function setBuffer($data) {
+		$this->bufferlen += strlen($data);
+		$this->buffer .= $data;
+	}
+
+	/**
+	 * Get buffer content.
+	 * @return string buffer content
+	 * @protected
+	 * @since 4.5.000 (2009-01-02)
+	 */
+	protected function getBuffer() {
+		return $this->buffer;
+	}
 }

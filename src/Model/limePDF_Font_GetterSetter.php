@@ -5,6 +5,16 @@ namespace LimePDF;
 trait LIMEPDF_FONT_GETTERSETTER {
 
 	/**
+	 * Defines the default monospaced font.
+	 * @param string $font Font name.
+	 * @public
+	 * @since 4.5.025
+	 */
+	public function setDefaultMonospacedFont($font) {
+		$this->default_monospaced_font = $font;
+	}
+
+	/**
 	 * Defines the size of the current font.
 	 * @param float $size The font size in points.
 	 * @param boolean $out if true output the font size command, otherwise only set the font properties.
