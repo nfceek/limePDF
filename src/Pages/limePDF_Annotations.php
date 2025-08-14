@@ -4,6 +4,50 @@ namespace LimePDF;
 
 trait LIMEPDF_ANNOTATIONS{
 
+		/**
+	 * Get references to page annotations.
+	 * @param int $n page number
+	 * @return string
+	 * @protected
+	 * @author Nicola Asuni
+	 * @since 5.0.010 (2010-05-17)
+	 */
+	protected function _getannotsrefs($n) {
+		if (!(isset($this->PageAnnots[$n]) OR count($this->empty_signature_appearance)>0 OR ($this->sign AND isset($this->signature_data['cert_type'])))) {
+			return '';
+		}
+		$out = ' /Annots [';
+		if (isset($this->PageAnnots[$n])) {
+			foreach ($this->PageAnnots[$n] as $key => $val) {
+				if (!in_array($val['n'], $this->radio_groups)) {
+					$out .= ' '.$val['n'].' 0 R';
+				}
+			}
+			// add radiobutton groups
+			if (isset($this->radiobutton_groups[$n])) {
+				foreach ($this->radiobutton_groups[$n] as $key => $data) {
+					if (isset($data['n'])) {
+						$out .= ' '.$data['n'].' 0 R';
+					}
+				}
+			}
+		}
+		if ($this->sign AND ($n == $this->signature_appearance['page']) AND isset($this->signature_data['cert_type'])) {
+			// set reference for signature object
+			$out .= ' '.$this->sig_obj_id.' 0 R';
+		}
+		if (!empty($this->empty_signature_appearance)) {
+			foreach ($this->empty_signature_appearance as $esa) {
+				if ($esa['page'] == $n) {
+					// set reference for empty signature objects
+					$out .= ' '.$esa['objid'].' 0 R';
+				}
+			}
+		}
+		$out .= ' ]';
+		return $out;
+	}
+
 	/**
 	 * Puts a markup annotation on a rectangular area of the page.
 	 * !!!!THE ANNOTATION SUPPORT IS NOT YET FULLY IMPLEMENTED !!!!
@@ -126,6 +170,8 @@ trait LIMEPDF_ANNOTATIONS{
 			$this->embeddedfiles[$filename] = array('f' => ++$this->n, 'n' => ++$this->n, 'content' => $content );
 		}
 	}
+
+
 	
 	// /**
 	//  * Output annotations objects for all pages.
@@ -776,114 +822,6 @@ trait LIMEPDF_ANNOTATIONS{
 	// 	} // end for each page
 	// }
 
-	/**
-	 * Put appearance streams XObject used to define annotation's appearance states.
-	 * @param int $w annotation width
-	 * @param int $h annotation height
-	 * @param string $stream appearance stream
-	 * @return int object ID
-	 * @protected
-	 * @since 4.8.001 (2009-09-09)
-	 */
-	protected function _putAPXObject($w=0, $h=0, $stream='') {
-		$stream = trim($stream);
-		$out = $this->_getobj()."\n";
-		$this->xobjects['AX'.$this->n] = array('n' => $this->n);
-		$out .= '<<';
-		$out .= ' /Type /XObject';
-		$out .= ' /Subtype /Form';
-		$out .= ' /FormType 1';
-		if ($this->compress) {
-			$stream = gzcompress($stream);
-			$out .= ' /Filter /FlateDecode';
-		}
-		$rect = sprintf('%F %F', $w, $h);
-		$out .= ' /BBox [0 0 '.$rect.']';
-		$out .= ' /Matrix [1 0 0 1 0 0]';
-		$out .= ' /Resources 2 0 R';
-		$stream = $this->_getrawstream($stream);
-		$out .= ' /Length '.strlen($stream);
-		$out .= ' >>';
-		$out .= ' stream'."\n".$stream."\n".'endstream';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-		return $this->n;
-	}
 
-
-
-	/**
-	 * Output CID-0 fonts.
-	 * A Type 0 CIDFont contains glyph descriptions based on the Adobe Type 1 font format
-	 * @param array $font font data
-	 * @protected
-	 * @author Andrew Whitehead, Nicola Asuni, Yukihiro Nakadaira
-	 * @since 3.2.000 (2008-06-23)
-	 */
-	protected function _putcidfont0($font) {
-		$cidoffset = 0;
-		if (!isset($font['cw'][1])) {
-			$cidoffset = 31;
-		}
-		if (isset($font['cidinfo']['uni2cid'])) {
-			// convert unicode to cid.
-			$uni2cid = $font['cidinfo']['uni2cid'];
-			$cw = array();
-			foreach ($font['cw'] as $uni => $width) {
-				if (isset($uni2cid[$uni])) {
-					$cw[($uni2cid[$uni] + $cidoffset)] = $width;
-				} elseif ($uni < 256) {
-					$cw[$uni] = $width;
-				} // else unknown character
-			}
-			$font = array_merge($font, array('cw' => $cw));
-		}
-		$name = $font['name'];
-		$enc = $font['enc'];
-		if ($enc) {
-			$longname = $name.'-'.$enc;
-		} else {
-			$longname = $name;
-		}
-		$out = $this->_getobj($this->font_obj_ids[$font['fontkey']])."\n";
-		$out .= '<</Type /Font';
-		$out .= ' /Subtype /Type0';
-		$out .= ' /BaseFont /'.$longname;
-		$out .= ' /Name /F'.$font['i'];
-		if ($enc) {
-			$out .= ' /Encoding /'.$enc;
-		}
-		$out .= ' /DescendantFonts ['.($this->n + 1).' 0 R]';
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-		$oid = $this->_newobj();
-		$out = '<</Type /Font';
-		$out .= ' /Subtype /CIDFontType0';
-		$out .= ' /BaseFont /'.$name;
-		$cidinfo = '/Registry '.$this->_datastring($font['cidinfo']['Registry'], $oid);
-		$cidinfo .= ' /Ordering '.$this->_datastring($font['cidinfo']['Ordering'], $oid);
-		$cidinfo .= ' /Supplement '.$font['cidinfo']['Supplement'];
-		$out .= ' /CIDSystemInfo <<'.$cidinfo.'>>';
-		$out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
-		$out .= ' /DW '.$font['dw'];
-		$out .= "\n".LIMEPDF_FONT::_putfontwidths($font, $cidoffset);
-		$out .= ' >>';
-		$out .= "\n".'endobj';
-		$this->_out($out);
-		$this->_newobj();
-		$s = '<</Type /FontDescriptor /FontName /'.$name;
-		foreach ($font['desc'] as $k => $v) {
-			if ($k != 'Style') {
-				if (is_float($v)) {
-					$v = sprintf('%F', $v);
-				}
-				$s .= ' /'.$k.' '.$v.'';
-			}
-		}
-		$s .= '>>';
-		$s .= "\n".'endobj';
-		$this->_out($s);
-	}
 
 }

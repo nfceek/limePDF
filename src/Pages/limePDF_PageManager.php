@@ -653,5 +653,176 @@ trait LIMEPDF_PAGEMANAGER {
 		}
 	}
 
+	/**
+	 * Move a page to a previous position.
+	 * @param int $frompage number of the source page
+	 * @param int $topage number of the destination page (must be less than $frompage)
+	 * @return bool true in case of success, false in case of error.
+	 * @public
+	 * @since 4.5.000 (2009-01-02)
+	 */
+	public function movePage($frompage, $topage) {
+		if (($frompage > $this->numpages) OR ($frompage <= $topage)) {
+			return false;
+		}
+		if ($frompage == $this->page) {
+			// close the page before moving it
+			$this->endPage();
+		}
+		// move all page-related states
+		$tmppage = $this->getPageBuffer($frompage);
+		$tmppagedim = $this->pagedim[$frompage];
+		$tmppagelen = $this->pagelen[$frompage];
+		$tmpintmrk = $this->intmrk[$frompage];
+		$tmpbordermrk = $this->bordermrk[$frompage];
+		$tmpcntmrk = $this->cntmrk[$frompage];
+		$tmppageobjects = $this->pageobjects[$frompage];
+		if (isset($this->footerpos[$frompage])) {
+			$tmpfooterpos = $this->footerpos[$frompage];
+		}
+		if (isset($this->footerlen[$frompage])) {
+			$tmpfooterlen = $this->footerlen[$frompage];
+		}
+		if (isset($this->transfmrk[$frompage])) {
+			$tmptransfmrk = $this->transfmrk[$frompage];
+		}
+		if (isset($this->PageAnnots[$frompage])) {
+			$tmpannots = $this->PageAnnots[$frompage];
+		}
+		if (isset($this->newpagegroup) AND !empty($this->newpagegroup)) {
+			for ($i = $frompage; $i > $topage; --$i) {
+				if (isset($this->newpagegroup[$i]) AND (($i + $this->pagegroups[$this->newpagegroup[$i]]) > $frompage)) {
+					--$this->pagegroups[$this->newpagegroup[$i]];
+					break;
+				}
+			}
+			for ($i = $topage; $i > 0; --$i) {
+				if (isset($this->newpagegroup[$i]) AND (($i + $this->pagegroups[$this->newpagegroup[$i]]) > $topage)) {
+					++$this->pagegroups[$this->newpagegroup[$i]];
+					break;
+				}
+			}
+		}
+		for ($i = $frompage; $i > $topage; --$i) {
+			$j = $i - 1;
+			// shift pages down
+			$this->setPageBuffer($i, $this->getPageBuffer($j));
+			$this->pagedim[$i] = $this->pagedim[$j];
+			$this->pagelen[$i] = $this->pagelen[$j];
+			$this->intmrk[$i] = $this->intmrk[$j];
+			$this->bordermrk[$i] = $this->bordermrk[$j];
+			$this->cntmrk[$i] = $this->cntmrk[$j];
+			$this->pageobjects[$i] = $this->pageobjects[$j];
+			if (isset($this->footerpos[$j])) {
+				$this->footerpos[$i] = $this->footerpos[$j];
+			} elseif (isset($this->footerpos[$i])) {
+				unset($this->footerpos[$i]);
+			}
+			if (isset($this->footerlen[$j])) {
+				$this->footerlen[$i] = $this->footerlen[$j];
+			} elseif (isset($this->footerlen[$i])) {
+				unset($this->footerlen[$i]);
+			}
+			if (isset($this->transfmrk[$j])) {
+				$this->transfmrk[$i] = $this->transfmrk[$j];
+			} elseif (isset($this->transfmrk[$i])) {
+				unset($this->transfmrk[$i]);
+			}
+			if (isset($this->PageAnnots[$j])) {
+				$this->PageAnnots[$i] = $this->PageAnnots[$j];
+			} elseif (isset($this->PageAnnots[$i])) {
+				unset($this->PageAnnots[$i]);
+			}
+			if (isset($this->newpagegroup[$j])) {
+				$this->newpagegroup[$i] = $this->newpagegroup[$j];
+				unset($this->newpagegroup[$j]);
+			}
+			if ($this->currpagegroup == $j) {
+				$this->currpagegroup = $i;
+			}
+		}
+		$this->setPageBuffer($topage, $tmppage);
+		$this->pagedim[$topage] = $tmppagedim;
+		$this->pagelen[$topage] = $tmppagelen;
+		$this->intmrk[$topage] = $tmpintmrk;
+		$this->bordermrk[$topage] = $tmpbordermrk;
+		$this->cntmrk[$topage] = $tmpcntmrk;
+		$this->pageobjects[$topage] = $tmppageobjects;
+		if (isset($tmpfooterpos)) {
+			$this->footerpos[$topage] = $tmpfooterpos;
+		} elseif (isset($this->footerpos[$topage])) {
+			unset($this->footerpos[$topage]);
+		}
+		if (isset($tmpfooterlen)) {
+			$this->footerlen[$topage] = $tmpfooterlen;
+		} elseif (isset($this->footerlen[$topage])) {
+			unset($this->footerlen[$topage]);
+		}
+		if (isset($tmptransfmrk)) {
+			$this->transfmrk[$topage] = $tmptransfmrk;
+		} elseif (isset($this->transfmrk[$topage])) {
+			unset($this->transfmrk[$topage]);
+		}
+		if (isset($tmpannots)) {
+			$this->PageAnnots[$topage] = $tmpannots;
+		} elseif (isset($this->PageAnnots[$topage])) {
+			unset($this->PageAnnots[$topage]);
+		}
+		// adjust outlines
+		$tmpoutlines = $this->outlines;
+		foreach ($tmpoutlines as $key => $outline) {
+			if (!$outline['f']) {
+				if (($outline['p'] >= $topage) AND ($outline['p'] < $frompage)) {
+					$this->outlines[$key]['p'] = ($outline['p'] + 1);
+				} elseif ($outline['p'] == $frompage) {
+					$this->outlines[$key]['p'] = $topage;
+				}
+			}
+		}
+		// adjust dests
+		$tmpdests = $this->dests;
+		foreach ($tmpdests as $key => $dest) {
+			if (!$dest['f']) {
+				if (($dest['p'] >= $topage) AND ($dest['p'] < $frompage)) {
+					$this->dests[$key]['p'] = ($dest['p'] + 1);
+				} elseif ($dest['p'] == $frompage) {
+					$this->dests[$key]['p'] = $topage;
+				}
+			}
+		}
+		// adjust links
+		$tmplinks = $this->links;
+		foreach ($tmplinks as $key => $link) {
+			if (!$link['f']) {
+				if (($link['p'] >= $topage) AND ($link['p'] < $frompage)) {
+					$this->links[$key]['p'] = ($link['p'] + 1);
+				} elseif ($link['p'] == $frompage) {
+					$this->links[$key]['p'] = $topage;
+				}
+			}
+		}
+		// adjust javascript
+		$jfrompage = $frompage;
+		$jtopage = $topage;
+		if (preg_match_all('/this\.addField\(\'([^\']*)\',\'([^\']*)\',([0-9]+)/', $this->javascript, $pamatch) > 0) {
+			foreach($pamatch[0] as $pk => $pmatch) {
+				$pagenum = intval($pamatch[3][$pk]) + 1;
+				if (($pagenum >= $jtopage) AND ($pagenum < $jfrompage)) {
+					$newpage = ($pagenum + 1);
+				} elseif ($pagenum == $jfrompage) {
+					$newpage = $jtopage;
+				} else {
+					$newpage = $pagenum;
+				}
+				--$newpage;
+				$newjs = "this.addField(\'".$pamatch[1][$pk]."\',\'".$pamatch[2][$pk]."\',".$newpage;
+				$this->javascript = str_replace($pmatch, $newjs, $this->javascript);
+			}
+			unset($pamatch);
+		}
+		// return to last page
+		$this->lastPage(true);
+		return true;
+	}
     
 }
