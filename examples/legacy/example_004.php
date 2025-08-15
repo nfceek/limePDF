@@ -26,11 +26,16 @@
  * @group pdf
  */
 
-// Include the main TCPDF library (search for installation path).
-//require_once('tcpdf_include.php');
+// ---------- ONLY EDIT THIS AREA --------------------------------
 
-require_once __DIR__ . '/../tcpdf.php';
-require_once '../vendor/autoload.php'; 
+// set Output File Name
+$OutputFile = 'example_004.pdf';
+
+// ---------- Dont Edit below here -----------------------------
+
+// Include the main TCPDF library (search for installation path).
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
 
 use LimePDF\TCPDF;
 
@@ -130,7 +135,7 @@ for ($stretching = 90; $stretching <= 110; $stretching += 10) {
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_004.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

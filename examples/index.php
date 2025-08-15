@@ -8,7 +8,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <head>
 <title>TCPDF Examples</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="description" content="TCPDF is a PHP class for generating PDF documents on the fly" />
+<meta name="description" content="Example files for the a PHP class for generating PDF documents on the fly" />
 <meta name="author" content="Nicola Asuni" />
 <meta name="keywords" content="Examples, TCPDF, PDF, PHP class" />
 </head>

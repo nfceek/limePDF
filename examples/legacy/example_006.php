@@ -28,9 +28,16 @@
  * @group pdf
  */
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// set Output File Name
+$OutputFile = 'example_006.pdf';
+
+// ---------- Dont Edit below here -----------------------------
+
 // Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../tcpdf.php';
-require_once '../vendor/autoload.php'; 
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
 
 use LimePDF\TCPDF;
 use LimePDF\Config\ConfigManager;
@@ -123,7 +130,7 @@ List example:
 	<dd>White cold drink</dd>
 </dl>
 <div style="text-align:center">IMAGES<br />
-<img src="images/logo_example.png" alt="test alt attribute" width="100" height="100" border="0" /><img src="images/tcpdf_box.svg" alt="test alt attribute" width="100" height="100" border="0" /><img src="images/logo_example.jpg" alt="test alt attribute" width="100" height="100" border="0" />
+<img src="images/logo_example.png" alt="test alt attribute" width="100" height="100" border="0" /><img src="../images/tcpdf_box.svg" alt="test alt attribute" width="100" height="100" border="0" /><img src="images/logo_example.jpg" alt="test alt attribute" width="100" height="100" border="0" />
 </div>';
 
 // output the HTML content
@@ -409,7 +416,7 @@ $pdf->lastPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_006.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

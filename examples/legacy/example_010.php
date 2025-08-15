@@ -26,9 +26,31 @@
  * @group pdf
  */
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ---------- ONLY EDIT THIS AREA --------------------------------
 
+// Set Text
+$PrintText = '../data/chapter_demo_1.txt';
+
+// Set HTML
+$PrintHtml = '../data/chapter_demo_2.txt';
+
+//Set Output File Name
+$OutputFile = 'example_010.pdf';
+
+
+// ---------- Dont Edit below here -----------------------------
+
+// Include the main TCPDF library (search for installation path).
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
 
 /**
  * Extend TCPDF to work with multiple columns
@@ -137,15 +159,15 @@ if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
 // ---------------------------------------------------------
 
 // print TEXT
-$pdf->PrintChapter(1, 'LOREM IPSUM [TEXT]', 'data/chapter_demo_1.txt', false);
+$pdf->PrintChapter(1, 'LOREM IPSUM [TEXT]', $PrintText, false);
 
 // print HTML
-$pdf->PrintChapter(2, 'LOREM IPSUM [HTML]', 'data/chapter_demo_2.txt', true);
+$pdf->PrintChapter(2, 'LOREM IPSUM [HTML]', $PrintHtml, true);
 
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_010.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

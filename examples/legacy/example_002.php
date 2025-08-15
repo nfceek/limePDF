@@ -27,12 +27,16 @@
  * @group page
  * @group pdf
  */
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// set Output File Name
+$OutputFile = 'example_002.pdf';
+
+// ---------- Dont Edit below here -----------------------------
 
 // Include the main TCPDF library (search for installation path).
-//require_once('tcpdf_include.php');
-
-require_once __DIR__ . '/../tcpdf.php';
-require_once '../vendor/autoload.php'; 
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php';  
 
 use LimePDF\TCPDF;
 
@@ -98,7 +102,7 @@ $pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_002.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

@@ -27,8 +27,31 @@
  * @group pdf
  */
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) load your table Data
+$PrintText = '../data/table_data_demo.txt';
+
+// 2) add Column Titles
+$ColumnTitles = ['Country', 'Capitals', 'Area (sq km)', 'Pop. (thousands)'];
+
+// 3) set Output File Name
+$OutputFile = 'example_011.pdf';
+
+
+// ---------- Dont Edit below here -----------------------------
+
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
 
 // extend TCPF with custom functions
 class MYPDF extends TCPDF {
@@ -123,10 +146,10 @@ $pdf->setFont('helvetica', '', 12);
 $pdf->AddPage();
 
 // column titles
-$header = array('Country', 'Capital', 'Area (sq km)', 'Pop. (thousands)');
+$header = $ColumnTitles;;
 
 // data loading
-$data = $pdf->LoadData('data/table_data_demo.txt');
+$data = $pdf->LoadData($PrintText);
 
 // print colored table
 $pdf->ColoredTable($header, $data);
