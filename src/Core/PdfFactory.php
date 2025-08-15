@@ -1,11 +1,8 @@
 <?php
 
-namespace limepdf\CorePDF;
+namespace limepdf\Core;
 
-use limepdf\Config\ConfigManager;
-
-class PdfFactory
-{
+class PdfFactory {
     public static function create(array $options = []): CorePDF
     {
         $cfg = new ConfigManager();

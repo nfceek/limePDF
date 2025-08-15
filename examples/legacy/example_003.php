@@ -29,8 +29,21 @@
  */
 
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+//require_once('tcpdf_include.php');
 
+require_once __DIR__ . '/../tcpdf.php';
+require_once '../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+
+$pdf = new TCPDF();
+
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
 
 // Extend the TCPDF class to create custom Header and Footer
 class MYPDF extends TCPDF {

@@ -2,10 +2,11 @@
 //============================================================+
 // File name   : example_006.php
 // Begin       : 2008-03-04
-// Last Update : 2013-05-14
+// Last Update : 2025-08-15
 //
 // Description : Example 006 for TCPDF class
 //               WriteHTML and RTL support
+//               Updated for PHP 7/8 compatibility
 //
 // Author: Nicola Asuni
 //
@@ -28,7 +29,16 @@
  */
 
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+require_once __DIR__ . '/../tcpdf.php';
+require_once '../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -44,8 +54,8 @@ $pdf->setKeywords('TCPDF, PDF, example, test, guide');
 $pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 006', PDF_HEADER_STRING);
 
 // set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+$pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN]);
+$pdf->setFooterFont([PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA]);
 
 // set default monospaced font
 $pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
@@ -56,14 +66,15 @@ $pdf->setHeaderMargin(PDF_MARGIN_HEADER);
 $pdf->setFooterMargin(PDF_MARGIN_FOOTER);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(true, PDF_MARGIN_BOTTOM);
 
 // set image scale factor
 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
 // set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
+$langFile = dirname(__FILE__).'/lang/eng.php';
+if (file_exists($langFile)) {
+	require_once($langFile);
 	$pdf->setLanguageArray($l);
 }
 
@@ -234,9 +245,16 @@ $html = '<h1>Embedded Images</h1>
 <tr><td>src="data..."</td><td><img src="@DATA2@" border="0" height="41" width="41" /></td></tr>
 </table>';
 
-$data = base64_encode(file_get_contents("images/logo_example.png"));
-$html = str_replace("@DATA1@", "@" . $data, $html);
-$html = str_replace("@DATA2@", "data:image/png;base64," . $data, $html);
+$imageFile = "images/logo_example.png";
+if (file_exists($imageFile)) {
+    $data = base64_encode(file_get_contents($imageFile));
+    $html = str_replace("@DATA1@", "@" . $data, $html);
+    $html = str_replace("@DATA2@", "data:image/png;base64," . $data, $html);
+} else {
+    // Fallback if image doesn't exist
+    $html = str_replace("@DATA1@", "", $html);
+    $html = str_replace("@DATA2@", "", $html);
+}
 
 // output the HTML content
 $pdf->writeHTML($html, true, false, true, false, '');
@@ -253,9 +271,59 @@ $pdf->AddPage();
 $textcolors = '<h1>HTML Text Colors</h1>';
 $bgcolors = '<hr /><h1>HTML Background Colors</h1>';
 
-foreach(TCPDF_COLORS::$webcolor as $k => $v) {
-	$textcolors .= '<span color="#'.$v.'">'.$v.'</span> ';
-	$bgcolors .= '<span bgcolor="#'.$v.'" color="#333333">'.$v.'</span> ';
+/**
+ * Validates if a string is a valid hexadecimal color code
+ * @param string $hex The hex string to validate
+ * @return bool True if valid hex color, false otherwise
+ */
+function isValidHexColor($hex) {
+    // Remove # if present
+    $hex = ltrim($hex, '#');
+    // Check if it's exactly 6 characters and contains only valid hex characters
+    return strlen($hex) === 6 && ctype_xdigit($hex);
+}
+
+// Check if LIMEPDF_COLORS class and webcolor property exist
+if (class_exists('LIMEPDF_COLORS') && isset(LIMEPDF_COLORS::$webcolor)) {
+    foreach(LIMEPDF_COLORS::$webcolor as $k => $v) {
+        // Validate hex color before using it
+        if (isValidHexColor($v)) {
+            $textcolors .= '<span color="#'.$v.'">'.$v.'</span> ';
+            $bgcolors .= '<span bgcolor="#'.$v.'" color="#333333">'.$v.'</span> ';
+        }
+    }
+} else {
+    // Fallback color array if LIMEPDF_COLORS is not available
+    $webcolors = [
+        'red' => 'FF0000',
+        'green' => '008000',
+        'blue' => '0000FF',
+        'yellow' => 'FFFF00',
+        'cyan' => '00FFFF',
+        'magenta' => 'FF00FF',
+        'black' => '000000',
+        'white' => 'FFFFFF',
+        'orange' => 'FFA500',
+        'purple' => '800080',
+        'brown' => 'A52A2A',
+        'pink' => 'FFC0CB',
+        'gray' => '808080',
+        'silver' => 'C0C0C0',
+        'gold' => 'FFD700',
+        'navy' => '000080',
+        'teal' => '008080',
+        'lime' => '00FF00',
+        'maroon' => '800000',
+        'olive' => '808000'
+    ];
+    
+    foreach($webcolors as $k => $v) {
+        // Double-check validation even for our fallback colors
+        if (isValidHexColor($v)) {
+            $textcolors .= '<span color="#'.$v.'">'.$v.'</span> ';
+            $bgcolors .= '<span bgcolor="#'.$v.'" color="#333333">'.$v.'</span> ';
+        }
+    }
 }
 
 // output the HTML content
@@ -278,7 +346,8 @@ $pdf->writeHTML($html, true, false, true, false, '');
 // Test fonts nesting
 $html1 = 'Default <font face="courier">Courier <font face="helvetica">Helvetica <font face="times">Times <font face="dejavusans">dejavusans </font>Times </font>Helvetica </font>Courier </font>Default';
 $html2 = '<small>small text</small> normal <small>small text</small> normal <sub>subscript</sub> normal <sup>superscript</sup> normal';
-$html3 = '<font size="10" color="#ff7f50">The</font> <font size="10" color="#6495ed">quick</font> <font size="14" color="#dc143c">brown</font> <font size="18" color="#008000">fox</font> <font size="22"><a href="http://www.tcpdf.org">jumps</a></font> <font size="22" color="#a0522d">over</font> <font size="18" color="#da70d6">the</font> <font size="14" color="#9400d3">lazy</font> <font size="10" color="#4169el">dog</font>.';
+// Fixed invalid hex color "#4169el" to "#4169e1" (corrected typo)
+$html3 = '<font size="10" color="#ff7f50">The</font> <font size="10" color="#6495ed">quick</font> <font size="14" color="#dc143c">brown</font> <font size="18" color="#008000">fox</font> <font size="22"><a href="http://www.tcpdf.org">jumps</a></font> <font size="22" color="#a0522d">over</font> <font size="18" color="#da70d6">the</font> <font size="14" color="#9400d3">lazy</font> <font size="10" color="#4169e1">dog</font>.';
 
 $html = $html1.'<br />'.$html2.'<br />'.$html3.'<br />'.$html3.'<br />'.$html2;
 
@@ -326,7 +395,7 @@ $html = <<<EOF
 	<li>test custom bullet image</li>
 	<li>test custom bullet image</li>
 	<li>test custom bullet image</li>
-<ul>
+</ul>
 EOF;
 
 // output the HTML content

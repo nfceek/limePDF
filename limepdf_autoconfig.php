@@ -33,6 +33,18 @@
 //
 //============================================================+
 
+// Set Header String: PDF_HEADER_STRING
+$HeaderString = "PDF_HEADER_STRING in autoconfig \nlimePDF.com";
+
+
+// Set Logo File: PDF_HEADER_LOGO
+$LogoFile = 'limePDF_logo.png';
+
+
+
+
+//---------- DO NOT EDIT BELOW ----------------------------------------
+//---------- UNLESS ABSOLUTELY NECESSARY ------------------------------
 /**
  * @file
  * Try to automatically configure some TCPDF constants if not defined.
@@ -107,8 +119,8 @@ if (!defined('K_PATH_IMAGES')) {
 
 if (!defined('PDF_HEADER_LOGO')) {
 	$tcpdf_header_logo = '';
-	if (@file_exists(K_PATH_IMAGES.'tcpdf_logo.jpg')) {
-		$tcpdf_header_logo = 'tcpdf_logo.jpg';
+	if (@file_exists(K_PATH_IMAGES.$LogoFile)) {
+		$tcpdf_header_logo = $LogoFile;
 	}
 	define ('PDF_HEADER_LOGO', $tcpdf_header_logo);
 }
@@ -154,7 +166,7 @@ if (!defined('PDF_HEADER_TITLE')) {
 }
 
 if (!defined('PDF_HEADER_STRING')) {
-	define ('PDF_HEADER_STRING', "dude by Nicola Asuni - Tecnick.com\nwww.tcpdf.org");
+	define ('PDF_HEADER_STRING', $HeaderString);
 }
 
 if (!defined('PDF_UNIT')) {

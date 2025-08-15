@@ -4,6 +4,80 @@ namespace LimePDF;
 
 trait LIMEPDF_COLUMNS{
 
+	//----- php 7 & php 8 ------------------------------
+
+	/**
+     * Column tracking data.
+     * Structure example:
+     * [
+     *   1 => ['y' => 0, 'pages' => [1 => ['y' => 10, 'm' => 0]], 'nb' => 0]
+     * ]
+     */
+
+
+    /**
+     * Add a column to the document
+     */
+    public function addColumn(int $col, float $y = 0.0): void
+    {
+        if (isset($this->columns[$col])) {
+            return;
+        }
+
+        if (\LimePDF\LIMEPDF_STATIC::empty_string($y)) {
+            $y = $this->y;
+        }
+
+        $this->columns[$col] = [
+            'y'     => $y,
+            'pages' => [$this->page => ['y' => $y, 'm' => 0]],
+            'nb'    => 0
+        ];
+
+        $this->current_column = $col;
+        $this->num_columns++;
+    }
+
+    /**
+     * Get the current column number
+     */
+    public function getCurrentColumn(): int
+    {
+        return $this->current_column;
+    }
+
+    /**
+     * Get total number of columns
+     */
+    public function getNumColumns(): int
+    {
+        return $this->num_columns;
+    }
+
+    /**
+     * Get all column data
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
+     * Set the table header (used when rendering)
+     */
+    public function setThead(?string $thead): void
+    {
+        $this->thead = $thead;
+    }
+
+    /**
+     * Get the table header
+     */
+    public function getThead(): ?string
+    {
+        return $this->thead;
+    }
+
 	// --- MULTI COLUMNS METHODS -----------------------
 
 	/**
