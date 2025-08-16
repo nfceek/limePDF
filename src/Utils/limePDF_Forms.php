@@ -2,6 +2,9 @@
 
 namespace LimePDF;
 
+// Include the static file
+require_once dirname(__DIR__) . '/include/limePDF_Static.php';
+
 trait LIMEPDF_FORMS {
 	/**
 	 * Creates a text field
@@ -18,10 +21,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function TextField($name, $w, $h, $prop=array(), $opt=array(), $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -33,7 +36,7 @@ trait LIMEPDF_FORMS {
 		// get default style
 		$prop = array_merge($this->getFormDefaultProp(), $prop);
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		// set default appearance stream
 		$this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
 		$fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -139,10 +142,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function RadioButton($name, $w, $prop=array(), $opt=array(), $onvalue='On', $checked=false, $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -151,7 +154,7 @@ trait LIMEPDF_FORMS {
 			$this->_addfield('radiobutton', $name, $x, $y, $w, $w, $prop);
 			return;
 		}
-		if (TCPDF_STATIC::empty_string($onvalue)) {
+		if (LIMEPDF_STATIC::empty_string($onvalue)) {
 			$onvalue = 'On';
 		}
 		if ($checked) {
@@ -186,7 +189,7 @@ trait LIMEPDF_FORMS {
 		$prop['Radio'] = 'true';
 		$prop['borderStyle'] = 'inset';
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		// set additional default options
 		$this->annotation_fonts[$tmpfont['fontkey']] = $tmpfont['i'];
 		$fontstyle = sprintf('/F%d %F Tf %s', $tmpfont['i'], $this->FontSizePt, $this->TextColor);
@@ -242,10 +245,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function ListBox($name, $w, $h, $values, $prop=array(), $opt=array(), $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -266,7 +269,7 @@ trait LIMEPDF_FORMS {
 		// get default style
 		$prop = array_merge($this->getFormDefaultProp(), $prop);
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		// set additional default values
 		$this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
 		$fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -328,10 +331,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function ComboBox($name, $w, $h, $values, $prop=array(), $opt=array(), $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -353,7 +356,7 @@ trait LIMEPDF_FORMS {
 		$prop = array_merge($this->getFormDefaultProp(), $prop);
 		$prop['Combo'] = true;
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		// set additional default options
 		$this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
 		$fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -415,10 +418,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function CheckBox($name, $w, $checked=false, $prop=array(), $opt=array(), $onvalue='Yes', $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -434,7 +437,7 @@ trait LIMEPDF_FORMS {
 		$prop = array_merge($this->getFormDefaultProp(), $prop);
 		$prop['borderStyle'] = 'inset';
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		// set additional default options
 		$font = 'zapfdingbats';
 		if ($this->pdfa_mode) {
@@ -459,7 +462,7 @@ trait LIMEPDF_FORMS {
 		$opt['Subtype'] = 'Widget';
 		$opt['ft'] = 'Btn';
 		$opt['t'] = $name;
-		if (TCPDF_STATIC::empty_string($onvalue)) {
+		if (LIMEPDF_STATIC::empty_string($onvalue)) {
 			$onvalue = 'Yes';
 		}
 		$opt['opt'] = array($onvalue);
@@ -495,10 +498,10 @@ trait LIMEPDF_FORMS {
 	 * @since 4.8.000 (2009-09-07)
 	 */
 	public function Button($name, $w, $h, $caption, $action, $prop=array(), $opt=array(), $x=null, $y=null, $js=false) {
-		if (TCPDF_STATIC::empty_string($x)) {
+		if (LIMEPDF_STATIC::empty_string($x)) {
 			$x = $this->x;
 		}
-		if (TCPDF_STATIC::empty_string($y)) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -517,7 +520,7 @@ trait LIMEPDF_FORMS {
 		$prop['highlight'] = 'push';
 		$prop['display'] = 'display.noPrint';
 		// get annotation data
-		$popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+		$popt = LIMEPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
 		$this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
 		$fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
 		$popt['da'] = $fontstyle;

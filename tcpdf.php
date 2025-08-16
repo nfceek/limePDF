@@ -13,9 +13,7 @@ namespace LimePDF;
 	// limePDF configuration
 	require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
 
-	// Include files
-	require_once(dirname(__FILE__).'/include/limePDF_Vars.php');
-	require_once(dirname(__FILE__).'/include/limePDF_Static.php');
+
 
 	// src files
 	require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
@@ -30,8 +28,11 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_Images.php');	
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_SVG.php');
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_Transformations.php');
-
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_XObjects_Templates.php');
+
+	// Include files
+	require_once(dirname(__FILE__).'/src//include/limePDF_Vars.php');
+	require_once(dirname(__FILE__).'/src//include/limePDF_Static.php');	
 
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Annotations.php');
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Bookmarks.php');	

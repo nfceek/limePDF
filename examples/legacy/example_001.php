@@ -183,7 +183,7 @@ $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
 // Close and output PDF document
 // This method has several options, check the source code documentation for more information.
-$pdf->Output($outputFile, 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

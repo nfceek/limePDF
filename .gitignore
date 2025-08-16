@@ -9,4 +9,4 @@ tests/private
 docs/internal
 /scripts
 /site
-/api
+/src/api

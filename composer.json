@@ -34,15 +34,15 @@
             "include",
             "tcpdf_barcodes_1d.php",
             "tcpdf_barcodes_2d.php",
-            "include/limePDF_Colors.php",
-            "include/limePDF_Filters.php",
-            "include/limePDF_Font_Data.php",
-            "include/limePDF_Font.php",
-            "include/limePDF_Images.php",
-            "include/limePDF_Static.php",
-            "include/barcodes/datamatrix.php",
-            "include/barcodes/pdf417.php",
-            "include/barcodes/qrcode.php"
+            "src/include/limePDF_Colors.php",
+            "src/include/limePDF_Filters.php",
+            "src/include/limePDF_Font_Data.php",
+            "src/include/limePDF_Font.php",
+            "src/include/limePDF_Images.php",
+            "src/include/limePDF_Static.php",
+            "src/include/barcodes/datamatrix.php",
+            "src/include/barcodes/pdf417.php",
+            "src/include/barcodes/qrcode.php"
         ]
     },
     "require-dev": {
