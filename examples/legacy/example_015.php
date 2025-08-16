@@ -28,8 +28,24 @@
  * @group pdf
  */
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// set Output File Name
+$OutputFile = 'example_015.pdf';
+
+// ---------- Dont Edit below here -----------------------------
+
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -157,7 +173,7 @@ $pdf->Bookmark('External URL', 0, 0, '', 'B', array(0,0,255), -1, 'http://www.tc
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_015.pdf', 'D');
+$pdf->Output($OutputFile, 'D');
 
 //============================================================+
 // END OF FILE

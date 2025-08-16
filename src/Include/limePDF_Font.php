@@ -878,6 +878,108 @@ class LIMEPDF_FONT {
 	}
 
 	/**
+	 * Return true in the character is present in the specified font.
+	 * @param mixed $char Character to check (integer value or string)
+	 * @param string $font Font name (family name).
+	 * @param string $style Font style.
+	 * @return bool true if the char is defined, false otherwise.
+	 * @public
+	 * @since 5.9.153 (2012-03-28)
+	 */
+	public function isCharDefined($char, $font='', $style='') {
+		if (is_string($char)) {
+			// get character code
+			$char = LIMEPDF_FONT::UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
+			$char = $char[0];
+		}
+		if (LIMEPDF_STATIC::empty_string($font)) {
+			if (LIMEPDF_STATIC::empty_string($style)) {
+				return (isset($this->CurrentFont['cw'][intval($char)]));
+			}
+			$font = $this->FontFamily;
+		}
+		$fontdata = $this->AddFont($font, $style);
+		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
+		return (isset($fontinfo['cw'][intval($char)]));
+	}
+
+	/**
+	 * Replace missing font characters on selected font with specified substitutions.
+	 * @param string $text Text to process.
+	 * @param string $font Font name (family name).
+	 * @param string $style Font style.
+	 * @param array $subs Array of possible character substitutions. The key is the character to check (integer value) and the value is a single intege value or an array of possible substitutes.
+	 * @return string Processed text.
+	 * @public
+	 * @since 5.9.153 (2012-03-28)
+	 */
+	public function replaceMissingChars($text, $font='', $style='', $subs=array()) {
+		if (empty($subs)) {
+			return $text;
+		}
+		if (LIMEPDF_STATIC::empty_string($font)) {
+			$font = $this->FontFamily;
+		}
+		$fontdata = $this->AddFont($font, $style);
+		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
+		$uniarr = LIMEPDF_FONT::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+		foreach ($uniarr as $k => $chr) {
+			if (!isset($fontinfo['cw'][$chr])) {
+				// this character is missing on the selected font
+				if (isset($subs[$chr])) {
+					// we have available substitutions
+					if (is_array($subs[$chr])) {
+						foreach($subs[$chr] as $s) {
+							if (isset($fontinfo['cw'][$s])) {
+								$uniarr[$k] = $s;
+								break;
+							}
+						}
+					} elseif (isset($fontinfo['cw'][$subs[$chr]])) {
+						$uniarr[$k] = $subs[$chr];
+					}
+				}
+			}
+		}
+		return LIMEPDF_FONT::UniArrSubString(LIMEPDF_FONT::UTF8ArrayToUniArray($uniarr, $this->isunicode));
+	}
+
+		/**
+	 * Performs a line break.
+	 * The current abscissa goes back to the left margin and the ordinate increases by the amount passed in parameter.
+	 * @param float|null $h The height of the break. By default, the value equals the height of the last printed cell.
+	 * @param boolean $cell if true add the current left (or right o for RTL) padding to the X coordinate
+	 * @public
+	 * @since 1.0
+	 * @see Cell()
+	 */
+	public function Ln($h=null, $cell=false) {
+		if (($this->num_columns > 1) AND ($this->y == $this->columns[$this->current_column]['y']) AND isset($this->columns[$this->current_column]['x']) AND ($this->x == $this->columns[$this->current_column]['x'])) {
+			// revove vertical space from the top of the column
+			return;
+		}
+		if ($cell) {
+			if ($this->rtl) {
+				$cellpadding = $this->cell_padding['R'];
+			} else {
+				$cellpadding = $this->cell_padding['L'];
+			}
+		} else {
+			$cellpadding = 0;
+		}
+		if ($this->rtl) {
+			$this->x = $this->w - $this->rMargin - $cellpadding;
+		} else {
+			$this->x = $this->lMargin + $cellpadding;
+		}
+		if (LIMEPDF_STATIC::empty_string($h)) {
+			$h = $this->lasth;
+		}
+		$this->y += $h;
+		$this->newline = true;
+	}
+
+	/**
 	 * Returs the checksum of a TTF table.
 	 * @param string $table table to check
 	 * @param int $length length of table in bytes

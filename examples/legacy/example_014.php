@@ -27,12 +27,9 @@
  * @group pdf
  */
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
 // set Output File Name
 $OutputFile = 'example_014.pdf';
 
-// ---------- Dont Edit below here -----------------------------
 
 // Include the main TCPDF library (search for installation path).
 require_once __DIR__ . '/../../tcpdf.php';

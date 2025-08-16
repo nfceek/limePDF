@@ -26,8 +26,21 @@
  * @group pdf
  */
 
+// set Output File Name
+$OutputFile = 'example_020.pdf';
+
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
+
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -108,7 +121,7 @@ $pdf->Cell(0, 10, 'This is the fourth page of group 2', 0, 1, 'L');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_023.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

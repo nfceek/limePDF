@@ -26,8 +26,23 @@
  * @group pdf
  */
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// set Output File Name
+$OutputFile = 'example_025.pdf';
+
 // Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+require_once __DIR__ . '/../../tcpdf.php';
+require_once '../../vendor/autoload.php'; 
+
+use LimePDF\TCPDF;
+use LimePDF\Config\ConfigManager;
+
+// Instantiate and load ConfigManager
+$config = new ConfigManager();
+$config->loadFromArray([
+]);
+
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -66,7 +81,7 @@ if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
 	$pdf->setLanguageArray($l);
 }
 
-// ---------------------------------------------------------
+// ---------- ONLY EDIT THIS AREA --------------------------------
 
 // set font
 $pdf->setFont('helvetica', '', 12);
@@ -105,7 +120,7 @@ $pdf->setDrawColor(0, 0, 127);
 $pdf->Rect(70, 80, 60, 60, 'DF');
 
 // draw jpeg image
-$pdf->Image('images/image_demo.jpg', 90, 100, 60, 60, '', 'http://www.tcpdf.org', '', true, 72);
+$pdf->Image('images/image_demo.jpg', 90, 100, 60, 60, '', 'http://www.limePDF.com', '', true, 72);
 
 // restore full opacity
 $pdf->setAlpha(1);
@@ -113,7 +128,7 @@ $pdf->setAlpha(1);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_025.pdf', 'I');
+$pdf->Output($OutputFile, 'I');
 
 //============================================================+
 // END OF FILE

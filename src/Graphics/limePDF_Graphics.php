@@ -927,6 +927,551 @@ trait LIMEPDF_GRAPHICS {
 		$this->Polygon(array($x2L, $y2L, $x1, $y1, $x2R, $y2R), $mode, $style, array());
 	}
 
+		/**
+	 * Set a rectangular clipping area.
+	 * @param float $x abscissa of the top left corner of the rectangle (or top right corner for RTL mode).
+	 * @param float $y ordinate of the top left corner of the rectangle.
+	 * @param float $w width of the rectangle.
+	 * @param float $h height of the rectangle.
+	 * @author Andreas W\FCrmser, Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @protected
+	 */
+	protected function Clip($x, $y, $w, $h) {
+		if ($this->state != 2) {
+			 return;
+		}
+		if ($this->rtl) {
+			$x = $this->w - $x - $w;
+		}
+		//save current Graphic State
+		$s = 'q';
+		//set clipping area
+		$s .= sprintf(' %F %F %F %F re W n', $x*$this->k, ($this->h-$y)*$this->k, $w*$this->k, -$h*$this->k);
+		//set up transformation matrix for gradient
+		$s .= sprintf(' %F 0 0 %F %F %F cm', $w*$this->k, $h*$this->k, $x*$this->k, ($this->h-($y+$h))*$this->k);
+		$this->_out($s);
+	}
+
+	/**
+	 * Output gradient.
+	 * @param int $type type of gradient (1 Function-based shading; 2 Axial shading; 3 Radial shading; 4 Free-form Gouraud-shaded triangle mesh; 5 Lattice-form Gouraud-shaded triangle mesh; 6 Coons patch mesh; 7 Tensor-product patch mesh). (Not all types are currently supported)
+	 * @param array $coords array of coordinates.
+	 * @param array $stops array gradient color components: color = array of GRAY, RGB or CMYK color components; offset = (0 to 1) represents a location along the gradient vector; exponent = exponent of the exponential interpolation function (default = 1).
+	 * @param array $background An array of colour components appropriate to the colour space, specifying a single background colour value.
+	 * @param boolean $antialias A flag indicating whether to filter the shading function to prevent aliasing artifacts.
+	 * @author Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @public
+	 */
+	public function Gradient($type, $coords, $stops, $background=array(), $antialias=false) {
+		if (($this->pdfa_mode && $this->pdfa_version < 2) OR ($this->state != 2)) {
+			return;
+		}
+		$n = count($this->gradients) + 1;
+		$this->gradients[$n] = array();
+		$this->gradients[$n]['type'] = $type;
+		$this->gradients[$n]['coords'] = $coords;
+		$this->gradients[$n]['antialias'] = $antialias;
+		$this->gradients[$n]['colors'] = array();
+		$this->gradients[$n]['transparency'] = false;
+		// color space
+		$numcolspace = count($stops[0]['color']);
+		$bcolor = array_values($background);
+		switch($numcolspace) {
+			case 5:   // SPOT
+			case 4: { // CMYK
+				$this->gradients[$n]['colspace'] = 'DeviceCMYK';
+				if (!empty($background)) {
+					$this->gradients[$n]['background'] = sprintf('%F %F %F %F', $bcolor[0]/100, $bcolor[1]/100, $bcolor[2]/100, $bcolor[3]/100);
+				}
+				break;
+			}
+			case 3: { // RGB
+				$this->gradients[$n]['colspace'] = 'DeviceRGB';
+				if (!empty($background)) {
+					$this->gradients[$n]['background'] = sprintf('%F %F %F', $bcolor[0]/255, $bcolor[1]/255, $bcolor[2]/255);
+				}
+				break;
+			}
+			case 1: { // GRAY SCALE
+				$this->gradients[$n]['colspace'] = 'DeviceGray';
+				if (!empty($background)) {
+					$this->gradients[$n]['background'] = sprintf('%F', $bcolor[0]/255);
+				}
+				break;
+			}
+		}
+		$num_stops = count($stops);
+		$last_stop_id = $num_stops - 1;
+		foreach ($stops as $key => $stop) {
+			$this->gradients[$n]['colors'][$key] = array();
+			// offset represents a location along the gradient vector
+			if (isset($stop['offset'])) {
+				$this->gradients[$n]['colors'][$key]['offset'] = $stop['offset'];
+			} else {
+				if ($key == 0) {
+					$this->gradients[$n]['colors'][$key]['offset'] = 0;
+				} elseif ($key == $last_stop_id) {
+					$this->gradients[$n]['colors'][$key]['offset'] = 1;
+				} else {
+					$offsetstep = (1 - $this->gradients[$n]['colors'][($key - 1)]['offset']) / ($num_stops - $key);
+					$this->gradients[$n]['colors'][$key]['offset'] = $this->gradients[$n]['colors'][($key - 1)]['offset'] + $offsetstep;
+				}
+			}
+			if (isset($stop['opacity'])) {
+				$this->gradients[$n]['colors'][$key]['opacity'] = $stop['opacity'];
+				if ((!($this->pdfa_mode && $this->pdfa_version < 2)) AND ($stop['opacity'] < 1)) {
+					$this->gradients[$n]['transparency'] = true;
+				}
+			} else {
+				$this->gradients[$n]['colors'][$key]['opacity'] = 1;
+			}
+			// exponent for the exponential interpolation function
+			if (isset($stop['exponent'])) {
+				$this->gradients[$n]['colors'][$key]['exponent'] = $stop['exponent'];
+			} else {
+				$this->gradients[$n]['colors'][$key]['exponent'] = 1;
+			}
+			// set colors
+			$color = array_values($stop['color']);
+			switch($numcolspace) {
+				case 5:   // SPOT
+				case 4: { // CMYK
+					$this->gradients[$n]['colors'][$key]['color'] = sprintf('%F %F %F %F', $color[0]/100, $color[1]/100, $color[2]/100, $color[3]/100);
+					break;
+				}
+				case 3: { // RGB
+					$this->gradients[$n]['colors'][$key]['color'] = sprintf('%F %F %F', $color[0]/255, $color[1]/255, $color[2]/255);
+					break;
+				}
+				case 1: { // GRAY SCALE
+					$this->gradients[$n]['colors'][$key]['color'] = sprintf('%F', $color[0]/255);
+					break;
+				}
+			}
+		}
+		if ($this->gradients[$n]['transparency']) {
+			// paint luminosity gradient
+			$this->_out('/TGS'.$n.' gs');
+		}
+		//paint the gradient
+		$this->_out('/Sh'.$n.' sh');
+		//restore previous Graphic State
+		$this->_outRestoreGraphicsState();
+		if ($this->inxobj) {
+			// we are inside an XObject template
+			$this->xobjects[$this->xobjid]['gradients'][$n] = $this->gradients[$n];
+		}
+	}
+
+	/**
+	 * Draw the sector of a circle.
+	 * It can be used for instance to render pie charts.
+	 * @param float $xc abscissa of the center.
+	 * @param float $yc ordinate of the center.
+	 * @param float $r radius.
+	 * @param float $a start angle (in degrees).
+	 * @param float $b end angle (in degrees).
+	 * @param string $style Style of rendering. See the getPathPaintOperator() function for more information.
+	 * @param float $cw indicates whether to go clockwise (default: true).
+	 * @param float $o origin of angles (0 for 3 o'clock, 90 for noon, 180 for 9 o'clock, 270 for 6 o'clock). Default: 90.
+	 * @author Maxime Delorme, Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @public
+	 */
+	public function PieSector($xc, $yc, $r, $a, $b, $style='FD', $cw=true, $o=90) {
+		$this->PieSectorXY($xc, $yc, $r, $r, $a, $b, $style, $cw, $o);
+	}
+
+	/**
+	 * Draw the sector of an ellipse.
+	 * It can be used for instance to render pie charts.
+	 * @param float $xc abscissa of the center.
+	 * @param float $yc ordinate of the center.
+	 * @param float $rx the x-axis radius.
+	 * @param float $ry the y-axis radius.
+	 * @param float $a start angle (in degrees).
+	 * @param float $b end angle (in degrees).
+	 * @param string $style Style of rendering. See the getPathPaintOperator() function for more information.
+	 * @param float $cw indicates whether to go clockwise.
+	 * @param float $o origin of angles (0 for 3 o'clock, 90 for noon, 180 for 9 o'clock, 270 for 6 o'clock).
+	 * @param integer $nc Number of curves used to draw a 90 degrees portion of arc.
+	 * @author Maxime Delorme, Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @public
+	 */
+	public function PieSectorXY($xc, $yc, $rx, $ry, $a, $b, $style='FD', $cw=false, $o=0, $nc=2) {
+		if ($this->state != 2) {
+			 return;
+		}
+		if ($this->rtl) {
+			$xc = ($this->w - $xc);
+		}
+		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		if ($op == 'f') {
+			$line_style = array();
+		}
+		if ($cw) {
+			$d = $b;
+			$b = (360 - $a + $o);
+			$a = (360 - $d + $o);
+		} else {
+			$b += $o;
+			$a += $o;
+		}
+		$this->_outellipticalarc($xc, $yc, $rx, $ry, 0, $a, $b, true, $nc);
+		$this->_out($op);
+	}
+
+	/**
+	 * Embed vector-based Adobe Illustrator (AI) or AI-compatible EPS files.
+	 * NOTE: EPS is not yet fully implemented, use the setRasterizeVectorImages() method to enable/disable rasterization of vector images using ImageMagick library.
+	 * Only vector drawing is supported, not text or bitmap.
+	 * Although the script was successfully tested with various AI format versions, best results are probably achieved with files that were exported in the AI3 format (tested with Illustrator CS2, Freehand MX and Photoshop CS2).
+	 * @param string $file Name of the file containing the image or a '@' character followed by the EPS/AI data string.
+	 * @param float|null $x Abscissa of the upper-left corner.
+	 * @param float|null $y Ordinate of the upper-left corner.
+	 * @param float $w Width of the image in the page. If not specified or equal to zero, it is automatically calculated.
+	 * @param float $h Height of the image in the page. If not specified or equal to zero, it is automatically calculated.
+	 * @param mixed $link URL or identifier returned by AddLink().
+	 * @param boolean $useBoundingBox specifies whether to position the bounding box (true) or the complete canvas (false) at location (x,y). Default value is true.
+	 * @param string $align Indicates the alignment of the pointer next to image insertion relative to image height. The value can be:<ul><li>T: top-right for LTR or top-left for RTL</li><li>M: middle-right for LTR or middle-left for RTL</li><li>B: bottom-right for LTR or bottom-left for RTL</li><li>N: next line</li></ul>
+	 * @param string $palign Allows to center or align the image on the current line. Possible values are:<ul><li>L : left align</li><li>C : center</li><li>R : right align</li><li>'' : empty string : left for LTR or right for RTL</li></ul>
+	 * @param mixed $border Indicates if borders must be drawn around the cell. The value can be a number:<ul><li>0: no border (default)</li><li>1: frame</li></ul> or a string containing some or all of the following characters (in any order):<ul><li>L: left</li><li>T: top</li><li>R: right</li><li>B: bottom</li></ul> or an array of line styles for each border group - for example: array('LTRB' => array('width' => 2, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)))
+	 * @param boolean $fitonpage if true the image is resized to not exceed page dimensions.
+	 * @param boolean $fixoutvals if true remove values outside the bounding box.
+	 * @author Valentin Schmidt, Nicola Asuni
+	 * @since 3.1.000 (2008-06-09)
+	 * @public
+	 */
+	public function ImageEps($file, $x=null, $y=null, $w=0, $h=0, $link='', $useBoundingBox=true, $align='', $palign='', $border=0, $fitonpage=false, $fixoutvals=false) {
+		if ($this->state != 2) {
+			 return;
+		}
+		if ($this->rasterize_vector_images AND ($w > 0) AND ($h > 0)) {
+			// convert EPS to raster image using GD or ImageMagick libraries
+			return $this->Image($file, $x, $y, $w, $h, 'EPS', $link, $align, true, 300, $palign, false, false, $border, false, false, $fitonpage);
+		}
+		if (LIMEPDF_STATIC::empty_string($x)) {
+			$x = $this->x;
+		}
+		if (LIMEPDF_STATIC::empty_string($y)) {
+			$y = $this->y;
+		}
+		// check page for no-write regions and adapt page margins if necessary
+		list($x, $y) = $this->checkPageRegions($h, $x, $y);
+		$k = $this->k;
+		if ($file[0] === '@') { // image from string
+			$data = substr($file, 1);
+		} else { // EPS/AI file
+            $data = $this->getCachedFileContents($file);
+		}
+		if ($data === FALSE) {
+			$this->Error('EPS file not found: '.$file);
+		}
+		$regs = array();
+		// EPS/AI compatibility check (only checks files created by Adobe Illustrator!)
+		preg_match("/%%Creator:([^\r\n]+)/", $data, $regs); # find Creator
+		if (count($regs) > 1) {
+			$version_str = trim($regs[1]); # e.g. "Adobe Illustrator(R) 8.0"
+			if (strpos($version_str, 'Adobe Illustrator') !== false) {
+				$versexp = explode(' ', $version_str);
+				$version = (float)array_pop($versexp);
+				if ($version >= 9) {
+					$this->Error('This version of Adobe Illustrator file is not supported: '.$file);
+				}
+			}
+		}
+		// strip binary bytes in front of PS-header
+		$start = strpos($data, '%!PS-Adobe');
+		if ($start > 0) {
+			$data = substr($data, $start);
+		}
+		// find BoundingBox params
+		preg_match("/%%BoundingBox:([^\r\n]+)/", $data, $regs);
+		if (count($regs) > 1) {
+			list($x1, $y1, $x2, $y2) = explode(' ', trim($regs[1]));
+		} else {
+			$this->Error('No BoundingBox found in EPS/AI file: '.$file);
+		}
+		$start = strpos($data, '%%EndSetup');
+		if ($start === false) {
+			$start = strpos($data, '%%EndProlog');
+		}
+		if ($start === false) {
+			$start = strpos($data, '%%BoundingBox');
+		}
+		$data = substr($data, $start);
+		$end = strpos($data, '%%PageTrailer');
+		if ($end===false) {
+			$end = strpos($data, 'showpage');
+		}
+		if ($end) {
+			$data = substr($data, 0, $end);
+		}
+		// calculate image width and height on document
+		if (($w <= 0) AND ($h <= 0)) {
+			$w = ($x2 - $x1) / $k;
+			$h = ($y2 - $y1) / $k;
+		} elseif ($w <= 0) {
+			$w = ($x2-$x1) / $k * ($h / (($y2 - $y1) / $k));
+		} elseif ($h <= 0) {
+			$h = ($y2 - $y1) / $k * ($w / (($x2 - $x1) / $k));
+		}
+		// fit the image on available space
+		list($w, $h, $x, $y) = $this->fitBlock($w, $h, $x, $y, $fitonpage);
+		if ($this->rasterize_vector_images) {
+			// convert EPS to raster image using GD or ImageMagick libraries
+			return $this->Image($file, $x, $y, $w, $h, 'EPS', $link, $align, true, 300, $palign, false, false, $border, false, false, $fitonpage);
+		}
+		// set scaling factors
+		$scale_x = $w / (($x2 - $x1) / $k);
+		$scale_y = $h / (($y2 - $y1) / $k);
+		// set alignment
+		$this->img_rb_y = $y + $h;
+		// set alignment
+		if ($this->rtl) {
+			if ($palign == 'L') {
+				$ximg = $this->lMargin;
+			} elseif ($palign == 'C') {
+				$ximg = ($this->w + $this->lMargin - $this->rMargin - $w) / 2;
+			} elseif ($palign == 'R') {
+				$ximg = $this->w - $this->rMargin - $w;
+			} else {
+				$ximg = $x - $w;
+			}
+			$this->img_rb_x = $ximg;
+		} else {
+			if ($palign == 'L') {
+				$ximg = $this->lMargin;
+			} elseif ($palign == 'C') {
+				$ximg = ($this->w + $this->lMargin - $this->rMargin - $w) / 2;
+			} elseif ($palign == 'R') {
+				$ximg = $this->w - $this->rMargin - $w;
+			} else {
+				$ximg = $x;
+			}
+			$this->img_rb_x = $ximg + $w;
+		}
+		if ($useBoundingBox) {
+			$dx = $ximg * $k - $x1;
+			$dy = $y * $k - $y1;
+		} else {
+			$dx = $ximg * $k;
+			$dy = $y * $k;
+		}
+		// save the current graphic state
+		$this->_out('q'.$this->epsmarker);
+		// translate
+		$this->_out(sprintf('%F %F %F %F %F %F cm', 1, 0, 0, 1, $dx, $dy + ($this->hPt - (2 * $y * $k) - ($y2 - $y1))));
+		// scale
+		$this->_out(sprintf('%F %F %F %F %F %F cm', $scale_x, 0, 0, $scale_y, $x1 * (1 - $scale_x), $y2 * (1 - $scale_y)));
+		// handle pc/unix/mac line endings
+		$lines = preg_split('/[\r\n]+/si', $data, -1, PREG_SPLIT_NO_EMPTY);
+		$u=0;
+		$cnt = count($lines);
+		for ($i=0; $i < $cnt; ++$i) {
+			$line = $lines[$i];
+			if (($line == '') OR ($line[0] == '%')) {
+				continue;
+			}
+			$len = strlen($line);
+			// check for spot color names
+			$color_name = '';
+			if (strcasecmp('x', substr(trim($line), -1)) == 0) {
+				if (preg_match('/\([^\)]*\)/', $line, $matches) > 0) {
+					// extract spot color name
+					$color_name = $matches[0];
+					// remove color name from string
+					$line = str_replace(' '.$color_name, '', $line);
+					// remove pharentesis from color name
+					$color_name = substr($color_name, 1, -1);
+				}
+			}
+			$chunks = explode(' ', $line);
+			$cmd = trim(array_pop($chunks));
+			// RGB
+			if (($cmd == 'Xa') OR ($cmd == 'XA')) {
+				$b = array_pop($chunks);
+				$g = array_pop($chunks);
+				$r = array_pop($chunks);
+				$this->_out(''.$r.' '.$g.' '.$b.' '.($cmd=='Xa'?'rg':'RG')); //substr($line, 0, -2).'rg' -> in EPS (AI8): c m y k r g b rg!
+				continue;
+			}
+			$skip = false;
+			if ($fixoutvals) {
+				// check for values outside the bounding box
+				switch ($cmd) {
+					case 'm':
+					case 'l':
+					case 'L': {
+						// skip values outside bounding box
+						foreach ($chunks as $key => $val) {
+							if ((($key % 2) == 0) AND (($val < $x1) OR ($val > $x2))) {
+								$skip = true;
+							} elseif ((($key % 2) != 0) AND (($val < $y1) OR ($val > $y2))) {
+								$skip = true;
+							}
+						}
+					}
+				}
+			}
+			switch ($cmd) {
+				case 'm':
+				case 'l':
+				case 'v':
+				case 'y':
+				case 'c':
+				case 'k':
+				case 'K':
+				case 'g':
+				case 'G':
+				case 's':
+				case 'S':
+				case 'J':
+				case 'j':
+				case 'w':
+				case 'M':
+				case 'd':
+				case 'n': {
+					if ($skip) {
+						break;
+					}
+					$this->_out($line);
+					break;
+				}
+				case 'x': {// custom fill color
+					if (empty($color_name)) {
+						// CMYK color
+						list($col_c, $col_m, $col_y, $col_k) = $chunks;
+						$this->_out(''.$col_c.' '.$col_m.' '.$col_y.' '.$col_k.' k');
+					} else {
+						// Spot Color (CMYK + tint)
+						list($col_c, $col_m, $col_y, $col_k, $col_t) = $chunks;
+						$this->AddSpotColor($color_name, ($col_c * 100), ($col_m * 100), ($col_y * 100), ($col_k * 100));
+						$color_cmd = sprintf('/CS%d cs %F scn', $this->spot_colors[$color_name]['i'], (1 - $col_t));
+						$this->_out($color_cmd);
+					}
+					break;
+				}
+				case 'X': { // custom stroke color
+					if (empty($color_name)) {
+						// CMYK color
+						list($col_c, $col_m, $col_y, $col_k) = $chunks;
+						$this->_out(''.$col_c.' '.$col_m.' '.$col_y.' '.$col_k.' K');
+					} else {
+						// Spot Color (CMYK + tint)
+						list($col_c, $col_m, $col_y, $col_k, $col_t) = $chunks;
+						$this->AddSpotColor($color_name, ($col_c * 100), ($col_m * 100), ($col_y * 100), ($col_k * 100));
+						$color_cmd = sprintf('/CS%d CS %F SCN', $this->spot_colors[$color_name]['i'], (1 - $col_t));
+						$this->_out($color_cmd);
+					}
+					break;
+				}
+				case 'Y':
+				case 'N':
+				case 'V':
+				case 'L':
+				case 'C': {
+					if ($skip) {
+						break;
+					}
+					$line[($len - 1)] = strtolower($cmd);
+					$this->_out($line);
+					break;
+				}
+				case 'b':
+				case 'B': {
+					$this->_out($cmd . '*');
+					break;
+				}
+				case 'f':
+				case 'F': {
+					if ($u > 0) {
+						$isU = false;
+						$max = min(($i + 5), $cnt);
+						for ($j = ($i + 1); $j < $max; ++$j) {
+							$isU = ($isU OR (($lines[$j] == 'U') OR ($lines[$j] == '*U')));
+						}
+						if ($isU) {
+							$this->_out('f*');
+						}
+					} else {
+						$this->_out('f*');
+					}
+					break;
+				}
+				case '*u': {
+					++$u;
+					break;
+				}
+				case '*U': {
+					--$u;
+					break;
+				}
+			}
+		}
+		// restore previous graphic state
+		$this->_out($this->epsmarker.'Q');
+		if (!empty($border)) {
+			$bx = $this->x;
+			$by = $this->y;
+			$this->x = $ximg;
+			if ($this->rtl) {
+				$this->x += $w;
+			}
+			$this->y = $y;
+			$this->Cell($w, $h, '', $border, 0, '', 0, '', 0, true);
+			$this->x = $bx;
+			$this->y = $by;
+		}
+		if ($link) {
+			$this->Link($ximg, $y, $w, $h, $link, 0);
+		}
+		// set pointer to align the next text/objects
+		switch($align) {
+			case 'T':{
+				$this->y = $y;
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'M':{
+				$this->y = $y + round($h/2);
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'B':{
+				$this->y = $this->img_rb_y;
+				$this->x = $this->img_rb_x;
+				break;
+			}
+			case 'N':{
+				$this->setY($this->img_rb_y);
+				break;
+			}
+			default:{
+				break;
+			}
+		}
+		$this->endlinex = $this->img_rb_x;
+	}
+
+	/**
+	 * Outputs the "save graphics state" operator 'q'
+	 * @protected
+	 */
+	protected function _outSaveGraphicsState() {
+		$this->_out('q');
+	}
+
+	/**
+	 * Outputs the "restore graphics state" operator 'Q'
+	 * @protected
+	 */
+	protected function _outRestoreGraphicsState() {
+		$this->_out('Q');
+	}
 	// END GRAPHIC FUNCTIONS SECTION -----------------------
 
 }

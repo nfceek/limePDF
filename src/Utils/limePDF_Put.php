@@ -2,9 +2,12 @@
 
 namespace LimePDF;
 
+// Include the static file
+require_once dirname(__DIR__) . '/include/limePDF_Static.php';
+
 trait LIMEPDF_PUT {
 
-    	/**
+    /**
 	 * Output pages (and replace page number aliases).
 	 * @protected
 	 */
@@ -513,9 +516,9 @@ trait LIMEPDF_PUT {
 			$out .= ' /R';
 			if ($this->encryptdata['V'] == 5) { // AES-256
 				$out .= ' 5';
-				$out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-				$out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-				$out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
+				$out .= ' /OE ('.LIMEPDF_STATIC::_escape($this->encryptdata['OE']).')';
+				$out .= ' /UE ('.LIMEPDF_STATIC::_escape($this->encryptdata['UE']).')';
+				$out .= ' /Perms ('.LIMEPDF_STATIC::_escape($this->encryptdata['perms']).')';
 			} elseif ($this->encryptdata['V'] == 4) { // AES-128
 				$out .= ' 4';
 			} elseif ($this->encryptdata['V'] < 2) { // RC-40
@@ -523,8 +526,8 @@ trait LIMEPDF_PUT {
 			} else { // RC-128
 				$out .= ' 3';
 			}
-			$out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-			$out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
+			$out .= ' /O ('.LIMEPDF_STATIC::_escape($this->encryptdata['O']).')';
+			$out .= ' /U ('.LIMEPDF_STATIC::_escape($this->encryptdata['U']).')';
 			$out .= ' /P '.$this->encryptdata['P'];
 			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
 				$out .= ' /EncryptMetadata false';
@@ -867,7 +870,7 @@ trait LIMEPDF_PUT {
 					}
 					$s .= ' /'.$fdk.' '.$fdv.'';
 				}
-				if (!TCPDF_STATIC::empty_string($font['file'])) {
+				if (!LIMEPDF_STATIC::empty_string($font['file'])) {
 					$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
 				}
 				$s .= '>>';
@@ -1083,7 +1086,7 @@ trait LIMEPDF_PUT {
 				if (is_string($o['u'])) {
 					if ($o['u'][0] == '#') {
 						// internal destination
-						$out .= ' /Dest /'.TCPDF_STATIC::encodeNameObject(substr($o['u'], 1));
+						$out .= ' /Dest /'.LIMEPDF_STATIC::encodeNameObject(substr($o['u'], 1));
 					} elseif ($o['u'][0] == '%') {
 						// embedded PDF file
 						$filename = basename(substr($o['u'], 1));

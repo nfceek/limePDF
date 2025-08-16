@@ -824,5 +824,94 @@ trait LIMEPDF_PAGEMANAGER {
 		$this->lastPage(true);
 		return true;
 	}
-    
+ 
+	
+	/**
+	 * Output end of document (EOF).
+	 * @protected
+	 */
+	protected function _enddoc() {
+		if (isset($this->CurrentFont['fontkey']) AND isset($this->CurrentFont['subsetchars'])) {
+			// save subset chars of the previous font
+			$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
+		}
+		$this->state = 1;
+		$this->_putheader();
+		$this->_putpages();
+		$this->_putresources();
+		// empty signature fields
+		if (!empty($this->empty_signature_appearance)) {
+			foreach ($this->empty_signature_appearance as $key => $esa) {
+				// widget annotation for empty signature
+				$out = $this->_getobj($esa['objid'])."\n";
+				$out .= '<< /Type /Annot';
+				$out .= ' /Subtype /Widget';
+				$out .= ' /Rect ['.$esa['rect'].']';
+				$out .= ' /P '.$this->page_obj_id[($esa['page'])].' 0 R'; // link to signature appearance page
+				$out .= ' /F 4';
+				$out .= ' /FT /Sig';
+				$signame = $esa['name'].sprintf(' [%03d]', ($key + 1));
+				$out .= ' /T '.$this->_textstring($signame, $esa['objid']);
+				$out .= ' /Ff 0';
+				$out .= ' >>';
+				$out .= "\n".'endobj';
+				$this->_out($out);
+			}
+		}
+		// Signature
+		if ($this->sign AND isset($this->signature_data['cert_type'])) {
+			// widget annotation for signature
+			$out = $this->_getobj($this->sig_obj_id)."\n";
+			$out .= '<< /Type /Annot';
+			$out .= ' /Subtype /Widget';
+			$out .= ' /Rect ['.$this->signature_appearance['rect'].']';
+			$out .= ' /P '.$this->page_obj_id[($this->signature_appearance['page'])].' 0 R'; // link to signature appearance page
+			$out .= ' /F 4';
+			$out .= ' /FT /Sig';
+			$out .= ' /T '.$this->_textstring($this->signature_appearance['name'], $this->sig_obj_id);
+			$out .= ' /Ff 0';
+			$out .= ' /V '.($this->sig_obj_id + 1).' 0 R';
+			$out .= ' >>';
+			$out .= "\n".'endobj';
+			$this->_out($out);
+			// signature
+			$this->_putsignature();
+		}
+		// Info
+		$objid_info = $this->_putinfo();
+		// Catalog
+		$objid_catalog = $this->_putcatalog();
+		// Cross-ref
+		$o = $this->bufferlen;
+		// XREF section
+		$this->_out('xref');
+		$this->_out('0 '.($this->n + 1));
+		$this->_out('0000000000 65535 f ');
+		$freegen = ($this->n + 2);
+		for ($i=1; $i <= $this->n; ++$i) {
+			if (!isset($this->offsets[$i]) AND ($i > 1)) {
+				$this->_out(sprintf('0000000000 %05d f ', $freegen));
+				++$freegen;
+			} else {
+				$this->_out(sprintf('%010d 00000 n ', $this->offsets[$i]));
+			}
+		}
+		// TRAILER
+		$out = 'trailer'."\n";
+		$out .= '<<';
+		$out .= ' /Size '.($this->n + 1);
+		$out .= ' /Root '.$objid_catalog.' 0 R';
+		$out .= ' /Info '.$objid_info.' 0 R';
+		if ($this->encrypted) {
+			$out .= ' /Encrypt '.$this->encryptdata['objid'].' 0 R';
+		}
+		$out .= ' /ID [ <'.$this->file_id.'> <'.$this->file_id.'> ]';
+		$out .= ' >>';
+		$this->_out($out);
+		$this->_out('startxref');
+		$this->_out($o);
+		$this->_out('%%EOF');
+		$this->state = 3; // end-of-doc
+	}
+
 }

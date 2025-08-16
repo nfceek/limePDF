@@ -1,6 +1,5 @@
 <?php
 
-
 namespace LimePDF;
 
 class LIMEPDF_STATIC {
@@ -444,8 +443,8 @@ class LIMEPDF_STATIC {
 	 * @param string $last_enc_key Reference to last RC4 key encrypted.
 	 * @param string $last_enc_key_c Reference to last RC4 computed key.
 	 * @return string encrypted text
-	 * @since 2.0.000 (2008-01-02)
-	 * @author Klemen Vodopivec, Nicola Asuni
+	 * @since 0.0.1 (8-16-2025), fixed to be 8+ compatible //2.0.000 (2008-01-02)
+	 * @author Klemen Vodopivec, Nicola Asuni, Brad Smith
 	 * @public static
 	 */
 	public static function _RC4($key, $text, &$last_enc_key, &$last_enc_key_c) {
@@ -453,6 +452,38 @@ class LIMEPDF_STATIC {
 			// try to use mcrypt function if exist
 			return $out;
 		}
+		// if ($last_enc_key != $key) {
+		// 	$k = str_repeat($key, (int) ((256 / strlen($key)) + 1));
+		// 	$rc4 = range(0, 255);
+		// 	$j = 0;
+		// 	for ($i = 0; $i < 256; ++$i) {
+		// 		$t = $rc4[$i];
+		// 		$j = ($j + $t + ord($k[$i])) % 256;
+		// 		$rc4[$i] = $rc4[$j];
+		// 		$rc4[$j] = $t;
+		// 	}
+		// 	$last_enc_key = $key;
+		// 	// Store as array, not string
+		// 	$last_enc_key_c = $rc4;
+		// 	} else {
+		// 		//$rc4 = $last_enc_key_c;
+		// 		$rc4 = implode('', array_map('chr', $last_enc_key_c));
+		// 	}
+
+		// $len = strlen($text);
+		// $a = 0;
+		// $b = 0;
+		// $out = '';
+		// for ($i = 0; $i < $len; ++$i) {
+		// 	$a = ($a + 1) % 256;
+		// 	$t = $rc4[$a];
+		// 	$b = ($b + $t) % 256;
+		// 	$rc4[$a] = $rc4[$b];
+		// 	$rc4[$b] = $t;
+		// 	$k = $rc4[($rc4[$a] + $rc4[$b]) % 256];
+		// 	$out .= chr(ord($text[$i]) ^ $k);
+		// }
+		// return $out;
 		if ($last_enc_key != $key) {
 			$k = str_repeat($key, (int) ((256 / strlen($key)) + 1));
 			$rc4 = range(0, 255);
@@ -464,24 +495,35 @@ class LIMEPDF_STATIC {
 				$rc4[$j] = $t;
 			}
 			$last_enc_key = $key;
-			$last_enc_key_c = implode('', array_map('chr', $rc4));
+
+			// ✅ store as array, not string
+			$last_enc_key_c = $rc4;
 		} else {
+			// ✅ reuse cached array
 			$rc4 = $last_enc_key_c;
 		}
+
 		$len = strlen($text);
 		$a = 0;
 		$b = 0;
 		$out = '';
+
 		for ($i = 0; $i < $len; ++$i) {
 			$a = ($a + 1) % 256;
 			$t = $rc4[$a];
 			$b = ($b + $t) % 256;
+
+			// swap
+			$tmp = $rc4[$a];
 			$rc4[$a] = $rc4[$b];
-			$rc4[$b] = $t;
+			$rc4[$b] = $tmp;
+
 			$k = $rc4[($rc4[$a] + $rc4[$b]) % 256];
 			$out .= chr(ord($text[$i]) ^ $k);
 		}
+
 		return $out;
+
 	}
 
 	/**
