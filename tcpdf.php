@@ -51,16 +51,16 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_PageColors.php');
 	require_once(dirname(__FILE__).'/src/Pages/limePDF_Sections.php');
 
-	require_once(dirname(__FILE__).'/src/Text/limePDF_text.php');
+	require_once(dirname(__FILE__).'/src/Text/limePDF_Text.php');
 	require_once(dirname(__FILE__).'/src/Text/limePDF_Write.php');
 
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Forms.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
 
+	require_once(dirname(__FILE__).'/src/View/limePDF_Forms.php');	
 	require_once(dirname(__FILE__).'/src/View/limePDF_OutPut.php');
 	require_once(dirname(__FILE__).'/src/View/limePDF_Setup.php');
 
@@ -377,12 +377,14 @@ class TCPDF {
 	}
 	
 	/**
+	 * 
+	 * 8/2025 -- 8+ --> error improvement
+	 * 
 	 * Throw an exception or print an error message and die if the K_TCPDF_PARSER_THROW_EXCEPTION_ERROR constant is set to true.
 	 * @param string $msg The error message
 	 * @public
 	 * @since 1.0
 	 */
-	// 8/2025 -- 8+ --> error improvement
 	public function Error(string $msg): never 
 	{
 		$this->_destroy(true);
