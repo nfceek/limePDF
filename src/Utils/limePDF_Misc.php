@@ -715,6 +715,61 @@ trait LIMEPDF_MISC {
 		$this->objcopy = LIMEPDF_STATIC::objclone($this);
 	}
 
+	
+	/**
+	 * Unset all class variables except the following critical variables.
+	 * @param boolean $destroyall if true destroys all class variables, otherwise preserves critical variables.
+	 * @param boolean $preserve_objcopy if true preserves the objcopy variable
+	 * @public
+	 * @since 4.5.016 (2009-02-24)
+	 */
+	public function _destroy($destroyall=false, $preserve_objcopy=false) {
+		if (isset(self::$cleaned_ids[$this->file_id])) {
+			$destroyall = false;
+		}
+		if ($destroyall AND !$preserve_objcopy && isset($this->file_id)) {
+			self::$cleaned_ids[$this->file_id] = true;
+			// remove all temporary files
+			if ($handle = @opendir(K_PATH_CACHE)) {
+				while ( false !== ( $file_name = readdir( $handle ) ) ) {
+					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
+						$this->_unlink(K_PATH_CACHE.$file_name);
+					}
+				}
+				closedir($handle);
+			}
+			if (isset($this->imagekeys)) {
+				foreach($this->imagekeys as $file) {
+					if ((strpos($file,  K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_') === 0)
+						&& LIMEPDF_STATIC::file_exists($file)) {
+							$this->_unlink($file);
+					}
+				}
+			}
+		}
+		$preserve = array(
+			'file_id',
+			'state',
+			'bufferlen',
+			'buffer',
+			'cached_files',
+			'imagekeys',
+			'sign',
+			'signature_data',
+			'signature_max_length',
+			'byterange_string',
+			'tsa_timestamp',
+			'tsa_data'
+		);
+		foreach (array_keys(get_object_vars($this)) as $val) {
+			if ($destroyall OR !in_array($val, $preserve)) {
+				if ((!$preserve_objcopy OR ($val != 'objcopy')) AND ($val != 'file_id') AND isset($this->$val)) {
+					unset($this->$val);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Delete the copy of the current TCPDF object used for undo operation.
 	 * @public
@@ -756,5 +811,58 @@ trait LIMEPDF_MISC {
 		return $objcopy;
 	}
 
+    /**
+	 * Calculates the hash value of the given data.
+	 *
+	 * @param string $data The data to be hashed.
+	 * @return string The hashed value of the data.
+	 */
+	protected function hashTCPDFtag($data) {
+		return hash_hmac('sha256', $data, $this->hash_key, false);
+	}
+
+    /**
+	 * Serialize data to be used with TCPDF tag in HTML code.
+	 * @param string $method TCPDF method name
+	 * @param array $params Method parameters
+	 * @return string Serialized data
+	 * @public static
+	 */
+	public function serializeTCPDFtag($method, $params=array()) {
+		$data = array('m' => $method, 'p' => $params);
+		$encoded = urlencode(json_encode($data));
+		$hash = $this->hashTCPDFtag($encoded);
+		return strlen($hash).'+'.$hash.'+'.$encoded;
+	}
+
+	/**
+	 * Unserialize data to be used with TCPDF tag in HTML code.
+	 * @param string $data serialized data
+	 * @return array containing unserialized data
+	 * @protected static
+	 */
+	protected function unserializeTCPDFtag($data) {
+		$hpos = strpos($data, '+');
+		$hlen = intval(substr($data, 0, $hpos));
+		$hash = substr($data, $hpos + 1, $hlen);
+		$encoded = substr($data, $hpos + 2 + $hlen);
+		if (!hash_equals( $this->hashTCPDFtag($encoded), $hash)) {
+			$this->Error('Invalid parameters');
+		}
+		return json_decode(urldecode($encoded), true);
+	}
+
+	/**
+	 * Check if a TCPDF tag is allowed
+	 * @param string $method TCPDF method name
+	 * @return boolean
+	 * @protected
+	 */
+	protected function allowedTCPDFtag($method) {
+		if (defined('K_ALLOWED_TCPDF_TAGS')) {
+			return (strpos(K_ALLOWED_TCPDF_TAGS, '|'.$method.'|') !== false);
+		}
+		return false;
+	}
 
 }

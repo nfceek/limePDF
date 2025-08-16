@@ -66,6 +66,41 @@ trait LIMEPDF_TEXT {
 		return $height;
 	}
 
+    /**
+	 * Performs a line break.
+	 * The current abscissa goes back to the left margin and the ordinate increases by the amount passed in parameter.
+	 * @param float|null $h The height of the break. By default, the value equals the height of the last printed cell.
+	 * @param boolean $cell if true add the current left (or right o for RTL) padding to the X coordinate
+	 * @public
+	 * @since 1.0
+	 * @see Cell()
+	 */
+	public function Ln($h=null, $cell=false) {
+		if (($this->num_columns > 1) AND ($this->y == $this->columns[$this->current_column]['y']) AND isset($this->columns[$this->current_column]['x']) AND ($this->x == $this->columns[$this->current_column]['x'])) {
+			// revove vertical space from the top of the column
+			return;
+		}
+		if ($cell) {
+			if ($this->rtl) {
+				$cellpadding = $this->cell_padding['R'];
+			} else {
+				$cellpadding = $this->cell_padding['L'];
+			}
+		} else {
+			$cellpadding = 0;
+		}
+		if ($this->rtl) {
+			$this->x = $this->w - $this->rMargin - $cellpadding;
+		} else {
+			$this->x = $this->lMargin + $cellpadding;
+		}
+		if (LIMEPDF_STATIC::empty_string($h)) {
+			$h = $this->lasth;
+		}
+		$this->y += $h;
+		$this->newline = true;
+	}
+
 	/**
 	 * Set regular expression to detect withespaces or word separators.
 	 * The pattern delimiter must be the forward-slash character "/".
@@ -170,4 +205,124 @@ trait LIMEPDF_TEXT {
 	public function isRTLTextDir() {
 		return ($this->rtl OR ($this->tmprtl == 'R'));
 	}
+
+	/**
+	 * Whenever a page break condition is met, the method is called, and the break is issued or not depending on the returned value.
+	 * The default implementation returns a value according to the mode selected by SetAutoPageBreak().<br />
+	 * This method is called automatically and should not be called directly by the application.
+	 * @return bool
+	 * @public
+	 * @since 1.4
+	 * @see SetAutoPageBreak()
+	 */
+	public function AcceptPageBreak() {
+		if ($this->num_columns > 1) {
+			// multi column mode
+			if ($this->current_column < ($this->num_columns - 1)) {
+				// go to next column
+				$this->selectColumn($this->current_column + 1);
+			} elseif ($this->AutoPageBreak) {
+				// add a new page
+				$this->AddPage();
+				// set first column
+				$this->selectColumn(0);
+			}
+			// avoid page breaking from checkPageBreak()
+			return false;
+		}
+		return $this->AutoPageBreak;
+	}
+
+	/**
+	 * Add page if needed.
+	 * @param float $h Cell height. Default value: 0.
+	 * @param float|null $y starting y position, leave empty for current position.
+	 * @param bool  $addpage if true add a page, otherwise only return the true/false state
+	 * @return bool true in case of page break, false otherwise.
+	 * @since 3.2.000 (2008-07-01)
+	 * @protected
+	 */
+	protected function checkPageBreak($h=0, $y=null, $addpage=true) {
+		if (LIMEPDF_STATIC::empty_string($y)) {
+			$y = $this->y;
+		}
+		$current_page = $this->page;
+		if ((($y + $h) > $this->PageBreakTrigger) AND ($this->inPageBody()) AND ($this->AcceptPageBreak())) {
+			if ($addpage) {
+				//Automatic page break
+				$x = $this->x;
+				$this->AddPage($this->CurOrientation);
+				$this->y = $this->tMargin;
+				$oldpage = $this->page - 1;
+				if ($this->rtl) {
+					if ($this->pagedim[$this->page]['orm'] != $this->pagedim[$oldpage]['orm']) {
+						$this->x = $x - ($this->pagedim[$this->page]['orm'] - $this->pagedim[$oldpage]['orm']);
+					} else {
+						$this->x = $x;
+					}
+				} else {
+					if ($this->pagedim[$this->page]['olm'] != $this->pagedim[$oldpage]['olm']) {
+						$this->x = $x + ($this->pagedim[$this->page]['olm'] - $this->pagedim[$oldpage]['olm']);
+					} else {
+						$this->x = $x;
+					}
+				}
+			}
+			return true;
+		}
+		if ($current_page != $this->page) {
+			// account for columns mode
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Replace a char if is defined on the current font.
+	 * @param int $oldchar Integer code (unicode) of the character to replace.
+	 * @param int $newchar Integer code (unicode) of the new character.
+	 * @return int the replaced char or the old char in case the new char i not defined
+	 * @protected
+	 * @since 5.9.167 (2012-06-22)
+	 */
+	protected function replaceChar($oldchar, $newchar) {
+		if ($this->isCharDefined($newchar)) {
+			// add the new char on the subset list
+			$this->CurrentFont['subsetchars'][$newchar] = true;
+			// return the new character
+			return $newchar;
+		}
+		// return the old char
+		return $oldchar;
+	}
+
+	/**
+	 * Output a string to the document.
+	 * @param string $s string to output.
+	 * @protected
+	 */
+	//protected function _out($s) {
+	public function _out($s) {
+		if ($this->state == 2) {
+			if ($this->inxobj) {
+				// we are inside an XObject template
+				$this->xobjects[$this->xobjid]['outdata'] .= $s."\n";
+			} elseif ((!$this->InFooter) AND isset($this->footerlen[$this->page]) AND ($this->footerlen[$this->page] > 0)) {
+				// puts data before page footer
+				$pagebuff = $this->getPageBuffer($this->page);
+				$page = substr($pagebuff, 0, -$this->footerlen[$this->page]);
+				$footer = substr($pagebuff, -$this->footerlen[$this->page]);
+				$this->setPageBuffer($this->page, $page.$s."\n".$footer);
+				// update footer position
+				$this->footerpos[$this->page] += strlen($s."\n");
+			} else {
+				// set page data
+				$this->setPageBuffer($this->page, $s."\n", true);
+			}
+		} elseif ($this->state > 0) {
+			// set general data
+			$this->setBuffer($s."\n");
+		}
+	}
+		
 }

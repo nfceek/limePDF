@@ -944,40 +944,7 @@ class LIMEPDF_FONT {
 		return LIMEPDF_FONT::UniArrSubString(LIMEPDF_FONT::UTF8ArrayToUniArray($uniarr, $this->isunicode));
 	}
 
-		/**
-	 * Performs a line break.
-	 * The current abscissa goes back to the left margin and the ordinate increases by the amount passed in parameter.
-	 * @param float|null $h The height of the break. By default, the value equals the height of the last printed cell.
-	 * @param boolean $cell if true add the current left (or right o for RTL) padding to the X coordinate
-	 * @public
-	 * @since 1.0
-	 * @see Cell()
-	 */
-	public function Ln($h=null, $cell=false) {
-		if (($this->num_columns > 1) AND ($this->y == $this->columns[$this->current_column]['y']) AND isset($this->columns[$this->current_column]['x']) AND ($this->x == $this->columns[$this->current_column]['x'])) {
-			// revove vertical space from the top of the column
-			return;
-		}
-		if ($cell) {
-			if ($this->rtl) {
-				$cellpadding = $this->cell_padding['R'];
-			} else {
-				$cellpadding = $this->cell_padding['L'];
-			}
-		} else {
-			$cellpadding = 0;
-		}
-		if ($this->rtl) {
-			$this->x = $this->w - $this->rMargin - $cellpadding;
-		} else {
-			$this->x = $this->lMargin + $cellpadding;
-		}
-		if (LIMEPDF_STATIC::empty_string($h)) {
-			$h = $this->lasth;
-		}
-		$this->y += $h;
-		$this->newline = true;
-	}
+
 
 	/**
 	 * Returs the checksum of a TTF table.

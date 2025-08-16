@@ -914,4 +914,22 @@ trait LIMEPDF_PAGEMANAGER {
 		$this->state = 3; // end-of-doc
 	}
 
+	/**
+	 * Swap the left and right margins.
+	 * @param boolean $reverse if true swap left and right margins.
+	 * @protected
+	 * @since 4.2.000 (2008-10-29)
+	 */
+	protected function swapMargins($reverse=true) {
+		if ($reverse) {
+			// swap left and right margins
+			$mtemp = $this->original_lMargin;
+			$this->original_lMargin = $this->original_rMargin;
+			$this->original_rMargin = $mtemp;
+			$deltam = $this->original_lMargin - $this->original_rMargin;
+			$this->lMargin += $deltam;
+			$this->rMargin -= $deltam;
+		}
+	}
+
 }
