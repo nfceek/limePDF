@@ -1,10 +1,11 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Core;
 
+	// // limePDF configuration
+	require_once(dirname(__FILE__) . '/AutoConfig.php');
 
-
-	// includes Vars
+	// // includes Vars
 
 	use LimePDF\Encryption\EncryptionTrait;
 
@@ -29,13 +30,12 @@ namespace LimePDF;
 	use LimePDFModel\Model\VarsGetterSetterTrait;
 	use LimePDFModel\Model\WebGetterSetterTrait;
 
-	use LimePDF\Pages\AnnotationsTrait;
+	//use LimePDF\Pages\AnnotationsTrait;
 	use LimePDF\Pages\BookmarksTrait;	
 	use LimePDF\Pages\MarginsTrait;
 	use LimePDF\Pages\PagesTrait;
 	use LimePDF\Pages\PageColorsTrait;
 	use LimePDF\Pages\PageManagerTrait;	
-
 	use LimePDF\Pages\SectionsTrait;
 
 	use LimePDF\Support\StaticTrait;	
@@ -64,65 +64,9 @@ namespace LimePDF;
 	use LimePDF\LIMEPDF_FONT_DATA;
 	use LimePDF\LIMEPDF_IMAGES;
 
-
-
-	// limePDF configuration
-	require_once(dirname(__FILE__) . '/AutoConfig.php');
-
-	// src files
-	//require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
-	// require_once(dirname(__FILE__).'/src/Fonts/limePDF_FontManager.php');	
-	// require_once(dirname(__FILE__).'/src/Fonts/limePDF_Fonts.php');
-
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Barcode.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Columns.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Draw.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Graphics.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Images.php');	
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_SVG.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_Transformations.php');
-	// require_once(dirname(__FILE__).'/src/Graphics/limePDF_XObjects_Templates.php');
-
-	// Include files
-	// require_once(dirname(__FILE__).'/src/include/limePDF_Vars.php');
-	// require_once(dirname(__FILE__).'/src/include/limePDF_Static.php');	
-
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Barcode_GetterSetter.php');
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Font_GetterSetter.php');	
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Image_GetterSetter.php');		
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Page_GetterSetter.php');
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Text_GetterSetter.php');	
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Util_GetterSetter.php');
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Vars_GetterSetter.php');
-	// require_once(dirname(__FILE__).'/src/Model/limePDF_Web_GetterSetter.php');
-
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Annotations.php');
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Bookmarks.php');	
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Pages.php');
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_PageManager.php');	
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Margins.php');
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_PageColors.php');
-	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Sections.php');
-
-	// require_once(dirname(__FILE__).'/src/Text/limePDF_Text.php');
-	// require_once(dirname(__FILE__).'/src/Text/limePDF_Write.php');
-
-	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
-	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
-	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
-	// //require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
-	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
-
-	//require_once(dirname(__FILE__).'/src/View/limePDF_Forms.php');	
-	// require_once(dirname(__FILE__).'/src/View/limePDF_OutPut.php');
-	// require_once(dirname(__FILE__).'/src/View/limePDF_Setup.php');
-
-	// require_once(dirname(__FILE__).'/src/Web/limePDF_Cell.php');
-	// require_once(dirname(__FILE__).'/src/Web/limePDF_Html.php');		
-	// require_once(dirname(__FILE__).'/src/Web/limePDF_Web.php');
+	
 	
 class PDF {
-	
 
 	use AnnotationsTrait;
 

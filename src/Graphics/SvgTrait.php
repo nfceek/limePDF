@@ -1,6 +1,6 @@
 <?php
 
-namespace LimePDF\Grphics;
+namespace LimePDF\Graphics;
 
 trait SvgTrait {
 

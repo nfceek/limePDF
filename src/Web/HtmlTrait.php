@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Web;
 
-trait LIMEPDF_HTML {
+trait HtmlTrait {
 
     /**
 	 * Output anchor link.

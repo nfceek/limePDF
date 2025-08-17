@@ -30,13 +30,14 @@
             "LimePDF\\": "src/"
             },
         "classmap": [
-            "src",
-            "include",
             "src/Barcodes/tcpdf_barcodes_1d.php",
             "src/Barcodes/tcpdf_barcodes_2d.php",
             "src/include/limePDF_Colors.php",
             "src/include/limePDF_Filters.php",
+            "src/include/limePDF_Font.php",            
             "src/include/limePDF_Font_Data.php",
+            "src/include/limePDF_Images.php",
+            "src/include/limePDF_Properties.php",
             "src/include/barcodes/datamatrix.php",
             "src/include/barcodes/pdf417.php",
             "src/include/barcodes/qrcode.php"

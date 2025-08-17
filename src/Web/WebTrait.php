@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Web;
 
-trait LIMEPDF_WEB {
+trait WebTrait {
 
 	/**
 	 * Converts pixels to User's Units.
