@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Graphics;
 
-trait LIMEPDF_XOTEMPLATES{
+trait XObjectsTemplatesTrait{
 
 	/**
 	 * Start a new XObject Template.

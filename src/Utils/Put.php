@@ -1,12 +1,12 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Utils;
 
 // Include the static file
-require_once dirname(__DIR__) . '/include/limePDF_Static.php';
+use LimePDF\Support\StaticTrait;
 
-trait LIMEPDF_PUT {
-
+trait PutTrait {
+	use StaticTrait;
     /**
 	 * Output pages (and replace page number aliases).
 	 * @protected

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Grphics;
 
-trait LIMEPDF_SVG {
+trait SvgTrait {
 
 	// --- SVG METHODS ---------------------------------------------------------
 

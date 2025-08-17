@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Graphics;
 
-trait LIMEPDF_DRAW {
+trait DrawTrait {
 
 	/**
 	 * Underline text.

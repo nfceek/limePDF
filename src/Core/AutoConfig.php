@@ -33,18 +33,21 @@
 //
 //============================================================+
 
-// Set Header String: PDF_HEADER_STRING
-$HeaderString = "PDF_HEADER_STRING in autoconfig \nlimePDF.com";
+// 1) Set Header String: PDF_HEADER_STRING
+	$HeaderString = "PDF_HEADER_STRING in autoconfig \nlimePDF.com";
 
 
-// Set Logo File: PDF_HEADER_LOGO
-$LogoFile = 'limePDF_logo.png';
+// 2) Set Logo File: PDF_HEADER_LOGO
+//     * Logo file should be in the ./examples/images folder
+	$LogoFile = 'limePDF_logo.png';
 
+/*
+*
+*---------- DO NOT EDIT BELOW ----------------------------------------
+*---------- UNLESS ABSOLUTELY NECESSARY ------------------------------
+*
+*/
 
-
-
-//---------- DO NOT EDIT BELOW ----------------------------------------
-//---------- UNLESS ABSOLUTELY NECESSARY ------------------------------
 /**
  * @file
  * Try to automatically configure some TCPDF constants if not defined.

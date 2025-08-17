@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Graphics;
 
-trait LIMEPDF_GRAPHICS {
+trait GraphicsTrait {
 
 	// START GRAPHIC FUNCTIONS SECTION ---------------------
 	// The following section is based on the code provided by David Hernandez Sanz

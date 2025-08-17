@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Fonts;
 
-trait LIMEPDF_FONTS {	
+trait FontsTrait {	
 
 	/**
 	 * Imports a TrueType, Type1, core, or CID0 font and makes it available.

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Graphics;
 
-trait LIMEPDF_COLUMNS{
+trait ColumnsTrait{
 
 	//----- php 7 & php 8 ------------------------------
 

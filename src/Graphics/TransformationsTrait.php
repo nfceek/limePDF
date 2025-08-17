@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Grphics;
 
-trait LIMEPDF_TRANSFORMATIONS {
+trait TransformationsTrait {
 
 	// START TRANSFORMATIONS SECTION -----------------------
 

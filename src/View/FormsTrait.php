@@ -1,11 +1,13 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\View;
 
 // Include the static file
-require_once dirname(__DIR__) . '/include/limePDF_Static.php';
+use LimePDF\Support\StaticTrait;
 
-trait LIMEPDF_FORMS {
+trait FormsTrait {
+	use StaticTrait;
+	
 	/**
 	 * Creates a text field
 	 * @param string $name field name

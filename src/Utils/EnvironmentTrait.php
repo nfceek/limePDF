@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Utils;
 
-trait LIMEPDF_ENVIRONMENT {
+trait EnvironmentTrait {
     public static function doChecks(): void {
         if (!extension_loaded('mbstring')) {
             throw new \RuntimeException('The mbstring extension is required.');

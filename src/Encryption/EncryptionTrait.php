@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Encryption;
 
-trait LIMEPDF_ENCRYPTION {
+trait EncryptionTrait {
 
  	// ENCRYPTION METHODS ----------------------------------
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Grphics;
 
-trait LIMEPDF_IMAGE {
+trait ImageTrait {
 
 	/**
 	 * Puts an image in the page.

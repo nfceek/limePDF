@@ -1,6 +1,6 @@
 <?php
 
-namespace limepdf\Core;
+namespace limePDF\Core;
 
 class PdfFactory {
     public static function create(array $options = []): CorePDF

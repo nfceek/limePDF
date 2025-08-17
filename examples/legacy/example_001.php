@@ -27,16 +27,16 @@
     $pdfText = '<br /><br />Example # 001<br /><br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
 
 // 4) Set Output File Name
-$OutputFile = 'example_010.pdf';
+$OutputFile = 'example_001.pdf';
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
 
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/Core/Pdf.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Core\Pdf;
 
-$pdf = new TCPDF();
+$pdf = new Pdf();
 
 use LimePDF\Config\ConfigManager;
 

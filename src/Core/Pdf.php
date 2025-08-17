@@ -2,24 +2,35 @@
 
 namespace LimePDF;
 
+
+
 	// includes Vars
-	use LimePDF\LIMEPDF_STATIC;
+
+	use LimePDF\Encryption\EncryptionTrait;
+
+	use LimePDF\Fonts\FontManagerTrait;
+	use LimePDF\Fonts\FontsTrait;	
+
+	use LimePDF\Support\StaticTrait;	
+
+	use LimePDF\Utils\EnvironmentTrait;	
+	use LimePDF\Utils\FormsTrait;
+
+
+
 	use LimePDF\LIMEPDF_FONT;
 	use LimePDF\LIMEPDF_IMAGES;
 	use LimePDF\LIMEPDF_FONT_DATA;
 	use LimePDF\LIMEPDF_COLORS;
-	//use LimePDF\Graphics\IMAGES;
+
 
 	// limePDF configuration
-	require_once(dirname(__FILE__).'/limepdf_autoconfig.php');
-
-
+	require_once(dirname(__FILE__) . '/AutoConfig.php');
 
 	// src files
-	require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
-
-	require_once(dirname(__FILE__).'/src/Fonts/limePDF_FontManager.php');	
-	require_once(dirname(__FILE__).'/src/Fonts/limePDF_Fonts.php');
+	//require_once(dirname(__FILE__).'/src/Encryption/limePDF_Encryption.php');
+	// require_once(dirname(__FILE__).'/src/Fonts/limePDF_FontManager.php');	
+	// require_once(dirname(__FILE__).'/src/Fonts/limePDF_Fonts.php');
 
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_Barcode.php');
 	require_once(dirname(__FILE__).'/src/Graphics/limePDF_Columns.php');
@@ -57,10 +68,10 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
+	//require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
 	require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
 
-	require_once(dirname(__FILE__).'/src/View/limePDF_Forms.php');	
+	//require_once(dirname(__FILE__).'/src/View/limePDF_Forms.php');	
 	require_once(dirname(__FILE__).'/src/View/limePDF_OutPut.php');
 	require_once(dirname(__FILE__).'/src/View/limePDF_Setup.php');
 
@@ -68,7 +79,7 @@ namespace LimePDF;
 	require_once(dirname(__FILE__).'/src/Web/limePDF_Html.php');		
 	require_once(dirname(__FILE__).'/src/Web/limePDF_Web.php');
 	
-class TCPDF {
+class PDF {
 	
 	use LIMEPDF_IMAGE;
 
@@ -82,12 +93,14 @@ class TCPDF {
 
 	use LIMEPDF_DRAW;
 
-	use LIMEPDF_ENCRYPTION;
-	use LIMEPDF_ENVIRONMENT;
+	use EncryptionTrait;
+	use EnvironmentTrait;
 
-	use LIMEPDF_FONTMANAGER;	
-	use LIMEPDF_FONTS;
-	use LIMEPDF_FORMS;
+	use FontManagerTrait;	
+	use FontsTrait;
+	//use LIMEPDF_FORMS;
+
+	use FormsTrait;
 
 	use LIMEPDF_GRAPHICS;
 
@@ -108,6 +121,7 @@ class TCPDF {
 	use LIMEPDF_SECTIONS;
 	use LIMEPDF_SETUP;
 	use LIMEPDF_SIGNATURE;
+	use StaticTrait;
 	use LIMEPDF_SVG;
 
 	use LIMEPDF_TEXT;

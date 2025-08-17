@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Fonts;
 
-trait LIMEPDF_FONTMANAGER {
+trait FontManagerTrait {
     // protected array $config = [];
     // protected array $fonts = [];
     // protected array $fontkeys = [];

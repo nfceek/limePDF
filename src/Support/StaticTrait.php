@@ -1,14 +1,14 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Support;
 
-class LIMEPDF_STATIC {
+class StaticTrait {
 
 	/**
 	 * Current limePDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '0.0.5';
+	private static $tcpdf_version = '0.0.7';
 
 	/**
 	 * String alias for total number of pages.
