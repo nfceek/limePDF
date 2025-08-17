@@ -370,7 +370,7 @@ class PDF {
 	 * @since 5.8.009 (2010-08-20)
 	 */
 	public function _getobj($objid=null) {
-		if (StaticTrait::empty_string($objid)) {
+		if (self::empty_string($objid)) {
 			++$this->n;
 			$objid = $this->n;
 		}

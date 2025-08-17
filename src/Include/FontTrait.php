@@ -367,13 +367,13 @@ trait FontTrait {
 			// units ratio constant
 			$urk = (1000 / $fmetric['unitsPerEm']);
 			$offset += 16; // skip created, modified
-			$xMin = round($this->_getFWORD($font, $offset) * $urk);
+			$xMin = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$yMin = round($this->_getFWORD($font, $offset) * $urk);
+			$yMin = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$xMax = round($this->_getFWORD($font, $offset) * $urk);
+			$xMax = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$yMax = round($this->_getFWORD($font, $offset) * $urk);
+			$yMax = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$fmetric['bbox'] = ''.$xMin.' '.$yMin.' '.$xMax.' '.$yMax.'';
 			$macStyle = self::_getUSHORT($font, $offset);
@@ -431,10 +431,10 @@ trait FontTrait {
 			$offset = $table['OS/2']['offset'];
 			$offset += 2; // skip version
 			// xAvgCharWidth
-			$fmetric['AvgWidth'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['AvgWidth'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// usWeightClass
-			$usWeightClass = round($this->_getUFWORD($font, $offset) * $urk);
+			$usWeightClass = round(self::_getUFWORD($font, $offset) * $urk);
 			// estimate StemV and StemH (400 = usWeightClass for Normal - Regular font)
 			$fmetric['StemV'] = round((70 * $usWeightClass) / 400);
 			$fmetric['StemH'] = round((30 * $usWeightClass) / 400);
@@ -482,11 +482,11 @@ trait FontTrait {
 			// ---------- get post data ----------
 			$offset = $table['post']['offset'];
 			$offset += 4; // skip Format Type
-			$fmetric['italicAngle'] = $this->_getFIXED($font, $offset);
+			$fmetric['italicAngle'] = self::_getFIXED($font, $offset);
 			$offset += 4;
-			$fmetric['underlinePosition'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['underlinePosition'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$fmetric['underlineThickness'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['underlineThickness'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$isFixedPitch = (self::_getULONG($font, $offset) == 0) ? false : true;
 			$offset += 2;
@@ -497,16 +497,16 @@ trait FontTrait {
 			$offset = $table['hhea']['offset'];
 			$offset += 4; // skip Table version number
 			// Ascender
-			$fmetric['Ascent'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['Ascent'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// Descender
-			$fmetric['Descent'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['Descent'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// LineGap
-			$fmetric['Leading'] = round($this->_getFWORD($font, $offset) * $urk);
+			$fmetric['Leading'] = round(self::_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// advanceWidthMax
-			$fmetric['MaxWidth'] = round($this->_getUFWORD($font, $offset) * $urk);
+			$fmetric['MaxWidth'] = round(self::_getUFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$offset += 22; // skip some values
 			// get the number of hMetric entries in hmtx table
@@ -529,7 +529,7 @@ trait FontTrait {
 						case 0: { // Format 0: Byte encoding table
 							$offset += 4; // skip length and version/language
 							for ($c = 0; $c < 256; ++$c) {
-								$g = $this->_getBYTE($font, $offset);
+								$g = self::_getBYTE($font, $offset);
 								$ctg[$c] = $g;
 								++$offset;
 							}
@@ -660,7 +660,7 @@ trait FontTrait {
 						case 8: { // Format 8: Mixed 16-bit and 32-bit coverage
 							$offset += 10; // skip reserved, length and version/language
 							for ($k = 0; $k < 8192; ++$k) {
-								$is32[$k] = $this->_getBYTE($font, $offset);
+								$is32[$k] = self::_getBYTE($font, $offset);
 								++$offset;
 							}
 							$nGroups = self::_getULONG($font, $offset);
@@ -737,23 +737,23 @@ trait FontTrait {
 			}
 			// get xHeight (height of x)
 			$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[120]] + 4);
-			$yMin = $this->_getFWORD($font, $offset);
+			$yMin = self::_getFWORD($font, $offset);
 			$offset += 4;
-			$yMax = $this->_getFWORD($font, $offset);
+			$yMax = self::_getFWORD($font, $offset);
 			$offset += 2;
 			$fmetric['XHeight'] = round(($yMax - $yMin) * $urk);
 			// get CapHeight (height of H)
 			$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[72]] + 4);
-			$yMin = $this->_getFWORD($font, $offset);
+			$yMin = self::_getFWORD($font, $offset);
 			$offset += 4;
-			$yMax = $this->_getFWORD($font, $offset);
+			$yMax = self::_getFWORD($font, $offset);
 			$offset += 2;
 			$fmetric['CapHeight'] = round(($yMax - $yMin) * $urk);
 			// ceate widths array
 			$cw = array();
 			$offset = $table['hmtx']['offset'];
 			for ($i = 0 ; $i < $numberOfHMetrics; ++$i) {
-				$cw[$i] = round($this->_getUFWORD($font, $offset) * $urk);
+				$cw[$i] = round(self::_getUFWORD($font, $offset) * $urk);
 				$offset += 4; // skip lsb
 			}
 			if ($numberOfHMetrics < $numGlyphs) {
@@ -770,10 +770,10 @@ trait FontTrait {
 					}
 					if ($addcbbox AND isset($indexToLoc[$ctg[$cid]])) {
 						$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[$cid]]);
-						$xMin = round($this->_getFWORD($font, $offset + 2) * $urk);
-						$yMin = round($this->_getFWORD($font, $offset + 4) * $urk);
-						$xMax = round($this->_getFWORD($font, $offset + 6) * $urk);
-						$yMax = round($this->_getFWORD($font, $offset + 8) * $urk);
+						$xMin = round(self::_getFWORD($font, $offset + 2) * $urk);
+						$yMin = round(self::_getFWORD($font, $offset + 4) * $urk);
+						$xMax = round(self::_getFWORD($font, $offset + 6) * $urk);
+						$yMax = round(self::_getFWORD($font, $offset + 8) * $urk);
 						$fmetric['cbbox'] .= ','.$cid.'=>array('.$xMin.','.$yMin.','.$xMax.','.$yMax.')';
 					}
 				}
@@ -1063,7 +1063,7 @@ trait FontTrait {
 					$offset += 4; // skip length and version/language
 					for ($c = 0; $c < 256; ++$c) {
 						if (isset($subsetchars[$c])) {
-							$g = $this->_getBYTE($font, $offset);
+							$g = self::_getBYTE($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						++$offset;
@@ -1203,7 +1203,7 @@ trait FontTrait {
 				case 8: { // Format 8: Mixed 16-bit and 32-bit coverage
 					$offset += 10; // skip reserved, length and version/language
 					for ($k = 0; $k < 8192; ++$k) {
-						$is32[$k] = $this->_getBYTE($font, $offset);
+						$is32[$k] = self::_getBYTE($font, $offset);
 						++$offset;
 					}
 					$nGroups = self::_getULONG($font, $offset);
