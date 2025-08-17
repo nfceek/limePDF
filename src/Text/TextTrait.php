@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Text;
 
-trait LIMEPDF_TEXT {
+trait TextTrait {
 
 	/**
 	 * This method return the estimated height needed for printing a simple text string using the Multicell() method.

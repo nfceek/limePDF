@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Pages;
 
-trait LIMEPDF_BOOKMARKS {
+trait BookmarksTrait {
 
     /**
 	 * Adds a bookmark - alias for Bookmark().

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\View;
 
-trait LIMEPDF_OUTPUT {
+trait OutputTrait {
 
     /**
 	 * Send the document to a given destination: string, local file or browser.

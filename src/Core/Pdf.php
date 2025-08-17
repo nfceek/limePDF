@@ -11,10 +11,6 @@ namespace LimePDF;
 	use LimePDF\Fonts\FontManagerTrait;
 	use LimePDF\Fonts\FontsTrait;	
 
-
-	use LimePDF\Utils\EnvironmentTrait;	
-	use LimePDF\Utils\FormsTrait;
-
 	use LimePDF\Graphics\BarcodeTrait;
 	use LimePDF\Graphics\ColumnsTrait;
 	use LimePDF\Graphics\DrawTrait;
@@ -47,6 +43,20 @@ namespace LimePDF;
 
 	use LimePDF\Text\TextTrait;	
 	use LimePDF\Text\WriteTrait;
+
+	use LimePDFModel\Utils\JavascriptTrait;
+	use LimePDFModel\Utils\EnvironmentTrait;
+	use LimePDFModel\Utils\MiscTrait;	
+	use LimePDFModel\Utils\PutTrait;
+	use LimePDFModel\Utils\SignatureTrait;
+
+	use LimePDF\Views\FormsTrait;
+	use LimePDF\Views\OutPutTrait;
+	use LimePDF\Views\SetupTrait;
+
+	use LimePDF\Web\CellTrait;
+	use LimePDF\Web\HtmlTrait;
+	use LimePDF\Web\WebTrait;	
 
 	use LimePDF\LIMEPDF_COLORS;
 	use LimePDF\LIMEPDF_FILTERS;	
@@ -94,22 +104,22 @@ namespace LimePDF;
 	// require_once(dirname(__FILE__).'/src/Pages/limePDF_PageColors.php');
 	// require_once(dirname(__FILE__).'/src/Pages/limePDF_Sections.php');
 
-	require_once(dirname(__FILE__).'/src/Text/limePDF_Text.php');
-	require_once(dirname(__FILE__).'/src/Text/limePDF_Write.php');
+	// require_once(dirname(__FILE__).'/src/Text/limePDF_Text.php');
+	// require_once(dirname(__FILE__).'/src/Text/limePDF_Write.php');
 
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
-	//require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
-	require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
+	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Javascript.php');
+	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Environment.php');
+	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Misc.php');	
+	// //require_once(dirname(__FILE__).'/src/Utils/limePDF_Put.php');
+	// require_once(dirname(__FILE__).'/src/Utils/limePDF_Signature.php');	
 
 	//require_once(dirname(__FILE__).'/src/View/limePDF_Forms.php');	
-	require_once(dirname(__FILE__).'/src/View/limePDF_OutPut.php');
-	require_once(dirname(__FILE__).'/src/View/limePDF_Setup.php');
+	// require_once(dirname(__FILE__).'/src/View/limePDF_OutPut.php');
+	// require_once(dirname(__FILE__).'/src/View/limePDF_Setup.php');
 
-	require_once(dirname(__FILE__).'/src/Web/limePDF_Cell.php');
-	require_once(dirname(__FILE__).'/src/Web/limePDF_Html.php');		
-	require_once(dirname(__FILE__).'/src/Web/limePDF_Web.php');
+	// require_once(dirname(__FILE__).'/src/Web/limePDF_Cell.php');
+	// require_once(dirname(__FILE__).'/src/Web/limePDF_Html.php');		
+	// require_once(dirname(__FILE__).'/src/Web/limePDF_Web.php');
 	
 class PDF {
 	
@@ -119,7 +129,7 @@ class PDF {
 	use BookmarksTrait;
 	use BarcodeTrait;
 
-	use LIMEPDF_CELL;
+	use CellTrait;
 	use ColumnsTrait;
 
 	use DrawTrait;
@@ -129,30 +139,29 @@ class PDF {
 
 	use FontManagerTrait;	
 	use FontsTrait;
-	//use LIMEPDF_FORMS;
 	use FormsTrait;
 
 	use GraphicsTrait;
 
 	use ImageTrait;
 
-	use LIMEPDF_HTML;
+	use HtmlTrait;
 
-	use LIMEPDF_JAVASCRIPT;
+	use JavascriptTrait;
 
 	use MarginsTrait;
-	use LIMEPDF_MISC;
+	use MiscTrait;
 
-	use LIMEPDF_OUTPUT;
+	use OutputTrait;
 
 	use PagesTrait;
 	use PageManagerTrait;		
 	use PageColorsTrait;
-	use LIMEPDF_PUT;
+	use PutTrait;
 
 	use SectionsTrait;
-	use LIMEPDF_SETUP;
-	use LIMEPDF_SIGNATURE;
+	use SetupTrait;
+	use SignatureTrait;
 	use StaticTrait;
 	use SVGTrait;
 
@@ -161,7 +170,7 @@ class PDF {
 
 	use VarsTrait;
 
-	use LIMEPDF_WEB;
+	use WebTrait;
 	use WriteTrait;
 
 	use XObjectsTemplatesTrait;

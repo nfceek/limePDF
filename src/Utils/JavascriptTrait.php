@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Utils;
 
-trait LIMEPDF_JAVASCRIPT {
+trait JavascriptTrait {
 
 	// --- JAVASCRIPT ------------------------------------------------------
 

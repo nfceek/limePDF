@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Utils;
 
-trait LIMEPDF_SIGNATURE {
+trait SignatureTrait {
 
     /**
 	 * Add certification signature (DocMDP or UR3)

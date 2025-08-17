@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Pages;
 
-trait LIMEPDF_PAGES{
+trait PagesTrait {
 
 	/**
 	 * Initialize a new page.

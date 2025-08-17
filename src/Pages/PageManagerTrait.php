@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Pages;
 
-trait LIMEPDF_PAGEMANAGER {
+trait PageManagerTrait {
 
     /**
 	 * Remove the specified page.

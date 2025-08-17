@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Text;
 
-trait LIMEPDF_WRITE{
+trait WriteTrait{
     /**
      * Main Write function - orchestrates the text writing process
      * PHP 8+ compliant

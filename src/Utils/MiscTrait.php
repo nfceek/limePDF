@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Utils;
 
-trait LIMEPDF_MISC {
+trait MiscTrait {
 
 	/**
 	 * Set the block dimensions accounting for page breaks and page/column fitting

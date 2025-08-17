@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Pages;
 
-trait LIMEPDF_PAGECOLORS {
+trait PageColorsTrait {
 
 	/**
 	 * Returns the array of spot colors.

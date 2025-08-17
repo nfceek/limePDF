@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Pages;
 
-trait LIMEPDF_MARGINS {
+trait MarginsTrait {
 
 	/**
 	 * Defines the left, top and right margins.
