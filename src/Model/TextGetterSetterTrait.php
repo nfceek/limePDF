@@ -1,8 +1,7 @@
 <?php
 
-namespace LimePDF;
-
-trait LIMEPDF_TEXT_GETTERSETTER {
+namespace LimePDF\Model;
+trait TextGetterSetterTrait {
 
 	/**
 	 * Set parameters for drop shadow effect for text.

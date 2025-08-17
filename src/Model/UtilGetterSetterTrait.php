@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_UTIL_GETTERSETTER {
+trait UtilGetterSetterTrait {
 
 	/**
 	 * Set the document creation timestamp

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_VARS_GETTERSETTER {
+trait VarsGetterSetterTrait {
 
     	/**
 	 * Returns current graphic variables as array.

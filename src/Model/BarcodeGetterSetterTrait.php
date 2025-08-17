@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_BARCODE_GETTERSETTER {
+trait BarcodeGetterSetterTrait {
 
 	/**
 	 * Set document barcode.

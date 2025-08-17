@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_FONT_GETTERSETTER {
+trait FontGetterSetterTrait {
 
 	/**
 	 * Defines the default monospaced font.

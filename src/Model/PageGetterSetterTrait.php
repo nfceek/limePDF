@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_PAGE_GETTERSETTER {
+trait PageGetterSetterTrait {
 
 	/**
 	 * Defines the title of the document.

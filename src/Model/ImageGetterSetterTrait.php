@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_IMAGE_GETTERSETTER {
+trait ImageGetterSetterTrait {
 
     /**
 	 * Set the adjusting factor to convert pixels to user units.

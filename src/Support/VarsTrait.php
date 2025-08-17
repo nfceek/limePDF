@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Support;
 
-trait LIMEPDF_VARS {
+trait VarsTrait {
     
 	protected $utils;    
 	protected $utilsPut;    

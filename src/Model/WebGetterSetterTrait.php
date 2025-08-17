@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Model;
 
-trait LIMEPDF_WEB_GETTERSETTER {
+trait WebGetterSetterTrait {
 
     /**
 	 * Returns the border width from CSS property
