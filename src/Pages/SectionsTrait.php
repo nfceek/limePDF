@@ -2,7 +2,9 @@
 
 namespace LimePDF\Pages;
 
-use LimePDF\LIMEPDF_FONT;
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\ImagesTrait;
+use LimePDF\Support\StaticTrait;
 
 trait SectionsTrait {
 
@@ -25,7 +27,7 @@ trait SectionsTrait {
 				$this->x = $this->original_lMargin;
 			}
 			if (($headerdata['logo']) AND ($headerdata['logo'] != K_BLANK_IMAGE)) {
-				$imgtype = LIMEPDF_IMAGES::getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
+				$imgtype = $this->getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
 				if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
 					$this->ImageEps(K_PATH_IMAGES.$headerdata['logo'], '', '', $headerdata['logo_width']);
 				} elseif ($imgtype == 'svg') {
@@ -253,7 +255,7 @@ trait SectionsTrait {
 			$this->pagedim[$this->page]['tm'] = $this->tMargin;
 			$this->y = $this->tMargin;
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->thead) AND (!$this->inthead)) {
+		if (!$this->empty_string($this->thead) AND (!$this->inthead)) {
 			// set margins
 			$prev_lMargin = $this->lMargin;
 			$prev_rMargin = $this->rMargin;
@@ -327,7 +329,7 @@ trait SectionsTrait {
 	 * @since 1.2
 	 */
 	public function GetStringWidth($s, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
-		return $this->GetArrStringWidth(LIMEPDF_FONT::utf8Bidi(LIMEPDF_FONT::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
+		return $this->GetArrStringWidth($this->utf8Bidi($this->UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
 	}
 
 	/**
@@ -345,7 +347,7 @@ trait SectionsTrait {
 	 */
 	public function GetArrStringWidth($sa, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
 		// store current values
-		if (!LIMEPDF_STATIC::empty_string($fontname)) {
+		if (!$this->empty_string($fontname)) {
 			$prev_FontFamily = $this->FontFamily;
 			$prev_FontStyle = $this->FontStyle;
 			$prev_FontSizePt = $this->FontSizePt;
@@ -353,7 +355,7 @@ trait SectionsTrait {
 		}
 		// convert UTF-8 array to Latin1 if required
 		if ($this->isunicode AND (!$this->isUnicodeFont())) {
-			$sa = LIMEPDF_FONT::UTF8ArrToLatin1Arr($sa);
+			$sa = $this->UTF8ArrToLatin1Arr($sa);
 		}
 		$w = 0; // total width
 		$wa = array(); // array of characters widths
@@ -364,7 +366,7 @@ trait SectionsTrait {
 			$w += $cw;
 		}
 		// restore previous values
-		if (!LIMEPDF_STATIC::empty_string($fontname)) {
+		if (!$this->empty_string($fontname)) {
 			$this->setFont($prev_FontFamily, $prev_FontStyle, $prev_FontSizePt, '', 'default', false);
 		}
 		if ($getarray) {
@@ -432,7 +434,7 @@ trait SectionsTrait {
 	 */
 	public function GetNumChars($s) {
 		if ($this->isUnicodeFont()) {
-			return count(LIMEPDF_FONT::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
+			return count($this->UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
 		}
 		return strlen($s);
 	}
@@ -443,7 +445,7 @@ trait SectionsTrait {
 	 * @since 4.0.013 (2008-07-28)
 	 */
 	protected function getFontsList() {
-		if (($fontsdir = opendir(LIMEPDF_FONT::_getfontpath())) !== false) {
+		if (($fontsdir = opendir($this->_getfontpath())) !== false) {
 			while (($file = readdir($fontsdir)) !== false) {
 				if (substr($file, -4) == '.php') {
 					array_push($this->fontlist, strtolower(basename($file, '.php')));

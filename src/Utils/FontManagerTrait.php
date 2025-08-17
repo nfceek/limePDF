@@ -1,6 +1,6 @@
 <?php
 
-namespace LimePDF\Fonts;
+namespace LimePDF\Utils;
 
 trait FontManagerTrait {
     // protected array $config = [];

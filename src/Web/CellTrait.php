@@ -2,6 +2,8 @@
 
 namespace LimePDF\Web;
 
+use LimePDF\Support\StaticTrait;
+
 trait CellTrait {
 
 	/**
@@ -141,11 +143,11 @@ trait CellTrait {
 		$this->cell_padding['T'] = 0;
 		$this->cell_padding['B'] = 0;
 		$this->setCellMargins(0, 0, 0, 0);
-		if (LIMEPDF_STATIC::empty_string($this->lasth) OR $reseth) {
+		if ($this->empty_string($this->lasth) OR $reseth) {
 			// reset row height
 			$this->resetLastH();
 		}
-		if (!LIMEPDF_STATIC::empty_string($y)) {
+		if (!$this->empty_string($y)) {
 			$this->setY($y); // set y in order to convert negative y values to positive ones
 		}
 		$y = $this->GetY();
@@ -160,7 +162,7 @@ trait CellTrait {
 		$startpage = $this->page;
 		// get current column
 		$startcolumn = $this->current_column;
-		if (!LIMEPDF_STATIC::empty_string($x)) {
+		if (!$this->empty_string($x)) {
 			$this->setX($x);
 		} else {
 			$x = $this->GetX();
@@ -177,7 +179,7 @@ trait CellTrait {
 		$this->x = $ox;
 		$this->y = $oy;
 		// set width
-		if (LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) {
+		if ($this->empty_string($w) OR ($w <= 0)) {
 			if ($this->rtl) {
 				$w = ($this->x - $this->lMargin - $mc_margin['L']);
 			} else {
@@ -297,9 +299,9 @@ trait CellTrait {
 		$check_page_regions = $this->check_page_regions;
 		$this->check_page_regions = false;
 		// get border modes
-		$border_start = LIMEPDF_STATIC::getBorderMode($border, $position='start', $this->opencell);
-		$border_end = LIMEPDF_STATIC::getBorderMode($border, $position='end', $this->opencell);
-		$border_middle = LIMEPDF_STATIC::getBorderMode($border, $position='middle', $this->opencell);
+		$border_start = $this->getBorderMode($border, $position='start', $this->opencell);
+		$border_end = $this->getBorderMode($border, $position='end', $this->opencell);
+		$border_middle = $this->getBorderMode($border, $position='middle', $this->opencell);
 		// design borders around HTML cells.
 		for ($page = $startpage; $page <= $endpage; ++$page) { // for each page
 			$ccode = '';

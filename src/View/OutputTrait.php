@@ -2,6 +2,8 @@
 
 namespace LimePDF\View;
 
+use LimePDF\Support\StaticTrait;
+
 trait OutputTrait {
 
     /**
@@ -34,21 +36,21 @@ trait OutputTrait {
 			// remove last newline
 			$pdfdoc = substr($pdfdoc, 0, -1);
 			// remove filler space
-			$byterange_string_len = strlen(LIMEPDF_STATIC::$byterange_string);
+			$byterange_string_len = strlen($this->$byterange_string);
 			// define the ByteRange
 			$byte_range = array();
 			$byte_range[0] = 0;
-			$byte_range[1] = strpos($pdfdoc, LIMEPDF_STATIC::$byterange_string) + $byterange_string_len + 10;
+			$byte_range[1] = strpos($pdfdoc, $this->$byterange_string) + $byterange_string_len + 10;
 			$byte_range[2] = $byte_range[1] + $this->signature_max_length + 2;
 			$byte_range[3] = strlen($pdfdoc) - $byte_range[2];
 			$pdfdoc = substr($pdfdoc, 0, $byte_range[1]).substr($pdfdoc, $byte_range[2]);
 			// replace the ByteRange
 			$byterange = sprintf('/ByteRange[0 %u %u %u]', $byte_range[1], $byte_range[2], $byte_range[3]);
 			$byterange .= str_repeat(' ', ($byterange_string_len - strlen($byterange)));
-			$pdfdoc = str_replace(LIMEPDF_STATIC::$byterange_string, $byterange, $pdfdoc);
+			$pdfdoc = str_replace($this->$byterange_string, $byterange, $pdfdoc);
 			// write the document to a temporary folder
-			$tempdoc = LIMEPDF_STATIC::getObjFilename('doc', $this->file_id);
-			$f = LIMEPDF_STATIC::fopenLocal($tempdoc, 'wb');
+			$tempdoc = $this->getObjFilename('doc', $this->file_id);
+			$f = $this->fopenLocal($tempdoc, 'wb');
 			if (!$f) {
 				$this->Error('Unable to create temporary file: '.$tempdoc);
 			}
@@ -56,7 +58,7 @@ trait OutputTrait {
 			fwrite($f, $pdfdoc, $pdfdoc_length);
 			fclose($f);
 			// get digital signature via openssl library
-			$tempsign = LIMEPDF_STATIC::getObjFilename('sig', $this->file_id);
+			$tempsign = $this->getObjFilename('sig', $this->file_id);
 			if (empty($this->signature_data['extracerts'])) {
 				openssl_pkcs7_sign($tempdoc, $tempsign, $this->signature_data['signcert'], array($this->signature_data['privkey'], $this->signature_data['password']), array(), PKCS7_BINARY | PKCS7_DETACHED);
 			} else {
@@ -99,7 +101,7 @@ trait OutputTrait {
 					header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 					header('Content-Disposition: inline; filename="' . rawurlencode(basename($name)) . '"; ' .
 						'filename*=UTF-8\'\'' . rawurlencode(basename($name)));
-					LIMEPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
+					$this->sendOutputData($this->getBuffer(), $this->bufferlen);
 				} else {
 					echo $this->getBuffer();
 				}
@@ -132,14 +134,14 @@ trait OutputTrait {
 				header('Content-Disposition: attachment; filename="' . rawurlencode(basename($name)) . '"; ' .
 					'filename*=UTF-8\'\'' . rawurlencode(basename($name)));
 				header('Content-Transfer-Encoding: binary');
-				LIMEPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
+				$this->sendOutputData($this->getBuffer(), $this->bufferlen);
 				break;
 			}
 			case 'F':
 			case 'FI':
 			case 'FD': {
 				// save PDF to a local file
-				$f = LIMEPDF_STATIC::fopenLocal($name, 'wb');
+				$f = $this->fopenLocal($name, 'wb');
 				if (!$f) {
 					$this->Error('Unable to create output file: '.$name);
 				}
@@ -154,7 +156,7 @@ trait OutputTrait {
 					header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
 					header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
 					header('Content-Disposition: inline; filename="'.basename($name).'"');
-					LIMEPDF_STATIC::sendOutputData(file_get_contents($name), filesize($name));
+					$this->sendOutputData(file_get_contents($name), filesize($name));
 				} elseif ($dest == 'FD') {
 					// send headers to browser
 					if (ob_get_contents()) {
@@ -180,7 +182,7 @@ trait OutputTrait {
 					// use the Content-Disposition header to supply a recommended filename
 					header('Content-Disposition: attachment; filename="'.basename($name).'"');
 					header('Content-Transfer-Encoding: binary');
-					LIMEPDF_STATIC::sendOutputData(file_get_contents($name), filesize($name));
+					$this->sendOutputData(file_get_contents($name), filesize($name));
 				}
 				break;
 			}
@@ -292,10 +294,10 @@ trait OutputTrait {
 			$out .= ' /Dests '.($this->n_dests).' 0 R';
 		}
 		$out .= $this->_putviewerpreferences();
-		if (isset($this->LayoutMode) AND (!LIMEPDF_STATIC::empty_string($this->LayoutMode))) {
+		if (isset($this->LayoutMode) AND (!$this->empty_string($this->LayoutMode))) {
 			$out .= ' /PageLayout /'.$this->LayoutMode;
 		}
-		if (isset($this->PageMode) AND (!LIMEPDF_STATIC::empty_string($this->PageMode))) {
+		if (isset($this->PageMode) AND (!$this->empty_string($this->PageMode))) {
 			$out .= ' /PageMode /'.$this->PageMode;
 		}
 		if (count($this->outlines) > 0) {
@@ -485,7 +487,7 @@ trait OutputTrait {
 		if (isset($vp['PrintScaling'])) {
 			$out .= ' /PrintScaling /'.$vp['PrintScaling'];
 		}
-		if (isset($vp['Duplex']) AND (!LIMEPDF_STATIC::empty_string($vp['Duplex']))) {
+		if (isset($vp['Duplex']) AND (!$this->empty_string($vp['Duplex']))) {
 			$out .= ' /Duplex /'.$vp['Duplex'];
 		}
 		if (isset($vp['PickTrayByPDFSize'])) {

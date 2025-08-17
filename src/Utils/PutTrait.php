@@ -2,7 +2,8 @@
 
 namespace LimePDF\Utils;
 
-// Include the static file
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\FontDataTrait;
 use LimePDF\Support\StaticTrait;
 
 trait PutTrait {
@@ -16,8 +17,8 @@ trait PutTrait {
 		// get internal aliases for page numbers
 		$pnalias = $this->getAllInternalPageNumberAliases();
 		$num_pages = $this->numpages;
-		$ptpa = LIMEPDF_STATIC::formatPageNumber(($this->starting_page_number + $num_pages - 1));
-		$ptpu = LIMEPDF_FONT::UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
+		$ptpa = $this->formatPageNumber(($this->starting_page_number + $num_pages - 1));
+		$ptpu = $this->UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
 		$ptp_num_chars = $this->GetNumChars($ptpa);
 		$pagegroupnum = 0;
 		$groupnum = 0;
@@ -29,8 +30,8 @@ trait PutTrait {
 			$temppage = $this->getPageBuffer($n);
 			$pagelen = strlen($temppage);
 			// set replacements for total pages number
-			$pnpa = LIMEPDF_STATIC::formatPageNumber(($this->starting_page_number + $n - 1));
-			$pnpu = LIMEPDF_FONT::UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
+			$pnpa = $this->formatPageNumber(($this->starting_page_number + $n - 1));
+			$pnpu = $this->UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
 			$pnp_num_chars = $this->GetNumChars($pnpa);
 			$pdiff = 0; // difference used for right shift alignment of page numbers
 			$gdiff = 0; // difference used for right shift alignment of page group numbers
@@ -38,13 +39,13 @@ trait PutTrait {
 				if (isset($this->newpagegroup[$n])) {
 					$pagegroupnum = 0;
 					++$groupnum;
-					$ptga = LIMEPDF_STATIC::formatPageNumber($this->pagegroups[$groupnum]);
-					$ptgu = LIMEPDF_FONT::UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
+					$ptga = $this->formatPageNumber($this->pagegroups[$groupnum]);
+					$ptgu = $this->UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
 					$ptg_num_chars = $this->GetNumChars($ptga);
 				}
 				++$pagegroupnum;
-				$pnga = LIMEPDF_STATIC::formatPageNumber($pagegroupnum);
-				$pngu = LIMEPDF_FONT::UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
+				$pnga = $this->formatPageNumber($pagegroupnum);
+				$pngu = $this->UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
 				$png_num_chars = $this->GetNumChars($pnga);
 				// replace page numbers
 				$replace = array();
@@ -52,7 +53,7 @@ trait PutTrait {
 				$replace[] = array($ptga, $ptg_num_chars, 7, $pnalias[2]['a']);
 				$replace[] = array($pngu, $png_num_chars, 9, $pnalias[3]['u']);
 				$replace[] = array($pnga, $png_num_chars, 7, $pnalias[3]['a']);
-				list($temppage, $gdiff) = LIMEPDF_STATIC::replacePageNumAliases($temppage, $replace, $gdiff);
+				list($temppage, $gdiff) = $this->replacePageNumAliases($temppage, $replace, $gdiff);
 			}
 			// replace page numbers
 			$replace = array();
@@ -60,7 +61,7 @@ trait PutTrait {
 			$replace[] = array($ptpa, $ptp_num_chars, 7, $pnalias[0]['a']);
 			$replace[] = array($pnpu, $pnp_num_chars, 9, $pnalias[1]['u']);
 			$replace[] = array($pnpa, $pnp_num_chars, 7, $pnalias[1]['a']);
-			list($temppage, $pdiff) = LIMEPDF_STATIC::replacePageNumAliases($temppage, $replace, $pdiff);
+			list($temppage, $pdiff) = $this->replacePageNumAliases($temppage, $replace, $pdiff);
 			// replace right shift alias
 			$temppage = $this->replaceRightShiftPageNumAliases($temppage, $pnalias[4], max($pdiff, $gdiff));
 			// replace EPS marker
@@ -254,7 +255,7 @@ trait PutTrait {
 		$out .= ' /CIDSystemInfo <<'.$cidinfo.'>>';
 		$out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
 		$out .= ' /DW '.$font['dw'];
-		$out .= "\n".LIMEPDF_FONT::_putfontwidths($font, $cidoffset);
+		$out .= "\n".$this->_putfontwidths($font, $cidoffset);
 		$out .= ' >>';
 		$out .= "\n".'endobj';
 		$this->_out($out);
@@ -304,7 +305,7 @@ trait PutTrait {
 		$out .= "\n".'endobj';
 		$this->_out($out);
 		// ToUnicode map for Identity-H
-		$stream = LIMEPDF_FONT_DATA::$uni_identity_h;
+		$stream = $this->$uni_identity_h;
 		// ToUnicode Object
 		$this->_newobj();
 		$stream = ($this->compress) ? gzcompress($stream) : $stream;
@@ -324,8 +325,8 @@ trait PutTrait {
 		$out .= ' /CIDSystemInfo << '.$cidinfo.' >>';
 		$out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
 		$out .= ' /DW '.$font['dw']; // default width
-		$out .= "\n".LIMEPDF_FONT::_putfontwidths($font, 0);
-		if (isset($font['ctg']) AND (!LIMEPDF_STATIC::empty_string($font['ctg']))) {
+		$out .= "\n".$this->_putfontwidths($font, 0);
+		if (isset($font['ctg']) AND (!$this->empty_string($font['ctg']))) {
 			$out .= "\n".'/CIDToGIDMap '.($this->n + 2).' 0 R';
 		}
 		$out .= ' >>';
@@ -344,7 +345,7 @@ trait PutTrait {
 		}
 		$fontdir = false;
 
-		if (!LIMEPDF_STATIC::empty_string($font['file'])) {
+		if (!$this->empty_string($font['file'])) {
 			if (
 				isset($font['file'], $this->FontFiles[$font['file']]) &&
 				isset($this->FontFiles[$font['file']]['n'])
@@ -381,15 +382,15 @@ trait PutTrait {
 		$out .= ' >>';
 		$out .= "\n".'endobj';
 		$this->_out($out);
-		if (isset($font['ctg']) AND (!LIMEPDF_STATIC::empty_string($font['ctg']))) {
+		if (isset($font['ctg']) AND (!$this->empty_string($font['ctg']))) {
 			$this->_newobj();
 			// Embed CIDToGIDMap
 			// A specification of the mapping from CIDs to glyph indices
 			// search and get CTG font file to embedd
 			$ctgfile = strtolower($font['ctg']);
 			// search and get ctg font file to embedd
-			$fontfile = LIMEPDF_FONT::getFontFullPath($ctgfile, $fontdir);
-			if (LIMEPDF_STATIC::empty_string($fontfile)) {
+			$fontfile = $this->getFontFullPath($ctgfile, $fontdir);
+			if ($this->empty_string($fontfile)) {
 				$this->Error('Font file not found: '.$ctgfile);
 			}
 			$stream = $this->_getrawstream(file_get_contents($fontfile));
@@ -516,9 +517,9 @@ trait PutTrait {
 			$out .= ' /R';
 			if ($this->encryptdata['V'] == 5) { // AES-256
 				$out .= ' 5';
-				$out .= ' /OE ('.LIMEPDF_STATIC::_escape($this->encryptdata['OE']).')';
-				$out .= ' /UE ('.LIMEPDF_STATIC::_escape($this->encryptdata['UE']).')';
-				$out .= ' /Perms ('.LIMEPDF_STATIC::_escape($this->encryptdata['perms']).')';
+				$out .= ' /OE ('.$this->_escape($this->encryptdata['OE']).')';
+				$out .= ' /UE ('.$this->_escape($this->encryptdata['UE']).')';
+				$out .= ' /Perms ('.$this->_escape($this->encryptdata['perms']).')';
 			} elseif ($this->encryptdata['V'] == 4) { // AES-128
 				$out .= ' 4';
 			} elseif ($this->encryptdata['V'] < 2) { // RC-40
@@ -526,8 +527,8 @@ trait PutTrait {
 			} else { // RC-128
 				$out .= ' 3';
 			}
-			$out .= ' /O ('.LIMEPDF_STATIC::_escape($this->encryptdata['O']).')';
-			$out .= ' /U ('.LIMEPDF_STATIC::_escape($this->encryptdata['U']).')';
+			$out .= ' /O ('.$this->_escape($this->encryptdata['O']).')';
+			$out .= ' /U ('.$this->_escape($this->encryptdata['U']).')';
 			$out .= ' /P '.$this->encryptdata['P'];
 			if (isset($this->encryptdata['EncryptMetadata']) AND (!$this->encryptdata['EncryptMetadata'])) {
 				$out .= ' /EncryptMetadata false';
@@ -755,8 +756,8 @@ trait PutTrait {
 		}
 		foreach ($this->FontFiles as $file => $info) {
 			// search and get font file to embedd
-			$fontfile = LIMEPDF_FONT::getFontFullPath($file, $info['fontdir']);
-			if (!LIMEPDF_STATIC::empty_string($fontfile)) {
+			$fontfile = $this->getFontFullPath($file, $info['fontdir']);
+			if (!$this->empty_string($fontfile)) {
 				$font = file_get_contents($fontfile);
 				$compressed = (substr($file, -2) == '.z');
 				if ((!$compressed) AND (isset($info['length2']))) {
@@ -781,7 +782,7 @@ trait PutTrait {
 						$subsetchars += $fontinfo['subsetchars'];
 					}
 					// rebuild a font subset
-					$font = LIMEPDF_FONT::_getTrueTypeFontSubset($font, $subsetchars);
+					$font = $this->_getTrueTypeFontSubset($font, $subsetchars);
 					// calculate new font length
 					$info['length1'] = strlen($font);
 					if ($compressed) {
@@ -870,7 +871,7 @@ trait PutTrait {
 					}
 					$s .= ' /'.$fdk.' '.$fdv.'';
 				}
-				if (!LIMEPDF_STATIC::empty_string($font['file'])) {
+				if (!$this->empty_string($font['file'])) {
 					$s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
 				}
 				$s .= '>>';
@@ -1086,7 +1087,7 @@ trait PutTrait {
 				if (is_string($o['u'])) {
 					if ($o['u'][0] == '#') {
 						// internal destination
-						$out .= ' /Dest /'.LIMEPDF_STATIC::encodeNameObject(substr($o['u'], 1));
+						$out .= ' /Dest /'.$this->encodeNameObject(substr($o['u'], 1));
 					} elseif ($o['u'][0] == '%') {
 						// embedded PDF file
 						$filename = basename(substr($o['u'], 1));
@@ -1443,30 +1444,30 @@ trait PutTrait {
 		if ($this->docinfounicode) {
 			$this->isunicode = true;
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->title)) {
+		if (!$this->empty_string($this->title)) {
 			// The document's title.
 			$out .= ' /Title '.$this->_textstring($this->title, $oid);
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->author)) {
+		if (!$this->empty_string($this->author)) {
 			// The name of the person who created the document.
 			$out .= ' /Author '.$this->_textstring($this->author, $oid);
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->subject)) {
+		if (!$this->empty_string($this->subject)) {
 			// The subject of the document.
 			$out .= ' /Subject '.$this->_textstring($this->subject, $oid);
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->keywords)) {
+		if (!$this->empty_string($this->keywords)) {
 			// Keywords associated with the document.
 			$out .= ' /Keywords '.$this->_textstring($this->keywords, $oid);
 		}
-		if (!LIMEPDF_STATIC::empty_string($this->creator)) {
+		if (!$this->empty_string($this->creator)) {
 			// If the document was converted to PDF from another format, the name of the conforming product that created the original document from which it was converted.
 			$out .= ' /Creator '.$this->_textstring($this->creator, $oid);
 		}
 		// restore previous isunicode value
 		$this->isunicode = $prev_isunicode;
 		// default producer
-		$out .= ' /Producer '.$this->_textstring(LIMEPDF_STATIC::getTCPDFProducer(), $oid);
+		$out .= ' /Producer '.$this->_textstring($this->getTCPDFProducer(), $oid);
 		// The date and time the document was created, in human-readable form
 		$out .= ' /CreationDate '.$this->_datestring(0, $this->doc_creation_timestamp);
 		// The date and time the document was most recently modified, in human-readable form
@@ -1493,44 +1494,44 @@ trait PutTrait {
 		$prev_encrypted = $this->encrypted;
 		$this->encrypted = false;
 		// set XMP data
-		$xmp = '<?xpacket begin="'.LIMEPDF_FONT::unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
+		$xmp = '<?xpacket begin="'.$this->unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
 		$xmp .= '<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.2.1-c043 52.372728, 2009/01/18-15:08:04">'."\n";
 		$xmp .= "\t".'<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'."\n";
 		$xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">'."\n";
 		$xmp .= "\t\t\t".'<dc:format>application/pdf</dc:format>'."\n";
 		$xmp .= "\t\t\t".'<dc:title>'."\n";
 		$xmp .= "\t\t\t\t".'<rdf:Alt>'."\n";
-		$xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.LIMEPDF_STATIC::_escapeXML($this->title).'</rdf:li>'."\n";
+		$xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.$this->_escapeXML($this->title).'</rdf:li>'."\n";
 		$xmp .= "\t\t\t\t".'</rdf:Alt>'."\n";
 		$xmp .= "\t\t\t".'</dc:title>'."\n";
 		$xmp .= "\t\t\t".'<dc:creator>'."\n";
 		$xmp .= "\t\t\t\t".'<rdf:Seq>'."\n";
-		$xmp .= "\t\t\t\t\t".'<rdf:li>'.LIMEPDF_STATIC::_escapeXML($this->author).'</rdf:li>'."\n";
+		$xmp .= "\t\t\t\t\t".'<rdf:li>'.$this->_escapeXML($this->author).'</rdf:li>'."\n";
 		$xmp .= "\t\t\t\t".'</rdf:Seq>'."\n";
 		$xmp .= "\t\t\t".'</dc:creator>'."\n";
 		$xmp .= "\t\t\t".'<dc:description>'."\n";
 		$xmp .= "\t\t\t\t".'<rdf:Alt>'."\n";
-		$xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.LIMEPDF_STATIC::_escapeXML($this->subject).'</rdf:li>'."\n";
+		$xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.$this->_escapeXML($this->subject).'</rdf:li>'."\n";
 		$xmp .= "\t\t\t\t".'</rdf:Alt>'."\n";
 		$xmp .= "\t\t\t".'</dc:description>'."\n";
 		$xmp .= "\t\t\t".'<dc:subject>'."\n";
 		$xmp .= "\t\t\t\t".'<rdf:Bag>'."\n";
-		$xmp .= "\t\t\t\t\t".'<rdf:li>'.LIMEPDF_STATIC::_escapeXML($this->keywords).'</rdf:li>'."\n";
+		$xmp .= "\t\t\t\t\t".'<rdf:li>'.$this->_escapeXML($this->keywords).'</rdf:li>'."\n";
 		$xmp .= "\t\t\t\t".'</rdf:Bag>'."\n";
 		$xmp .= "\t\t\t".'</dc:subject>'."\n";
 		$xmp .= "\t\t".'</rdf:Description>'."\n";
 		// convert doc creation date format
-		$dcdate = LIMEPDF_STATIC::getFormattedDate($this->doc_creation_timestamp);
+		$dcdate = $this->getFormattedDate($this->doc_creation_timestamp);
 		$doccreationdate = substr($dcdate, 0, 4).'-'.substr($dcdate, 4, 2).'-'.substr($dcdate, 6, 2);
 		$doccreationdate .= 'T'.substr($dcdate, 8, 2).':'.substr($dcdate, 10, 2).':'.substr($dcdate, 12, 2);
 		$doccreationdate .= substr($dcdate, 14, 3).':'.substr($dcdate, 18, 2);
-		$doccreationdate = LIMEPDF_STATIC::_escapeXML($doccreationdate);
+		$doccreationdate = $this->_escapeXML($doccreationdate);
 		// convert doc modification date format
-		$dmdate = LIMEPDF_STATIC::getFormattedDate($this->doc_modification_timestamp);
+		$dmdate = $this->getFormattedDate($this->doc_modification_timestamp);
 		$docmoddate = substr($dmdate, 0, 4).'-'.substr($dmdate, 4, 2).'-'.substr($dmdate, 6, 2);
 		$docmoddate .= 'T'.substr($dmdate, 8, 2).':'.substr($dmdate, 10, 2).':'.substr($dmdate, 12, 2);
 		$docmoddate .= substr($dmdate, 14, 3).':'.substr($dmdate, 18, 2);
-		$docmoddate = LIMEPDF_STATIC::_escapeXML($docmoddate);
+		$docmoddate = $this->_escapeXML($docmoddate);
 		$xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">'."\n";
 		$xmp .= "\t\t\t".'<xmp:CreateDate>'.$doccreationdate.'</xmp:CreateDate>'."\n";
 		$xmp .= "\t\t\t".'<xmp:CreatorTool>'.$this->creator.'</xmp:CreatorTool>'."\n";
@@ -1538,8 +1539,8 @@ trait PutTrait {
 		$xmp .= "\t\t\t".'<xmp:MetadataDate>'.$doccreationdate.'</xmp:MetadataDate>'."\n";
 		$xmp .= "\t\t".'</rdf:Description>'."\n";
 		$xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">'."\n";
-		$xmp .= "\t\t\t".'<pdf:Keywords>'.LIMEPDF_STATIC::_escapeXML($this->keywords).'</pdf:Keywords>'."\n";
-		$xmp .= "\t\t\t".'<pdf:Producer>'.LIMEPDF_STATIC::_escapeXML(LIMEPDF_STATIC::getTCPDFProducer()).'</pdf:Producer>'."\n";
+		$xmp .= "\t\t\t".'<pdf:Keywords>'.$this->_escapeXML($this->keywords).'</pdf:Keywords>'."\n";
+		$xmp .= "\t\t\t".'<pdf:Producer>'.$this->_escapeXML($this->getTCPDFProducer()).'</pdf:Producer>'."\n";
 		$xmp .= "\t\t".'</rdf:Description>'."\n";
 		$xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">'."\n";
 		$uuid = 'uuid:'.substr($this->file_id, 0, 8).'-'.substr($this->file_id, 8, 4).'-'.substr($this->file_id, 12, 4).'-'.substr($this->file_id, 16, 4).'-'.substr($this->file_id, 20, 12);

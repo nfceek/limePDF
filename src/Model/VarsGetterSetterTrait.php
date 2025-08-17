@@ -2,6 +2,8 @@
 
 namespace LimePDF\Model;
 
+use LimePDF\Support\StaticTrait;
+
 trait VarsGetterSetterTrait {
 
     	/**
@@ -126,7 +128,7 @@ trait VarsGetterSetterTrait {
 			$this->num_columns = $gvars['num_columns'];
 		}
 		$this->_out(''.$this->linestyleWidth.' '.$this->linestyleCap.' '.$this->linestyleJoin.' '.$this->linestyleDash.' '.$this->DrawColor.' '.$this->FillColor.'');
-		if (!LIMEPDF_STATIC::empty_string($this->FontFamily)) {
+		if (!$this->empty_string($this->FontFamily)) {
 			$this->setFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
 		}
 	}

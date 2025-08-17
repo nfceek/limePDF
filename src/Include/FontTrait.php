@@ -2,7 +2,7 @@
 
 namespace LimePDF\Include;
 
-// Include the static file
+use LimePDF\Include\FontDataTrait;
 use LimePDF\Support\StaticTrait;
 
 trait FontTrait {
@@ -108,10 +108,10 @@ trait FontTrait {
 		$fmetric['enc'] = preg_replace('/[^A-Za-z0-9_\-]/', '', $enc);
 		$fmetric['diff'] = '';
 		if (($fmetric['type'] == 'TrueType') OR ($fmetric['type'] == 'Type1')) {
-			if (!empty($enc) AND ($enc != 'cp1252') AND isset(LIMEPDF_FONT_DATA::$encmap[$enc])) {
+			if (!empty($enc) AND ($enc != 'cp1252') AND isset($this->$encmap[$enc])) {
 				// build differences from reference encoding
-				$enc_ref = LIMEPDF_FONT_DATA::$encmap['cp1252'];
-				$enc_target = LIMEPDF_FONT_DATA::$encmap[$enc];
+				$enc_ref = $this->$encmap['cp1252'];
+				$enc_target = $this->$encmap[$enc];
 				$last = 0;
 				for ($i = 32; $i <= 255; ++$i) {
 					if ($enc_target[$i] != $enc_ref[$i]) {
@@ -235,8 +235,8 @@ trait FontTrait {
 			// get charstring data
 			$eplain = substr($eplain, (strpos($eplain, '/CharStrings') + 1));
 			preg_match_all('#/([A-Za-z0-9\.]*+)[\s][0-9]+[\s]RD[\s](.*)[\s]ND#sU', $eplain, $matches, PREG_SET_ORDER);
-			if (!empty($enc) AND isset(LIMEPDF_FONT_DATA::$encmap[$enc])) {
-				$enc_map = LIMEPDF_FONT_DATA::$encmap[$enc];
+			if (!empty($enc) AND isset($this->$encmap[$enc])) {
+				$enc_map = $this->$encmap[$enc];
 			} else {
 				$enc_map = false;
 			}
@@ -892,7 +892,7 @@ trait FontTrait {
 	public function isCharDefined($char, $font='', $style='') {
 		if (is_string($char)) {
 			// get character code
-			$char = LIMEPDF_FONT::UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
+			$char = $this->UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
 			$char = $char[0];
 		}
 		if ($this->empty_string($font)) {
@@ -925,7 +925,7 @@ trait FontTrait {
 		}
 		$fontdata = $this->AddFont($font, $style);
 		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
-		$uniarr = LIMEPDF_FONT::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+		$uniarr = $this->UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
 		foreach ($uniarr as $k => $chr) {
 			if (!isset($fontinfo['cw'][$chr])) {
 				// this character is missing on the selected font
@@ -944,7 +944,7 @@ trait FontTrait {
 				}
 			}
 		}
-		return LIMEPDF_FONT::UniArrSubString(LIMEPDF_FONT::UTF8ArrayToUniArray($uniarr, $this->isunicode));
+		return $this->UniArrSubString($this->UTF8ArrayToUniArray($uniarr, $this->isunicode));
 	}
 
 
@@ -1563,10 +1563,32 @@ trait FontTrait {
 
 
 
+	// /**
+	//  * Return font full path
+	//  * @param string $file Font file name.
+	//  * @param string $fontdir Font directory (set to false fto search on default directories)
+	//  * @return string Font full path or empty string
+	//  * @author Nicola Asuni
+	//  * @since 6.0.025
+	//  * @public static
+	//  */
+	// public static function getFontFullPath($file, $fontdir=false) {
+	// 	$fontfile = '';
+	// 	// search files on various directories
+	// 	if (($fontdir !== false) AND @$this->file_exists($fontdir.$file)) {
+	// 		$fontfile = $fontdir.$file;
+	// 	} elseif (@$this->file_exists(self::_getfontpath().$file)) {
+	// 		$fontfile = self::_getfontpath().$file;
+	// 	} elseif (@$this->file_exists($file)) {
+	// 		$fontfile = $file;
+	// 	}
+	// 	return $fontfile;
+	// }
+
 	/**
 	 * Return font full path
 	 * @param string $file Font file name.
-	 * @param string $fontdir Font directory (set to false fto search on default directories)
+	 * @param string $fontdir Font directory (set to false to search on default directories)
 	 * @return string Font full path or empty string
 	 * @author Nicola Asuni
 	 * @since 6.0.025
@@ -1575,17 +1597,15 @@ trait FontTrait {
 	public static function getFontFullPath($file, $fontdir=false) {
 		$fontfile = '';
 		// search files on various directories
-		if (($fontdir !== false) AND @$this->file_exists($fontdir.$file)) {
+		if (($fontdir !== false) AND @file_exists($fontdir.$file)) {
 			$fontfile = $fontdir.$file;
-		} elseif (@$this->file_exists(self::_getfontpath().$file)) {
+		} elseif (@file_exists(self::_getfontpath().$file)) {
 			$fontfile = self::_getfontpath().$file;
-		} elseif (@$this->file_exists($file)) {
+		} elseif (@file_exists($file)) {
 			$fontfile = $file;
 		}
 		return $fontfile;
 	}
-
-
 
 
 	/**
@@ -1874,9 +1894,9 @@ trait FontTrait {
 		foreach ($unicode as $char) {
 			if ($char < 256) {
 				$outarr[] = $char;
-			} elseif (array_key_exists($char, LIMEPDF_FONT_DATA::$uni_utf8tolatin)) {
+			} elseif (array_key_exists($char, $this->$uni_utf8tolatin)) {
 				// map from UTF-8
-				$outarr[] = LIMEPDF_FONT_DATA::$uni_utf8tolatin[$char];
+				$outarr[] = $this->$uni_utf8tolatin[$char];
 			} elseif ($char == 0xFFFD) {
 				// skip
 			} else {
@@ -1899,9 +1919,9 @@ trait FontTrait {
 		foreach ($unicode as $char) {
 			if ($char < 256) {
 				$outstr .= chr($char);
-			} elseif (array_key_exists($char, LIMEPDF_FONT_DATA::$uni_utf8tolatin)) {
+			} elseif (array_key_exists($char, $this->$uni_utf8tolatin)) {
 				// map from UTF-8
-				$outstr .= chr(LIMEPDF_FONT_DATA::$uni_utf8tolatin[$char]);
+				$outstr .= chr($this->$uni_utf8tolatin[$char]);
 			} elseif ($char == 0xFFFD) {
 				// skip
 			} else {
@@ -2128,18 +2148,18 @@ trait FontTrait {
 		$pel = 0;
 		// max level
 		$maxlevel = 0;
-		if (\LimePDF\Support\StaticTrait::empty_string($str)) {
+		if (self::empty_string($str)) {
 			// create string from array
 			$str = self::UTF8ArrSubString($ta, '', '', $isunicode);
 		}
 		// check if string contains arabic text
-		if (preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $str)) {
+		if (preg_match(self::$uni_RE_PATTERN_ARABIC, $str)) {
 			$arabic = true;
 		} else {
 			$arabic = false;
 		}
 		// check if string contains RTL text
-		if (!($forcertl OR $arabic OR preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $str))) {
+		if (!($forcertl OR $arabic OR preg_match(self::$uni_RE_PATTERN_RTL, $str))) {
 			return $ta;
 		}
 
@@ -2154,7 +2174,7 @@ trait FontTrait {
 			// P2. In each paragraph, find the first character of type L, AL, or R.
 			// P3. If a character is found in P2 and it is of type AL or R, then set the paragraph embedding level to one; otherwise, set it to zero.
 			for ($i=0; $i < $numchars; ++$i) {
-				$type = LIMEPDF_FONT_DATA::$uni_type[$ta[$i]];
+				$type = $this->$uni_type[$ta[$i]];
 				if ($type == 'L') {
 					$pel = 0;
 					break;
@@ -2180,62 +2200,62 @@ trait FontTrait {
 		// X1. Begin by setting the current embedding level to the paragraph embedding level. Set the directional override status to neutral. Process each character iteratively, applying rules X2 through X9. Only embedding levels from 0 to 61 are valid in this phase.
 		// In the resolution of levels in rules I1 and I2, the maximum embedding level of 62 can be reached.
 		for ($i=0; $i < $numchars; ++$i) {
-			if ($ta[$i] == LIMEPDF_FONT_DATA::$uni_RLE) {
+			if ($ta[$i] == $this->$uni_RLE) {
 				// X2. With each RLE, compute the least greater odd embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to neutral.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + ($cel % 2) + 1;
 				if ($next_level < 62) {
-					$remember[] = array('num' => LIMEPDF_FONT_DATA::$uni_RLE, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_RLE, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'N';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == LIMEPDF_FONT_DATA::$uni_LRE) {
+			} elseif ($ta[$i] == $this->$uni_LRE) {
 				// X3. With each LRE, compute the least greater even embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to neutral.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + 2 - ($cel % 2);
 				if ( $next_level < 62 ) {
-					$remember[] = array('num' => LIMEPDF_FONT_DATA::$uni_LRE, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_LRE, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'N';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == LIMEPDF_FONT_DATA::$uni_RLO) {
+			} elseif ($ta[$i] == $this->$uni_RLO) {
 				// X4. With each RLO, compute the least greater odd embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to right-to-left.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + ($cel % 2) + 1;
 				if ($next_level < 62) {
-					$remember[] = array('num' => LIMEPDF_FONT_DATA::$uni_RLO, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_RLO, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'R';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == LIMEPDF_FONT_DATA::$uni_LRO) {
+			} elseif ($ta[$i] == $this->$uni_LRO) {
 				// X5. With each LRO, compute the least greater even embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to left-to-right.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + 2 - ($cel % 2);
 				if ( $next_level < 62 ) {
-					$remember[] = array('num' => LIMEPDF_FONT_DATA::$uni_LRO, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_LRO, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'L';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == LIMEPDF_FONT_DATA::$uni_PDF) {
+			} elseif ($ta[$i] == $this->$uni_PDF) {
 				// X7. With each PDF, determine the matching embedding or override code. If there was a valid matching code, restore (pop) the last remembered (pushed) embedding level and directional override.
 				if (count($remember)) {
 					$last = count($remember ) - 1;
-					if (($remember[$last]['num'] == LIMEPDF_FONT_DATA::$uni_RLE) OR
-						($remember[$last]['num'] == LIMEPDF_FONT_DATA::$uni_LRE) OR
-						($remember[$last]['num'] == LIMEPDF_FONT_DATA::$uni_RLO) OR
-						($remember[$last]['num'] == LIMEPDF_FONT_DATA::$uni_LRO)) {
+					if (($remember[$last]['num'] == $this->$uni_RLE) OR
+						($remember[$last]['num'] == $this->$uni_LRE) OR
+						($remember[$last]['num'] == $this->$uni_RLO) OR
+						($remember[$last]['num'] == $this->$uni_LRO)) {
 						$match = array_pop($remember);
 						$cel = $match['cel'];
 						$dos = $match['dos'];
@@ -2243,19 +2263,19 @@ trait FontTrait {
 						$eor = ($cel > $match['cel'] ? $cel : $match['cel']) % 2 ? 'R' : 'L';
 					}
 				}
-			} elseif (($ta[$i] != LIMEPDF_FONT_DATA::$uni_RLE) AND
-							 ($ta[$i] != LIMEPDF_FONT_DATA::$uni_LRE) AND
-							 ($ta[$i] != LIMEPDF_FONT_DATA::$uni_RLO) AND
-							 ($ta[$i] != LIMEPDF_FONT_DATA::$uni_LRO) AND
-							 ($ta[$i] != LIMEPDF_FONT_DATA::$uni_PDF)) {
+			} elseif (($ta[$i] != $this->$uni_RLE) AND
+							 ($ta[$i] != $this->$uni_LRE) AND
+							 ($ta[$i] != $this->$uni_RLO) AND
+							 ($ta[$i] != $this->$uni_LRO) AND
+							 ($ta[$i] != $this->$uni_PDF)) {
 				// X6. For all types besides RLE, LRE, RLO, LRO, and PDF:
 				//	a. Set the level of the current character to the current embedding level.
 				//	b. Whenever the directional override status is not neutral, reset the current character type to the directional override status.
 				if ($dos != 'N') {
 					$chardir = $dos;
 				} else {
-					if (isset(LIMEPDF_FONT_DATA::$uni_type[$ta[$i]])) {
-						$chardir = LIMEPDF_FONT_DATA::$uni_type[$ta[$i]];
+					if (isset($this->$uni_type[$ta[$i]])) {
+						$chardir = $this->$uni_type[$ta[$i]];
 					} else {
 						$chardir = 'L';
 					}
@@ -2508,7 +2528,7 @@ trait FontTrait {
 			$charAL = array();
 			$x = 0;
 			for ($i=0; $i < $numchars; ++$i) {
-				if ((LIMEPDF_FONT_DATA::$uni_type[$chardata[$i]['char']] == 'AL') OR ($chardata[$i]['char'] == 32) OR ($chardata[$i]['char'] == 8204)) {
+				if (($this->$uni_type[$chardata[$i]['char']] == 'AL') OR ($chardata[$i]['char'] == 32) OR ($chardata[$i]['char'] == 8204)) {
 					$charAL[$x] = $chardata[$i];
 					$charAL[$x]['i'] = $i;
 					$chardata[$i]['x'] = $x;
@@ -2528,7 +2548,7 @@ trait FontTrait {
 				} else {
 					$nextchar = false;
 				}
-				if (LIMEPDF_FONT_DATA::$uni_type[$thischar['char']] == 'AL') {
+				if ($this->$uni_type[$thischar['char']] == 'AL') {
 					$x = $thischar['x'];
 					if ($x > 0) {
 						$prevchar = $charAL[($x-1)];
@@ -2542,7 +2562,7 @@ trait FontTrait {
 					}
 					// if laa letter
 					if (($prevchar !== false) AND ($prevchar['char'] == 1604) AND (in_array($thischar['char'], $alfletter))) {
-						$arabicarr = LIMEPDF_FONT_DATA::$uni_laa_array;
+						$arabicarr = $this->$uni_laa_array;
 						$laaletter = true;
 						if ($x > 1) {
 							$prevchar = $charAL[($x-2)];
@@ -2550,12 +2570,12 @@ trait FontTrait {
 							$prevchar = false;
 						}
 					} else {
-						$arabicarr = LIMEPDF_FONT_DATA::$uni_arabicsubst;
+						$arabicarr = $this->$uni_arabicsubst;
 						$laaletter = false;
 					}
 					if (($prevchar !== false) AND ($nextchar !== false) AND
-						((LIMEPDF_FONT_DATA::$uni_type[$prevchar['char']] == 'AL') OR (LIMEPDF_FONT_DATA::$uni_type[$prevchar['char']] == 'NSM')) AND
-						((LIMEPDF_FONT_DATA::$uni_type[$nextchar['char']] == 'AL') OR (LIMEPDF_FONT_DATA::$uni_type[$nextchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$prevchar['char']] == 'AL') OR ($this->$uni_type[$prevchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$nextchar['char']] == 'AL') OR ($this->$uni_type[$nextchar['char']] == 'NSM')) AND
 						($prevchar['type'] == $thischar['type']) AND
 						($nextchar['type'] == $thischar['type']) AND
 						($nextchar['char'] != 1567)) {
@@ -2571,7 +2591,7 @@ trait FontTrait {
 							}
 						}
 					} elseif (($nextchar !== false) AND
-						((LIMEPDF_FONT_DATA::$uni_type[$nextchar['char']] == 'AL') OR (LIMEPDF_FONT_DATA::$uni_type[$nextchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$nextchar['char']] == 'AL') OR ($this->$uni_type[$nextchar['char']] == 'NSM')) AND
 						($nextchar['type'] == $thischar['type']) AND
 						($nextchar['char'] != 1567)) {
 						if (isset($arabicarr[$chardata[$i]['char']][2])) {
@@ -2579,7 +2599,7 @@ trait FontTrait {
 							$chardata2[$i]['char'] = $arabicarr[$thischar['char']][2];
 						}
 					} elseif ((($prevchar !== false) AND
-						((LIMEPDF_FONT_DATA::$uni_type[$prevchar['char']] == 'AL') OR (LIMEPDF_FONT_DATA::$uni_type[$prevchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$prevchar['char']] == 'AL') OR ($this->$uni_type[$prevchar['char']] == 'NSM')) AND
 						($prevchar['type'] == $thischar['type'])) OR
 						(($nextchar !== false) AND ($nextchar['char'] == 1567))) {
 						// final
@@ -2620,11 +2640,11 @@ trait FontTrait {
 			 * Putting the combining mark and shadda in the same glyph allows us to avoid the two marks overlapping each other in an illegible manner.
 			 */
 			for ($i = 0; $i < ($numchars-1); ++$i) {
-				if (($chardata2[$i]['char'] == 1617) AND (isset(LIMEPDF_FONT_DATA::$uni_diacritics[($chardata2[$i+1]['char'])]))) {
+				if (($chardata2[$i]['char'] == 1617) AND (isset($this->$uni_diacritics[($chardata2[$i+1]['char'])]))) {
 					// check if the subtitution font is defined on current font
-					if (isset($currentfont['cw'][(LIMEPDF_FONT_DATA::$uni_diacritics[($chardata2[$i+1]['char'])])])) {
+					if (isset($currentfont['cw'][($this->$uni_diacritics[($chardata2[$i+1]['char'])])])) {
 						$chardata2[$i]['char'] = false;
-						$chardata2[$i+1]['char'] = LIMEPDF_FONT_DATA::$uni_diacritics[($chardata2[$i+1]['char'])];
+						$chardata2[$i+1]['char'] = $this->$uni_diacritics[($chardata2[$i+1]['char'])];
 					}
 				}
 			}
@@ -2650,9 +2670,9 @@ trait FontTrait {
 			for ($i=0; $i < $numchars; ++$i) {
 				if ($chardata[$i]['level'] >= $j) {
 					$onlevel = true;
-					if (isset(LIMEPDF_FONT_DATA::$uni_mirror[$chardata[$i]['char']])) {
+					if (isset($this->$uni_mirror[$chardata[$i]['char']])) {
 						// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
-						$chardata[$i]['char'] = LIMEPDF_FONT_DATA::$uni_mirror[$chardata[$i]['char']];
+						$chardata[$i]['char'] = $this->$uni_mirror[$chardata[$i]['char']];
 					}
 					$revarr[] = $chardata[$i];
 				} else {

@@ -1,7 +1,7 @@
 <?php
 
 namespace LimePDF\Pages;
-// Include the static file
+
 use LimePDF\Support\StaticTrait;
 
 trait PagesTrait {

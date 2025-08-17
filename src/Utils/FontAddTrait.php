@@ -1,11 +1,10 @@
 <?php
 
-namespace LimePDF\Fonts;
+namespace LimePDF\Utils;
 
-// Include the static file
 use LimePDF\Support\StaticTrait;
 
-trait FontsTrait {	
+trait FontAddTrait {	
 
 	/**
 	 * Imports a TrueType, Type1, core, or CID0 font and makes it available.
@@ -112,12 +111,12 @@ trait FontsTrait {
 		if ($this->empty_string($fontfile) OR (!@$this->file_exists($fontfile))) {
 			// build a standard filenames for specified font
 			$tmp_fontfile = str_replace(' ', '', $family).strtolower($style).'.php';
-			$fontfile = LIMEPDF_FONT::getFontFullPath($tmp_fontfile, $fontdir);
+			$fontfile = $this->getFontFullPath($tmp_fontfile, $fontdir);
 			if ($this->empty_string($fontfile)) {
 				$missing_style = true;
 				// try to remove the style part
 				$tmp_fontfile = str_replace(' ', '', $family).'.php';
-				$fontfile = LIMEPDF_FONT::getFontFullPath($tmp_fontfile, $fontdir);
+				$fontfile = $this->getFontFullPath($tmp_fontfile, $fontdir);
 			}
 		}
 		// include font file

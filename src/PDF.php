@@ -11,9 +11,6 @@ namespace LimePDF;
 	// includes Vars
 	use LimePDF\Encryption\EncryptionTrait;
 
-	use LimePDF\Fonts\FontManagerTrait;
-	use LimePDF\Fonts\FontsTrait;	
-
 	use LimePDF\Graphics\BarcodeTrait;
 	use LimePDF\Graphics\ColumnsTrait;
 	use LimePDF\Graphics\DrawTrait;
@@ -52,6 +49,8 @@ namespace LimePDF;
 	use LimePDF\Text\TextTrait;	
 	use LimePDF\Text\WriteTrait;
 
+	use LimePDF\Utils\FontManagerTrait;
+	use LimePDF\Utils\FontAddTrait;	
 	use LimePDF\Utils\JavascriptTrait;
 	use LimePDF\Utils\EnvironmentTrait;
 	use LimePDF\Utils\MiscTrait;	
@@ -88,7 +87,7 @@ class PDF {
 	use EnvironmentTrait;
 
 	use FontManagerTrait;	
-	use FontsTrait;
+	use FontAddTrait;	
 	use FormsTrait;
 
 	use GraphicsTrait;
@@ -258,7 +257,7 @@ class PDF {
 		// set default JPEG quality
 		$this->jpeg_quality = 75;
 		// initialize some settings
-		LIMEPDF_FONT::utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
+		$this->utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
 		// set default font
 		$this->setFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
 		$this->setHeaderFont(array($this->FontFamily, $this->FontStyle, $this->FontSizePt));
@@ -378,6 +377,28 @@ class PDF {
 		$this->offsets[$objid] = $this->bufferlen;
 		$this->pageobjects[$this->page][] = $objid;
 		return $objid.' 0 obj';
+	}
+
+	/**
+	 * Output error message
+	 * @param string $msg The error message
+	 * @protected
+	 */
+	protected function outputError(string $msg): void {
+		// Choose one of these approaches:
+		
+		// Option A: Simple error output
+		echo "<strong>LimePDF Error:</strong> " . $msg;
+		
+		// Option B: More formatted error
+		echo "<!DOCTYPE html><html><head><title>LimePDF Error</title></head><body>";
+		echo "<h1 style='color: red;'>LimePDF Error</h1>";
+		echo "<p style='font-family: monospace; background: #f0f0f0; padding: 10px;'>" . $msg . "</p>";
+		echo "</body></html>";
+		
+		// Option C: Log to error log and display simple message
+		error_log("LimePDF Error: " . strip_tags($msg));
+		echo "LimePDF Error: " . $msg;
 	}
 	
 	/**

@@ -84,7 +84,7 @@ $pdfConfig = [
 ];
 
 // create new PDF document
-$pdf = new TCPDF(
+$pdf = new PDF(
     $pdfConfig['layout']['orientation'],
     $pdfConfig['layout']['unit'],
     $pdfConfig['layout']['pageFormat'],
@@ -164,6 +164,7 @@ $pdf->setFontSubsetting(true);
 // dejavusans is a UTF-8 Unicode font, if you only need to
 // print standard ASCII chars, you can use core fonts like
 // helvetica or times to reduce file size.
+//$pdf->setFont('helvetica', '', 14, '', true);
 $pdf->setFont('dejavusans', '', 14, '', true);
 
 // Add a page

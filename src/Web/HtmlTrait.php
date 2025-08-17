@@ -2,6 +2,11 @@
 
 namespace LimePDF\Web;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\FontDataTrait;
+use LimePDF\Include\ImagesTrait;
+use LimePDF\Support\StaticTrait;
+
 trait HtmlTrait {
 
     /**
@@ -174,7 +179,7 @@ trait HtmlTrait {
 		$this->listordered = array();
 		$this->listcount = array();
 		$this->lispacer = '';
-		if ((LIMEPDF_STATIC::empty_string($this->lasth)) OR ($reseth)) {
+		if (($this->empty_string($this->lasth)) OR ($reseth)) {
 			// reset row height
 			$this->resetLastH();
 		}
@@ -267,7 +272,7 @@ trait HtmlTrait {
 			}
 			// print THEAD block
 			if (($dom[$key]['value'] == 'tr') AND isset($dom[$key]['thead']) AND $dom[$key]['thead']) {
-				if (isset($dom[$key]['parent']) AND isset($dom[$dom[$key]['parent']]['thead']) AND !LIMEPDF_STATIC::empty_string($dom[$dom[$key]['parent']]['thead'])) {
+				if (isset($dom[$key]['parent']) AND isset($dom[$dom[$key]['parent']]['thead']) AND !$this->empty_string($dom[$dom[$key]['parent']]['thead'])) {
 					$this->inthead = true;
 					// print table header (thead)
 					$this->writeHTML($this->thead, false, false, false, false, '');
@@ -521,7 +526,7 @@ trait HtmlTrait {
 				if (isset($dom[$key]['align'])) {
 					$lalign = $dom[$key]['align'];
 				}
-				if (LIMEPDF_STATIC::empty_string($lalign)) {
+				if ($this->empty_string($lalign)) {
 					$lalign = $align;
 				}
 			}
@@ -590,14 +595,14 @@ trait HtmlTrait {
 						$no = 0; // number of spaces on a line contained on a single block
 						if ($this->isRTLTextDir()) { // RTL
 							// remove left space if exist
-							$pos1 = LIMEPDF_STATIC::revstrpos($pmid, '[(');
+							$pos1 = $this->revstrpos($pmid, '[(');
 							if ($pos1 > 0) {
 								$pos1 = intval($pos1);
 								if ($this->isUnicodeFont()) {
-									$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
+									$pos2 = intval($this->revstrpos($pmid, '[('.chr(0).chr(32)));
 									$spacelen = 2;
 								} else {
-									$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, '[('.chr(32)));
+									$pos2 = intval($this->revstrpos($pmid, '[('.chr(32)));
 									$spacelen = 1;
 								}
 								if ($pos1 == $pos2) {
@@ -611,14 +616,14 @@ trait HtmlTrait {
 							}
 						} else { // LTR
 							// remove right space if exist
-							$pos1 = LIMEPDF_STATIC::revstrpos($pmid, ')]');
+							$pos1 = $this->revstrpos($pmid, ')]');
 							if ($pos1 > 0) {
 								$pos1 = intval($pos1);
 								if ($this->isUnicodeFont()) {
-									$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
+									$pos2 = intval($this->revstrpos($pmid, chr(0).chr(32).')]')) + 2;
 									$spacelen = 2;
 								} else {
-									$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, chr(32).')]')) + 1;
+									$pos2 = intval($this->revstrpos($pmid, chr(32).')]')) + 1;
 									$spacelen = 1;
 								}
 								if ($pos1 == $pos2) {
@@ -759,7 +764,7 @@ trait HtmlTrait {
 										}
 										case 're': {
 											// justify block
-											if (!LIMEPDF_STATIC::empty_string($this->lispacer)) {
+											if (!$this->empty_string($this->lispacer)) {
 												$this->lispacer = '';
 												break;
 											}
@@ -1276,7 +1281,7 @@ trait HtmlTrait {
 				}
 			} elseif (strlen($dom[$key]['value']) > 0) {
 				// print list-item
-				if (!LIMEPDF_STATIC::empty_string($this->lispacer) AND ($this->lispacer != '^')) {
+				if (!$this->empty_string($this->lispacer) AND ($this->lispacer != '^')) {
 					$this->setFont($pfontname, $pfontstyle, $pfontsize);
 					$this->resetLastH();
 					$minstartliney = $this->y;
@@ -1296,7 +1301,7 @@ trait HtmlTrait {
 				}
 				// text
 				$this->htmlvspace = 0;
-				$isRTLString = preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
+				$isRTLString = preg_match($this->$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match($this->$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
 				if ((!$this->premode) AND $this->isRTLTextDir() AND !$isRTLString) {
 					// reverse spaces order
 					$lsp = ''; // left spaces
@@ -1376,7 +1381,7 @@ trait HtmlTrait {
 									$tmp_fontsize = isset($dom[$nkey]['fontsize']) ? $dom[$nkey]['fontsize'] : $this->FontSizePt;
 									$same_textdir = ($dom[$nkey]['dir'] == $dom[$key]['dir']);
 								} else {
-									$nextstr = LIMEPDF_STATIC::pregSplit('/'.$this->re_space['p'].'+/', $this->re_space['m'], $dom[$nkey]['value']);
+									$nextstr = $this->pregSplit('/'.$this->re_space['p'].'+/', $this->re_space['m'], $dom[$nkey]['value']);
 									if (isset($nextstr[0]) AND $same_textdir) {
 										$wadj += $this->GetStringWidth($nextstr[0], $tmp_fontname, $tmp_fontstyle, $tmp_fontsize);
 										if (isset($nextstr[1])) {
@@ -1389,7 +1394,7 @@ trait HtmlTrait {
 						}
 						if (($wadj > 0) AND (($strlinelen + $wadj) >= $cwa)) {
 							$wadj = 0;
-							$nextstr = LIMEPDF_STATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $dom[$key]['value']);
+							$nextstr = $this->pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $dom[$key]['value']);
 							$numblks = count($nextstr);
 							if ($numblks > 1) {
 								// try to split on blank spaces
@@ -1538,14 +1543,14 @@ trait HtmlTrait {
 				$no = 0; // number of spaces on a line contained on a single block
 				if ($this->isRTLTextDir()) { // RTL
 					// remove left space if exist
-					$pos1 = LIMEPDF_STATIC::revstrpos($pmid, '[(');
+					$pos1 = $this->revstrpos($pmid, '[(');
 					if ($pos1 > 0) {
 						$pos1 = intval($pos1);
 						if ($this->isUnicodeFont()) {
-							$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
+							$pos2 = intval($this->revstrpos($pmid, '[('.chr(0).chr(32)));
 							$spacelen = 2;
 						} else {
-							$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, '[('.chr(32)));
+							$pos2 = intval($this->revstrpos($pmid, '[('.chr(32)));
 							$spacelen = 1;
 						}
 						if ($pos1 == $pos2) {
@@ -1559,14 +1564,14 @@ trait HtmlTrait {
 					}
 				} else { // LTR
 					// remove right space if exist
-					$pos1 = LIMEPDF_STATIC::revstrpos($pmid, ')]');
+					$pos1 = $this->revstrpos($pmid, ')]');
 					if ($pos1 > 0) {
 						$pos1 = intval($pos1);
 						if ($this->isUnicodeFont()) {
-							$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
+							$pos2 = intval($this->revstrpos($pmid, chr(0).chr(32).')]')) + 2;
 							$spacelen = 2;
 						} else {
-							$pos2 = intval(LIMEPDF_STATIC::revstrpos($pmid, chr(32).')]')) + 1;
+							$pos2 = intval($this->revstrpos($pmid, chr(32).')]')) + 1;
 							$spacelen = 1;
 						}
 						if ($pos1 == $pos2) {
@@ -1724,7 +1729,7 @@ trait HtmlTrait {
 				if (!isset($dom[$key]['attribute']['nested']) OR ($dom[$key]['attribute']['nested'] != 'true')) {
 					$this->htmlvspace = 0;
 					// set table header
-					if (!LIMEPDF_STATIC::empty_string($dom[$key]['thead'])) {
+					if (!$this->empty_string($dom[$key]['thead'])) {
 						// set table header
 						$this->thead = $dom[$key]['thead'];
 						if (!isset($this->theadMargins) OR (empty($this->theadMargins))) {
@@ -1841,7 +1846,7 @@ trait HtmlTrait {
 				} elseif ( $this->allowLocalFiles && substr($imgsrc, 0, 7) === 'file://') {
 					// get image type from a local file path
 					$imgsrc = substr($imgsrc, 7);
-					$type = LIMEPDF_IMAGES::getImageFileType($imgsrc);
+					$type = $this->getImageFileType($imgsrc);
 				} elseif ($this->hasExtForbiddenProtocol($imgsrc)) {
 					break;
 				} else {
@@ -1866,7 +1871,7 @@ trait HtmlTrait {
 						}
 					}
 					// get image type
-					$type = LIMEPDF_IMAGES::getImageFileType($imgsrc);
+					$type = $this->getImageFileType($imgsrc);
 				}
 				if (!isset($tag['width'])) {
 					$tag['width'] = 0;
@@ -1900,7 +1905,7 @@ trait HtmlTrait {
 				$prevy = $this->y;
 				$xpos = $this->x;
 				$imglink = '';
-				if (isset($this->HREF['url']) AND !LIMEPDF_STATIC::empty_string($this->HREF['url'])) {
+				if (isset($this->HREF['url']) AND !$this->empty_string($this->HREF['url'])) {
 					$imglink = $this->HREF['url'];
 					if ($imglink[0] == '#' AND isset($imglink[1]) AND is_numeric($imglink[1])) {
 						// convert url to internal link
@@ -2015,11 +2020,11 @@ trait HtmlTrait {
 				}
 				if ($this->listordered[$this->listnum]) {
 					// ordered item
-					if (isset($parent['attribute']['type']) AND !LIMEPDF_STATIC::empty_string($parent['attribute']['type'])) {
+					if (isset($parent['attribute']['type']) AND !$this->empty_string($parent['attribute']['type'])) {
 						$this->lispacer = $parent['attribute']['type'];
-					} elseif (isset($parent['listtype']) AND !LIMEPDF_STATIC::empty_string($parent['listtype'])) {
+					} elseif (isset($parent['listtype']) AND !$this->empty_string($parent['listtype'])) {
 						$this->lispacer = $parent['listtype'];
-					} elseif (isset($this->lisymbol) AND !LIMEPDF_STATIC::empty_string($this->lisymbol)) {
+					} elseif (isset($this->lisymbol) AND !$this->empty_string($this->lisymbol)) {
 						$this->lispacer = $this->lisymbol;
 					} else {
 						$this->lispacer = '#';
@@ -2030,11 +2035,11 @@ trait HtmlTrait {
 					}
 				} else {
 					// unordered item
-					if (isset($parent['attribute']['type']) AND !LIMEPDF_STATIC::empty_string($parent['attribute']['type'])) {
+					if (isset($parent['attribute']['type']) AND !$this->empty_string($parent['attribute']['type'])) {
 						$this->lispacer = $parent['attribute']['type'];
-					} elseif (isset($parent['listtype']) AND !LIMEPDF_STATIC::empty_string($parent['listtype'])) {
+					} elseif (isset($parent['listtype']) AND !$this->empty_string($parent['listtype'])) {
 						$this->lispacer = $parent['listtype'];
-					} elseif (isset($this->lisymbol) AND !LIMEPDF_STATIC::empty_string($this->lisymbol)) {
+					} elseif (isset($this->lisymbol) AND !$this->empty_string($this->lisymbol)) {
 						$this->lispacer = $this->lisymbol;
 					} else {
 						$this->lispacer = '!';
@@ -2106,24 +2111,24 @@ trait HtmlTrait {
 				break;
 			}
 			case 'input': {
-				if (isset($tag['attribute']['name']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['name'])) {
+				if (isset($tag['attribute']['name']) AND !$this->empty_string($tag['attribute']['name'])) {
 					$name = $tag['attribute']['name'];
 				} else {
 					break;
 				}
 				$prop = array();
 				$opt = array();
-				if (isset($tag['attribute']['readonly']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['readonly'])) {
+				if (isset($tag['attribute']['readonly']) AND !$this->empty_string($tag['attribute']['readonly'])) {
 					$prop['readonly'] = true;
 				}
-				if (isset($tag['attribute']['value']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['value'])) {
+				if (isset($tag['attribute']['value']) AND !$this->empty_string($tag['attribute']['value'])) {
 					$value = $tag['attribute']['value'];
 				}
-				if (isset($tag['attribute']['maxlength']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['maxlength'])) {
+				if (isset($tag['attribute']['maxlength']) AND !$this->empty_string($tag['attribute']['maxlength'])) {
 					$opt['maxlen'] = intval($tag['attribute']['maxlength']);
 				}
 				$h = $this->getCellHeight($this->FontSize);
-				if (isset($tag['attribute']['size']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['size'])) {
+				if (isset($tag['attribute']['size']) AND !$this->empty_string($tag['attribute']['size'])) {
 					$w = intval($tag['attribute']['size']) * $this->GetStringWidth(chr(32)) * 2;
 				} else {
 					$w = $h;
@@ -2231,7 +2236,7 @@ trait HtmlTrait {
 					}
 					case 'image': {
 						// THIS TYPE MUST BE FIXED
-						if (isset($tag['attribute']['src']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['src'])) {
+						if (isset($tag['attribute']['src']) AND !$this->empty_string($tag['attribute']['src'])) {
 							$img = $tag['attribute']['src'];
 						} else {
 							break;
@@ -2267,23 +2272,23 @@ trait HtmlTrait {
 			case 'textarea': {
 				$prop = array();
 				$opt = array();
-				if (isset($tag['attribute']['readonly']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['readonly'])) {
+				if (isset($tag['attribute']['readonly']) AND !$this->empty_string($tag['attribute']['readonly'])) {
 					$prop['readonly'] = true;
 				}
-				if (isset($tag['attribute']['name']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['name'])) {
+				if (isset($tag['attribute']['name']) AND !$this->empty_string($tag['attribute']['name'])) {
 					$name = $tag['attribute']['name'];
 				} else {
 					break;
 				}
-				if (isset($tag['attribute']['value']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['value'])) {
+				if (isset($tag['attribute']['value']) AND !$this->empty_string($tag['attribute']['value'])) {
 					$opt['v'] = $tag['attribute']['value'];
 				}
-				if (isset($tag['attribute']['cols']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['cols'])) {
+				if (isset($tag['attribute']['cols']) AND !$this->empty_string($tag['attribute']['cols'])) {
 					$w = intval($tag['attribute']['cols']) * $this->GetStringWidth(chr(32)) * 2;
 				} else {
 					$w = 40;
 				}
-				if (isset($tag['attribute']['rows']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['rows'])) {
+				if (isset($tag['attribute']['rows']) AND !$this->empty_string($tag['attribute']['rows'])) {
 					$h = intval($tag['attribute']['rows']) * $this->getCellHeight($this->FontSize);
 				} else {
 					$h = 10;
@@ -2294,18 +2299,18 @@ trait HtmlTrait {
 			}
 			case 'select': {
 				$h = $this->getCellHeight($this->FontSize);
-				if (isset($tag['attribute']['size']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['size'])) {
+				if (isset($tag['attribute']['size']) AND !$this->empty_string($tag['attribute']['size'])) {
 					$h *= ($tag['attribute']['size'] + 1);
 				}
 				$prop = array();
 				$opt = array();
-				if (isset($tag['attribute']['name']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['name'])) {
+				if (isset($tag['attribute']['name']) AND !$this->empty_string($tag['attribute']['name'])) {
 					$name = $tag['attribute']['name'];
 				} else {
 					break;
 				}
 				$w = 0;
-				if (isset($tag['attribute']['opt']) AND !LIMEPDF_STATIC::empty_string($tag['attribute']['opt'])) {
+				if (isset($tag['attribute']['opt']) AND !$this->empty_string($tag['attribute']['opt'])) {
 					$options = explode('#!NwL!#', $tag['attribute']['opt']);
 					$values = array();
 					foreach ($options as $val) {
@@ -2592,9 +2597,9 @@ trait HtmlTrait {
 						$starty = $y;
 						$w = abs($cellpos['endx'] - $cellpos['startx']);
 						// get border modes
-						$border_start = LIMEPDF_STATIC::getBorderMode($border, $position='start', $this->opencell);
-						$border_end = LIMEPDF_STATIC::getBorderMode($border, $position='end', $this->opencell);
-						$border_middle = LIMEPDF_STATIC::getBorderMode($border, $position='middle', $this->opencell);
+						$border_start = $this->getBorderMode($border, $position='start', $this->opencell);
+						$border_end = $this->getBorderMode($border, $position='end', $this->opencell);
+						$border_middle = $this->getBorderMode($border, $position='middle', $this->opencell);
 						// design borders around HTML cells.
 						for ($page = $startpage; $page <= $endpage; ++$page) { // for each page
 							$ccode = '';
@@ -2968,9 +2973,9 @@ trait HtmlTrait {
 		if (isset($tag['border']) AND !empty($tag['border'])) {
 			// get border style
 			$border = $tag['border'];
-			if (!LIMEPDF_STATIC::empty_string($this->thead) AND (!$this->inthead)) {
+			if (!$this->empty_string($this->thead) AND (!$this->inthead)) {
 				// border for table header
-				$border = LIMEPDF_STATIC::getBorderMode($border, $position='middle', $this->opencell);
+				$border = $this->getBorderMode($border, $position='middle', $this->opencell);
 			}
 		}
 		if (isset($tag['bgcolor']) AND ($tag['bgcolor'] !== false)) {
@@ -3024,9 +3029,9 @@ trait HtmlTrait {
 			$this->num_columns = 1;
 		}
 		// get border modes
-		$border_start = LIMEPDF_STATIC::getBorderMode($border, $position='start', $this->opencell);
-		$border_end = LIMEPDF_STATIC::getBorderMode($border, $position='end', $this->opencell);
-		$border_middle = LIMEPDF_STATIC::getBorderMode($border, $position='middle', $this->opencell);
+		$border_start = $this->getBorderMode($border, $position='start', $this->opencell);
+		$border_end = $this->getBorderMode($border, $position='end', $this->opencell);
+		$border_middle = $this->getBorderMode($border, $position='middle', $this->opencell);
 		// temporary disable page regions
 		$temp_page_regions = $this->page_regions;
 		$this->page_regions = array();
@@ -3270,12 +3275,12 @@ trait HtmlTrait {
 			}
 			case 'i':
 			case 'lower-roman': {
-				$textitem = strtolower(LIMEPDF_STATIC::intToRoman($this->listcount[$this->listnum]));
+				$textitem = strtolower($this->intToRoman($this->listcount[$this->listnum]));
 				break;
 			}
 			case 'I':
 			case 'upper-roman': {
-				$textitem = LIMEPDF_STATIC::intToRoman($this->listcount[$this->listnum]);
+				$textitem = $this->intToRoman($this->listcount[$this->listnum]);
 				break;
 			}
 			case 'a':
@@ -3291,7 +3296,7 @@ trait HtmlTrait {
 				break;
 			}
 			case 'lower-greek': {
-				$textitem = LIMEPDF_FONT::unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
+				$textitem = $this->unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
 				break;
 			}
 			/*
@@ -3325,7 +3330,7 @@ trait HtmlTrait {
 				$textitem = $this->listcount[$this->listnum];
 			}
 		}
-		if (!LIMEPDF_STATIC::empty_string($textitem)) {
+		if (!$this->empty_string($textitem)) {
 			// Check whether we need a new page or new column
 			$prev_y = $this->y;
 			$h = $this->getCellHeight($this->FontSize);
@@ -3396,7 +3401,7 @@ trait HtmlTrait {
 		foreach ($this->outlines as $key => $outline) {
 			// get HTML template
 			$row = $templates[$outline['l']];
-			if (LIMEPDF_STATIC::empty_string($page)) {
+			if ($this->empty_string($page)) {
 				$pagenum = $outline['p'];
 			} else {
 				// placemark to be replaced with the correct number
@@ -3439,7 +3444,7 @@ trait HtmlTrait {
 			}
 		}
 		$maxpage = max($maxpage, $page_last);
-		if (!LIMEPDF_STATIC::empty_string($page)) {
+		if (!$this->empty_string($page)) {
 			for ($p = $page_first; $p <= $page_last; ++$p) {
 				// get page data
 				$temppage = $this->getPageBuffer($p);
@@ -3454,16 +3459,16 @@ trait HtmlTrait {
 					} else {
 						$np = $n;
 					}
-					$na = LIMEPDF_STATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-					$nu = LIMEPDF_FONT::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+					$na = $this->formatTOCPageNumber(($this->starting_page_number + $np - 1));
+					$nu = $this->UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
 					// replace aliases with numbers
 					foreach ($pnalias['u'] as $u) {
 						if ($correct_align) {
 							$sfill = str_repeat($filler, (strlen($u) - strlen($nu.' ')));
 							if ($this->rtl) {
-								$nr = $nu.LIMEPDF_FONT::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+								$nr = $nu.$this->UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
 							} else {
-								$nr = LIMEPDF_FONT::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+								$nr = $this->UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
 							}
 						} else {
 							$nr = $nu;
@@ -3522,6 +3527,6 @@ trait HtmlTrait {
 // 	 * @see setHtmlVSpace()
 // 	 */
 // 	public function fixHTMLCode($html, $default_css='', $tagvs=null, $tidy_options=null) {
-// 		return LIMEPDF_STATIC::fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
+// 		return $this->fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
 // 	}
 }
