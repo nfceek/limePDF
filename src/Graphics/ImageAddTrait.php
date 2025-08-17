@@ -2,7 +2,10 @@
 
 namespace LimePDF\Graphics;
 
-trait ImageTrait {
+use LimePDF\Include\ImageTrait;
+use LimePDF\Support\StaticTrait;
+
+trait ImageAddTrait {
 
 	/**
 	 * Puts an image in the page.
@@ -42,10 +45,10 @@ trait ImageTrait {
 		if ($this->state != 2) {
 			return false;
 		}
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -81,8 +84,8 @@ trait ImageTrait {
 		if (!empty($imgdata)) {
 			// copy image to cache
 			$original_file = $file;
-			$file = LIMEPDF_STATIC::getObjFilename('img', $this->file_id);
-			$fp = LIMEPDF_STATIC::fopenLocal($file, 'w');
+			$file = $this->getObjFilename('img', $this->file_id);
+			$fp = $this->fopenLocal($file, 'w');
 			if (!$fp) {
 				$this->Error('Unable to write file: '.$file);
 			}
@@ -229,7 +232,7 @@ trait ImageTrait {
 			//First use of image, get info
 			$type = strtolower($type);
 			if ($type == '') {
-				$type = LIMEPDF_IMAGES::getImageFileType($file, $imsize);
+				$type = $this->getImageFileType($file, $imsize);
 			} elseif ($type == 'jpg') {
 				$type = 'jpeg';
 			}
@@ -240,7 +243,7 @@ trait ImageTrait {
 			$info = false;
 			if ((method_exists('LIMEPDF_IMAGES', $mtd)) AND (!($resize AND (function_exists($gdfunction) OR extension_loaded('imagick'))))) {
 				// TCPDF image functions
-				$info = LIMEPDF_IMAGES::$mtd($file);
+				$info = $this->$mtd($file);
 				if (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)
 					AND (($info === 'pngalpha') OR (isset($info['trns']) AND !empty($info['trns'])))) {
 					return $this->ImagePngAlpha($file, $x, $y, $pixw, $pixh, $w, $h, 'PNG', $link, $align, $resize, $dpi, $palign, $filehash);
@@ -254,15 +257,15 @@ trait ImageTrait {
 						if ($resize) {
 							$imgr = imagecreatetruecolor($neww, $newh);
 							if (($type == 'gif') OR ($type == 'png')) {
-								$imgr = LIMEPDF_IMAGES::setGDImageTransparency($imgr, $img);
+								$imgr = $this->setGDImageTransparency($imgr, $img);
 							}
 							imagecopyresampled($imgr, $img, 0, 0, 0, 0, $neww, $newh, $pixw, $pixh);
 							$img = $imgr;
 						}
 						if (($type == 'gif') OR ($type == 'png')) {
-							$info = LIMEPDF_IMAGES::_toPNG($img, LIMEPDF_STATIC::getObjFilename('img', $this->file_id));
+							$info = $this->_toPNG($img, $this->getObjFilename('img', $this->file_id));
 						} else {
-							$info = LIMEPDF_IMAGES::_toJPEG($img, $this->jpeg_quality, LIMEPDF_STATIC::getObjFilename('img', $this->file_id));
+							$info = $this->_toJPEG($img, $this->jpeg_quality, $this->getObjFilename('img', $this->file_id));
 						}
 					}
 				} catch(Exception $e) {
@@ -321,9 +324,9 @@ trait ImageTrait {
 					}
 					$img->setCompressionQuality($this->jpeg_quality);
 					$img->setImageFormat('jpeg');
-					$tempname = LIMEPDF_STATIC::getObjFilename('img', $this->file_id);
+					$tempname = $this->getObjFilename('img', $this->file_id);
 					$img->writeImage($tempname);
-					$info = LIMEPDF_IMAGES::_parsejpeg($tempname);
+					$info = $this->_parsejpeg($tempname);
 					$this->_unlink($tempname);
 					$img->destroy();
 				} catch(Exception $e) {
@@ -460,7 +463,7 @@ trait ImageTrait {
 				$img = new Imagick();
 				$img->readImage($file);
 				// clone image object
-				$imga = LIMEPDF_STATIC::objclone($img);
+				$imga = $this->objclone($img);
 				// extract alpha channel
 				if (method_exists($img, 'setImageAlphaChannel') AND defined('Imagick::ALPHACHANNEL_EXTRACT')) {
 					$img->setImageAlphaChannel(Imagick::ALPHACHANNEL_EXTRACT);

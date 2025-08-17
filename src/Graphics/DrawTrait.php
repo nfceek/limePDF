@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait DrawTrait {
 
 	/**
@@ -93,7 +95,7 @@ trait DrawTrait {
 			$n = $this->n;
 		}
 		$s = $this->_encrypt_data($n, $s);
-		return '('. LIMEPDF_STATIC::_escape($s).')';
+		return '('. $this->_escape($s).')';
 	}
 
 }

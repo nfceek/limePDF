@@ -2,6 +2,10 @@
 
 namespace LimePDF\Text;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\FontDataTrait;
+use LimePDF\Support\StaticTrait;
+
 trait WriteTrait{
     /**
      * Main Write function - orchestrates the text writing process
@@ -70,8 +74,8 @@ trait WriteTrait{
         $cleanText = str_replace("\r", '', $text);
         
         // Get character arrays
-        $chars = LIMEPDF_FONT::UTF8StringToArray($cleanText, $this->isunicode, $this->CurrentFont);
-        $uchars = LIMEPDF_FONT::UTF8ArrayToUniArray($chars, $this->isunicode);
+        $chars = $this->UTF8StringToArray($cleanText, $this->isunicode, $this->CurrentFont);
+        $uchars = $this->UTF8ArrayToUniArray($chars, $this->isunicode);
         
         return [
             'text' => $cleanText,
@@ -97,7 +101,7 @@ trait WriteTrait{
         
         // SHY character replacement setup
         $shy_replacement = 45;
-        $shy_replacement_char = LIMEPDF_FONT::unichr($shy_replacement, $this->isunicode);
+        $shy_replacement_char = $this->unichr($shy_replacement, $this->isunicode);
         $shy_replacement_width = $this->GetCharWidth($shy_replacement);
         
         return [
@@ -114,10 +118,10 @@ trait WriteTrait{
      */
     private function detectTextDirection(string $text): array 
     {
-        $arabic = (bool) preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $text);
+        $arabic = (bool) preg_match(self::$uni_RE_PATTERN_ARABIC, $text);
         $rtlmode = $arabic || 
                    ($this->tmprtl === 'R') || 
-                   (bool) preg_match(LIMEPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $text);
+                   (bool) preg_match(self::$uni_RE_PATTERN_RTL, $text);
         
         return [
             'arabic' => $arabic,
@@ -287,7 +291,7 @@ trait WriteTrait{
             default => $params['align']
         };
         
-        $tmpstr = LIMEPDF_FONT::UniArrSubString($uchars, $j, $i);
+        $tmpstr = $this->UniArrSubString($uchars, $j, $i);
         
         if ($params['firstline']) {
             $lineData = $this->calculateFirstLineMetrics($chars, $j, $i, $tmpstr, $params);
@@ -311,7 +315,7 @@ trait WriteTrait{
         
         if ($params['firstline']) {
             $this->cell_padding = $tmpcellpadding;
-            return ['return' => LIMEPDF_FONT::UniArrSubString($uchars, $i), 'state' => null];
+            return ['return' => $this->UniArrSubString($uchars, $i), 'state' => null];
         }
         
         ++$nl;
@@ -360,11 +364,11 @@ trait WriteTrait{
         // Check for various separator conditions
         if (($c !== 160) && (
             ($c === 173) ||
-            preg_match($this->re_spaces, LIMEPDF_FONT::unichr($c, $this->isunicode)) ||
+            preg_match($this->re_spaces, $this->unichr($c, $this->isunicode)) ||
             (($c === 45) && 
              ($i < ($nb - 1)) &&
-             @preg_match('/[\p{L}]/' . $this->re_space['m'], LIMEPDF_FONT::unichr($pc, $this->isunicode)) &&
-             @preg_match('/[\p{L}]/' . $this->re_space['m'], LIMEPDF_FONT::unichr($chars[$i + 1], $this->isunicode))
+             @preg_match('/[\p{L}]/' . $this->re_space['m'], $this->unichr($pc, $this->isunicode)) &&
+             @preg_match('/[\p{L}]/' . $this->re_space['m'], $this->unichr($chars[$i + 1], $this->isunicode))
             )
         )) {
             $result['prevsep'] = $sep;
@@ -405,7 +409,7 @@ trait WriteTrait{
         if ($this->isUnicodeFont() && $arabic) {
             // Bidirectional algorithm - slower but necessary for Arabic
             return $this->GetArrStringWidth(
-                LIMEPDF_FONT::utf8Bidi(
+                $this->utf8Bidi(
                     array_slice($chars, $j, ($i - $j)), 
                     '', 
                     $this->tmprtl, 
@@ -479,7 +483,7 @@ trait WriteTrait{
             $linebreak = true;
             
             if ($params['firstline']) {
-                return ['return' => LIMEPDF_FONT::UniArrSubString($uchars, $j), 'state' => null];
+                return ['return' => $this->UniArrSubString($uchars, $j), 'state' => null];
             }
         } else {
             // Truncate the word
@@ -520,8 +524,8 @@ trait WriteTrait{
         $endspace = ($this->rtl && !$params['firstblock'] && ($sep < $i)) ? 1 : 0;
         
         // Check if next word fits on full page
-        $strrest = LIMEPDF_FONT::UniArrSubString($uchars, ($sep + $endspace));
-        $nextstr = LIMEPDF_STATIC::pregSplit('/' . $this->re_space['p'] . '/', $this->re_space['m'], $this->stringTrim($strrest));
+        $strrest = $this->UniArrSubString($uchars, ($sep + $endspace));
+        $nextstr = $this->pregSplit('/' . $this->re_space['p'] . '/', $this->re_space['m'], $this->stringTrim($strrest));
         
         if (isset($nextstr[0]) && ($this->GetStringWidth($nextstr[0]) > $constraints['pw'])) {
             // Truncate because word doesn't fit on full page
@@ -566,7 +570,7 @@ trait WriteTrait{
         array $constraints,
         array $params
     ): array {
-        $tmpstr = LIMEPDF_FONT::UniArrSubString($uchars, $j, $i);
+        $tmpstr = $this->UniArrSubString($uchars, $j, $i);
         
         if ($params['firstline']) {
             $lineData = $this->calculateFirstLineMetrics($chars, $j, $i, $tmpstr, $params);
@@ -587,7 +591,7 @@ trait WriteTrait{
         
         if ($params['firstline']) {
             $this->cell_padding = $tmpcellpadding;
-            return ['return' => LIMEPDF_FONT::UniArrSubString($uchars, $i), 'state' => null];
+            return ['return' => $this->UniArrSubString($uchars, $i), 'state' => null];
         }
         
         return ['return' => null, 'state' => null];
@@ -625,7 +629,7 @@ trait WriteTrait{
             $shy_char_right = '';
         }
         
-        $tmpstr = LIMEPDF_FONT::UniArrSubString($uchars, $j, ($sep + $endspace));
+        $tmpstr = $this->UniArrSubString($uchars, $j, ($sep + $endspace));
         
         if ($params['firstline']) {
             $lineData = $this->calculateFirstLineMetrics($chars, $j, ($sep + $endspace), $tmpstr, $params);
@@ -649,7 +653,7 @@ trait WriteTrait{
                 $endspace += 1;
             }
             $this->cell_padding = $tmpcellpadding;
-            return ['return' => LIMEPDF_FONT::UniArrSubString($uchars, ($sep + $endspace)), 'state' => null];
+            return ['return' => $this->UniArrSubString($uchars, ($sep + $endspace)), 'state' => null];
         }
         
         return ['return' => null, 'state' => null];
@@ -669,7 +673,7 @@ trait WriteTrait{
         $tmparr = array_slice($chars, $start, ($end - $start));
         
         if ($params['rtlmode']) {
-            $tmparr = LIMEPDF_FONT::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+            $tmparr = $this->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
         }
         
         $linew = $this->GetArrStringWidth($tmparr);
@@ -707,7 +711,7 @@ trait WriteTrait{
             default => $l
         };
         
-        $tmpstr = LIMEPDF_FONT::UniArrSubString($uchars, $j, $nb);
+        $tmpstr = $this->UniArrSubString($uchars, $j, $nb);
         
         if ($params['firstline']) {
             $lineData = $this->calculateFirstLineMetrics($chars, $j, $nb, $tmpstr, $params);
@@ -728,7 +732,7 @@ trait WriteTrait{
         
         if ($params['firstline']) {
             $this->cell_padding = $tmpcellpadding;
-            return LIMEPDF_FONT::UniArrSubString($uchars, $nb);
+            return $this->UniArrSubString($uchars, $nb);
         }
         
         return $nl + 1;

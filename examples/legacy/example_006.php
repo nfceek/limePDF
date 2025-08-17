@@ -39,7 +39,7 @@ $OutputFile = 'example_006.pdf';
 require_once __DIR__ . '/../../tcpdf.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\PDF;
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager

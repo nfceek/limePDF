@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait BarcodeTrait {
 
 	/**
@@ -35,7 +37,7 @@ trait BarcodeTrait {
 	 * @public
 	 */
 	public function write1DBarcode($code, $type, $x=null, $y=null, $w=null, $h=null, $xres=null, $style=array(), $align='') {
-		if (LIMEPDF_STATIC::empty_string(trim($code))) {
+		if ($this->empty_string(trim($code))) {
 			return;
 		}
 		require_once(dirname(__FILE__).'/tcpdf_barcodes_1d.php');
@@ -98,15 +100,15 @@ trait BarcodeTrait {
 		if (!isset($style['stretchtext'])) {
 			$style['stretchtext'] = 4;
 		}
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
 		list($x, $y) = $this->checkPageRegions($h, $x, $y);
-		if (LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) {
+		if ($this->empty_string($w) OR ($w <= 0)) {
 			if ($this->rtl) {
 				$w = $x - $this->lMargin;
 			} else {
@@ -142,7 +144,7 @@ trait BarcodeTrait {
 		if ($style['stretch']) {
 			$xres = $max_xres;
 		} else {
-			if (LIMEPDF_STATIC::empty_string($xres)) {
+			if ($this->empty_string($xres)) {
 				$xres = (0.141 * $this->k); // default bar width = 0.4 mm
 			}
 			if ($xres > $max_xres) {
@@ -190,7 +192,7 @@ trait BarcodeTrait {
 		}
 		$text_height = $this->getCellHeight($fontsize / $this->k);
 		// height
-		if (LIMEPDF_STATIC::empty_string($h) OR ($h <= 0)) {
+		if ($this->empty_string($h) OR ($h <= 0)) {
 			// set default height
 			$h = (($arrcode['maxw'] * $xres) / 3) + (2 * $vpadding) + $text_height;
 		}
@@ -279,7 +281,7 @@ trait BarcodeTrait {
 		}
 		// print text
 		if ($style['text']) {
-			if (isset($style['label']) AND !LIMEPDF_STATIC::empty_string($style['label'])) {
+			if (isset($style['label']) AND !$this->empty_string($style['label'])) {
 				$label = $style['label'];
 			} else {
 				$label = $code;
@@ -353,7 +355,7 @@ trait BarcodeTrait {
 	 * @public
 	 */
 	public function write2DBarcode($code, $type, $x=null, $y=null, $w=null, $h=null, $style=array(), $align='', $distort=false) {
-		if (LIMEPDF_STATIC::empty_string(trim($code))) {
+		if ($this->empty_string(trim($code))) {
 			return;
 		}
 		require_once(dirname(__FILE__).'/tcpdf_barcodes_2d.php');
@@ -403,10 +405,10 @@ trait BarcodeTrait {
 		if (!isset($style['module_height'])) {
 			$style['module_height'] = 1; // height of a single module in points
 		}
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -448,7 +450,7 @@ trait BarcodeTrait {
 			$h = $maxh;
 		}
 		// set dimensions
-		if ((LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) AND (LIMEPDF_STATIC::empty_string($h) OR ($h <= 0))) {
+		if (($this->empty_string($w) OR ($w <= 0)) AND ($this->empty_string($h) OR ($h <= 0))) {
 			$w = ($cols + $hpad) * ($mw / $this->k);
 			$h = ($rows + $vpad) * ($mh / $this->k);
 		} elseif (($w === '') OR ($w <= 0)) {

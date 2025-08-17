@@ -2,6 +2,9 @@
 
 namespace LimePDF\Pages;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Support\StaticTrait;
+
 trait PageManagerTrait {
 
     /**
@@ -292,13 +295,13 @@ trait PageManagerTrait {
 		$page_fill_start = false;
 		$page_fill_end = false;
 		$current_column = $this->current_column;
-		if (LIMEPDF_STATIC::empty_string($numbersfont)) {
+		if ($this->empty_string($numbersfont)) {
 			$numbersfont = $this->default_monospaced_font;
 		}
-		if (LIMEPDF_STATIC::empty_string($filler)) {
+		if ($this->empty_string($filler)) {
 			$filler = ' ';
 		}
-		if (LIMEPDF_STATIC::empty_string($page)) {
+		if ($this->empty_string($page)) {
 			$gap = ' ';
 		} else {
 			$gap = '';
@@ -370,7 +373,7 @@ trait PageManagerTrait {
 				$tw = $this->w - $this->rMargin - $this->x;
 			}
 			$this->setFont($numbersfont, $fontstyle, $fontsize);
-			if (LIMEPDF_STATIC::empty_string($page)) {
+			if ($this->empty_string($page)) {
 				$pagenum = $outline['p'];
 			} else {
 				// placemark to be replaced with the correct number
@@ -421,7 +424,7 @@ trait PageManagerTrait {
 			}
 		}
 		$maxpage = max($maxpage, $page_last);
-		if (!LIMEPDF_STATIC::empty_string($page)) {
+		if (!$this->empty_string($page)) {
 			for ($p = $page_first; $p <= $page_last; ++$p) {
 				// get page data
 				$temppage = $this->getPageBuffer($p);
@@ -436,15 +439,15 @@ trait PageManagerTrait {
 					} else {
 						$np = $n;
 					}
-					$na = LIMEPDF_STATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-					$nu = LIMEPDF_FONT::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+					$na = $this->formatTOCPageNumber(($this->starting_page_number + $np - 1));
+					$nu = $this->UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
 					// replace aliases with numbers
 					foreach ($pnalias['u'] as $u) {
 						$sfill = str_repeat($filler, max(0, (strlen($u) - strlen($nu.' '))));
 						if ($this->rtl) {
-							$nr = $nu.LIMEPDF_FONT::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+							$nr = $nu.$this->UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
 						} else {
-							$nr = LIMEPDF_FONT::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+							$nr = $this->UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
 						}
 						$temppage = str_replace($u, $nr, $temppage);
 					}
@@ -500,7 +503,7 @@ trait PageManagerTrait {
 			$this->cell_padding = $cellpadding;
 		}
 		$this->adjustCellPadding($border);
-		if (LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) {
+		if ($this->empty_string($w) OR ($w <= 0)) {
 			if ($this->rtl) {
 				$w = $this->x - $this->lMargin;
 			} else {
@@ -514,7 +517,7 @@ trait PageManagerTrait {
 		}
 		$lines = 1;
 		$sum = 0;
-		$chars = LIMEPDF_FONT::utf8Bidi(LIMEPDF_FONT::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+		$chars = $this->utf8Bidi($this->UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 		$charsWidth = $this->GetArrStringWidth($chars, '', '', 0, true);
 		$length = count($chars);
 		$lastSeparator = -1;
@@ -523,11 +526,11 @@ trait PageManagerTrait {
 			$charWidth = $charsWidth[$i];
 			if (($c != 160)
 					AND (($c == 173)
-						OR preg_match($this->re_spaces, LIMEPDF_FONT::unichr($c, $this->isunicode))
+						OR preg_match($this->re_spaces, $this->unichr($c, $this->isunicode))
 						OR (($c == 45)
 							AND ($i > 0) AND ($i < ($length - 1))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], LIMEPDF_FONT::unichr($chars[($i - 1)], $this->isunicode))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], LIMEPDF_FONT::unichr($chars[($i + 1)], $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->unichr($chars[($i - 1)], $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->unichr($chars[($i + 1)], $this->isunicode))
 						)
 					)
 				) {
@@ -632,7 +635,7 @@ trait PageManagerTrait {
 	 * @see PaneNo(), formatPageNumber()
 	 */
 	public function PageNoFormatted() {
-		return LIMEPDF_STATIC::formatPageNumber($this->PageNo());
+		return $this->formatPageNumber($this->PageNo());
 	}
 
 	/**

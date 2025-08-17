@@ -2,6 +2,9 @@
 
 namespace LimePDF\Encryption;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Support\StaticTrait;
+
 trait EncryptionTrait {
 
  	// ENCRYPTION METHODS ----------------------------------
@@ -21,7 +24,7 @@ trait EncryptionTrait {
 			// AES padding
 			$objkey .= "\x73\x41\x6C\x54"; // sAlT
 		}
-		$objkey = substr(LIMEPDF_STATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
+		$objkey = substr($this->_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
 		$objkey = substr($objkey, 0, 16);
 		return $objkey;
 	}
@@ -42,15 +45,15 @@ trait EncryptionTrait {
 		switch ($this->encryptdata['mode']) {
 			case 0:   // RC4-40
 			case 1: { // RC4-128
-				$s = LIMEPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
+				$s = $this->_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
 				break;
 			}
 			case 2: { // AES-128
-				$s = LIMEPDF_STATIC::_AES($this->_objectkey($n), $s);
+				$s = $this->_AES($this->_objectkey($n), $s);
 				break;
 			}
 			case 3: { // AES-256
-				$s = LIMEPDF_STATIC::_AES($this->encryptdata['key'], $s);
+				$s = $this->_AES($this->encryptdata['key'], $s);
 				break;
 			}
 		}
@@ -66,22 +69,22 @@ trait EncryptionTrait {
 	 */
 	protected function _Uvalue() {
 		if ($this->encryptdata['mode'] == 0) { // RC4-40
-			return LIMEPDF_STATIC::_RC4($this->encryptdata['key'], LIMEPDF_STATIC::$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
+			return $this->_RC4($this->encryptdata['key'], $this->$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
 		} elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
-			$tmp = LIMEPDF_STATIC::_md5_16(LIMEPDF_STATIC::$enc_padding.$this->encryptdata['fileid']);
-			$enc = LIMEPDF_STATIC::_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
+			$tmp = $this->_md5_16($this->$enc_padding.$this->encryptdata['fileid']);
+			$enc = $this->_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
 			$len = strlen($tmp);
 			for ($i = 1; $i <= 19; ++$i) {
 				$ek = '';
 				for ($j = 0; $j < $len; ++$j) {
 					$ek .= chr(ord($this->encryptdata['key'][$j]) ^ $i);
 				}
-				$enc = LIMEPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
+				$enc = $this->_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
 			}
 			$enc .= str_repeat("\x00", 16);
 			return substr($enc, 0, 32);
 		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = LIMEPDF_STATIC::_md5_16(LIMEPDF_STATIC::getRandomSeed());
+			$seed = $this->_md5_16($this->getRandomSeed());
 			// User Validation Salt
 			$this->encryptdata['UVS'] = substr($seed, 0, 8);
 			// User Key Salt
@@ -99,7 +102,7 @@ trait EncryptionTrait {
 	 */
 	protected function _UEvalue() {
 		$hashkey = hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UKS'], true);
-		return LIMEPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
+		return $this->_AESnopad($hashkey, $this->encryptdata['key']);
 	}
 
 	/**
@@ -111,14 +114,14 @@ trait EncryptionTrait {
 	 */
 	protected function _Ovalue() {
 		if ($this->encryptdata['mode'] < 3) { // RC4-40, RC4-128, AES-128
-			$tmp = LIMEPDF_STATIC::_md5_16($this->encryptdata['owner_password']);
+			$tmp = $this->_md5_16($this->encryptdata['owner_password']);
 			if ($this->encryptdata['mode'] > 0) {
 				for ($i = 0; $i < 50; ++$i) {
-					$tmp = LIMEPDF_STATIC::_md5_16($tmp);
+					$tmp = $this->_md5_16($tmp);
 				}
 			}
 			$owner_key = substr($tmp, 0, ($this->encryptdata['Length'] / 8));
-			$enc = LIMEPDF_STATIC::_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
+			$enc = $this->_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
 			if ($this->encryptdata['mode'] > 0) {
 				$len = strlen($owner_key);
 				for ($i = 1; $i <= 19; ++$i) {
@@ -126,12 +129,12 @@ trait EncryptionTrait {
 					for ($j = 0; $j < $len; ++$j) {
 						$ek .= chr(ord($owner_key[$j]) ^ $i);
 					}
-					$enc = LIMEPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
+					$enc = $this->_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
 				}
 			}
 			return $enc;
 		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
-			$seed = LIMEPDF_STATIC::_md5_16(LIMEPDF_STATIC::getRandomSeed());
+			$seed = $this->_md5_16($this->getRandomSeed());
 			// Owner Validation Salt
 			$this->encryptdata['OVS'] = substr($seed, 0, 8);
 			// Owner Key Salt
@@ -149,7 +152,7 @@ trait EncryptionTrait {
 	 */
 	protected function _OEvalue() {
 		$hashkey = hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OKS'].$this->encryptdata['U'], true);
-		return LIMEPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
+		return $this->_AESnopad($hashkey, $this->encryptdata['key']);
 	}
 
 	/**
@@ -162,9 +165,9 @@ trait EncryptionTrait {
 	 */
 	protected function _fixAES256Password($password) {
 		$psw = ''; // password to be returned
-		$psw_array = LIMEPDF_FONT::utf8Bidi(LIMEPDF_FONT::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
+		$psw_array = $this->utf8Bidi($this->UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
 		foreach ($psw_array as $c) {
-			$psw .= LIMEPDF_FONT::unichr($c, $this->isunicode);
+			$psw .= $this->unichr($c, $this->isunicode);
 		}
 		return substr($psw, 0, 127);
 	}
@@ -180,7 +183,7 @@ trait EncryptionTrait {
 		if (!$this->encryptdata['pubkey']) { // standard mode
 			if ($this->encryptdata['mode'] == 3) { // AES-256
 				// generate 256 bit random key
-				$this->encryptdata['key'] = substr(hash('sha256', LIMEPDF_STATIC::getRandomSeed(), true), 0, $keybytelen);
+				$this->encryptdata['key'] = substr(hash('sha256', $this->getRandomSeed(), true), 0, $keybytelen);
 				// truncate passwords
 				$this->encryptdata['user_password'] = $this->_fixAES256Password($this->encryptdata['user_password']);
 				$this->encryptdata['owner_password'] = $this->_fixAES256Password($this->encryptdata['owner_password']);
@@ -195,7 +198,7 @@ trait EncryptionTrait {
 				// Compute P value
 				$this->encryptdata['P'] = $this->encryptdata['protection'];
 				// Computing the encryption dictionary's Perms (permissions) value
-				$perms = LIMEPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
+				$perms = $this->getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
 				$perms .= chr(255).chr(255).chr(255).chr(255); // bytes 4-7
 				if (isset($this->encryptdata['CF']['EncryptMetadata']) AND (!$this->encryptdata['CF']['EncryptMetadata'])) { // byte 8
 					$perms .= 'F';
@@ -204,20 +207,20 @@ trait EncryptionTrait {
 				}
 				$perms .= 'adb'; // bytes 9-11
 				$perms .= 'nick'; // bytes 12-15
-				$this->encryptdata['perms'] = LIMEPDF_STATIC::_AESnopad($this->encryptdata['key'], $perms);
+				$this->encryptdata['perms'] = $this->_AESnopad($this->encryptdata['key'], $perms);
 			} else { // RC4-40, RC4-128, AES-128
 				// Pad passwords
-				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].LIMEPDF_STATIC::$enc_padding, 0, 32);
-				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].LIMEPDF_STATIC::$enc_padding, 0, 32);
+				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].$this->$enc_padding, 0, 32);
+				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].$this->$enc_padding, 0, 32);
 				// Compute O value
 				$this->encryptdata['O'] = $this->_Ovalue();
 				// get default permissions (reverse byte order)
-				$permissions = LIMEPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']);
+				$permissions = $this->getEncPermissionsString($this->encryptdata['protection']);
 				// Compute encryption key
-				$tmp = LIMEPDF_STATIC::_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
+				$tmp = $this->_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
 				if ($this->encryptdata['mode'] > 0) {
 					for ($i = 0; $i < 50; ++$i) {
-						$tmp = LIMEPDF_STATIC::_md5_16(substr($tmp, 0, $keybytelen));
+						$tmp = $this->_md5_16(substr($tmp, 0, $keybytelen));
 					}
 				}
 				$this->encryptdata['key'] = substr($tmp, 0, $keybytelen);
@@ -228,29 +231,29 @@ trait EncryptionTrait {
 			}
 		} else { // Public-Key mode
 			// random 20-byte seed
-			$seed = sha1(LIMEPDF_STATIC::getRandomSeed(), true);
+			$seed = sha1($this->getRandomSeed(), true);
 			$recipient_bytes = '';
 			foreach ($this->encryptdata['pubkeys'] as $pubkey) {
 				// for each public certificate
 				if (isset($pubkey['p'])) {
-					$pkprotection = LIMEPDF_STATIC::getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
+					$pkprotection = $this->getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
 				} else {
 					$pkprotection = $this->encryptdata['protection'];
 				}
 				// get default permissions (reverse byte order)
-				$pkpermissions = LIMEPDF_STATIC::getEncPermissionsString($pkprotection);
+				$pkpermissions = $this->getEncPermissionsString($pkprotection);
 				// envelope data
 				$envelope = $seed.$pkpermissions;
 				// write the envelope data to a temporary file
-				$tempkeyfile = LIMEPDF_STATIC::getObjFilename('key', $this->file_id);
-				$f = LIMEPDF_STATIC::fopenLocal($tempkeyfile, 'wb');
+				$tempkeyfile = $this->getObjFilename('key', $this->file_id);
+				$f = $this->fopenLocal($tempkeyfile, 'wb');
 				if (!$f) {
 					$this->Error('Unable to create temporary key file: '.$tempkeyfile);
 				}
 				$envelope_length = strlen($envelope);
 				fwrite($f, $envelope, $envelope_length);
 				fclose($f);
-				$tempencfile = LIMEPDF_STATIC::getObjFilename('enc', $this->file_id);
+				$tempencfile = $this->getObjFilename('enc', $this->file_id);
 				if (!openssl_pkcs7_encrypt($tempkeyfile, $tempencfile, $pubkey['c'], array(), PKCS7_BINARY | PKCS7_DETACHED)) {
 					$this->Error('Unable to encrypt the file: '.$tempkeyfile);
 				}
@@ -298,7 +301,7 @@ trait EncryptionTrait {
 			// encryption is not allowed in PDF/A mode
 			return;
 		}
-		$this->encryptdata['protection'] = LIMEPDF_STATIC::getUserPermissionCode($permissions, $mode);
+		$this->encryptdata['protection'] = $this->getUserPermissionCode($permissions, $mode);
 		if (($pubkeys !== null) AND (is_array($pubkeys))) {
 			// public-key mode
 			$this->encryptdata['pubkeys'] = $pubkeys;
@@ -337,7 +340,7 @@ trait EncryptionTrait {
 			}
 		}
 		if ($owner_pass === null) {
-			$owner_pass = md5(LIMEPDF_STATIC::getRandomSeed());
+			$owner_pass = md5($this->getRandomSeed());
 		}
 		$this->encryptdata['user_password'] = $user_pass;
 		$this->encryptdata['owner_password'] = $owner_pass;
@@ -383,7 +386,7 @@ trait EncryptionTrait {
 			}
 		}
 		$this->encrypted = true;
-		$this->encryptdata['fileid'] = LIMEPDF_STATIC::convertHexStringToString($this->file_id);
+		$this->encryptdata['fileid'] = $this->convertHexStringToString($this->file_id);
 		$this->_generateencryptionkey();
 	}
 

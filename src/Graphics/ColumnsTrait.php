@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait ColumnsTrait{
 
 	//----- php 7 & php 8 ------------------------------
@@ -24,7 +26,7 @@ trait ColumnsTrait{
             return;
         }
 
-        if (\LimePDF\LIMEPDF_STATIC::empty_string($y)) {
+        if ($this->empty_string($y)) {
             $y = $this->y;
         }
 
@@ -99,7 +101,7 @@ trait ColumnsTrait{
 			if (($width == 0) OR ($width > $maxwidth)) {
 				$width = $maxwidth;
 			}
-			if (LIMEPDF_STATIC::empty_string($y)) {
+			if ($this->empty_string($y)) {
 				$y = $this->y;
 			}
 			// space between columns
@@ -148,7 +150,7 @@ trait ColumnsTrait{
 	 * @since 4.9.001 (2010-03-28)
 	 */
 	public function selectColumn($col=null) {
-		if (LIMEPDF_STATIC::empty_string($col)) {
+		if ($this->empty_string($col)) {
 			$col = $this->current_column;
 		} elseif ($col >= $this->num_columns) {
 			$col = 0;
@@ -195,7 +197,7 @@ trait ColumnsTrait{
 		// fix for HTML mode
 		$this->newline = true;
 		// print HTML table header (if any)
-		if ((!LIMEPDF_STATIC::empty_string($this->thead)) AND (!$this->inthead)) {
+		if ((!$this->empty_string($this->thead)) AND (!$this->inthead)) {
 			if ($enable_thead) {
 				// print table header
 				$this->writeHTML($this->thead, false, false, false, false, '');

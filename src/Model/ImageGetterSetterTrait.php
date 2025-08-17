@@ -2,6 +2,9 @@
 
 namespace LimePDF\Model;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Support\StaticTrait;
+
 trait ImageGetterSetterTrait {
 
     /**
@@ -98,10 +101,10 @@ trait ImageGetterSetterTrait {
 	protected function getCellCode($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M') {
 		// replace 'NO-BREAK SPACE' (U+00A0) character with a simple space
 		$txt = is_null($txt) ? '' : $txt;
-		$txt = str_replace(LIMEPDF_FONT::unichr(160, $this->isunicode), ' ', $txt);
+		$txt = str_replace($this->unichr(160, $this->isunicode), ' ', $txt);
 		$prev_cell_margin = $this->cell_margin;
 		$prev_cell_padding = $this->cell_padding;
-		$txt = LIMEPDF_STATIC::removeSHY($txt, $this->isunicode);
+		$txt = $this->removeSHY($txt, $this->isunicode);
 		$rs = ''; //string to be returned
 		$this->adjustCellPadding($border);
 		if (!$ignore_min_height) {
@@ -230,7 +233,7 @@ trait ImageGetterSetterTrait {
 			}
 		}
 		$basefonty = $yt + $this->FontAscent;
-		if (LIMEPDF_STATIC::empty_string($w) OR ($w <= 0)) {
+		if ($this->empty_string($w) OR ($w <= 0)) {
 			if ($this->rtl) {
 				$w = $x - $this->lMargin;
 			} else {
@@ -262,10 +265,10 @@ trait ImageGetterSetterTrait {
 			$txt2 = $txt;
 			if ($this->isunicode) {
 				if (($this->CurrentFont['type'] == 'core') OR ($this->CurrentFont['type'] == 'TrueType') OR ($this->CurrentFont['type'] == 'Type1')) {
-					$txt2 = LIMEPDF_FONT::UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
+					$txt2 = $this->UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
 				} else {
-					$unicode = LIMEPDF_FONT::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
-					$unicode = LIMEPDF_FONT::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
+					$unicode = $this->UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
+					$unicode = $this->utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
 					// replace thai chars (if any)
 					if (defined('K_THAI_TOPCHARS') AND (K_THAI_TOPCHARS == true)) {
 						// number of chars
@@ -357,10 +360,10 @@ trait ImageGetterSetterTrait {
 						// update font subsetchars
 						$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
 					} // end of K_THAI_TOPCHARS
-					$txt2 = LIMEPDF_FONT::arrUTF8ToUTF16BE($unicode, false);
+					$txt2 = $this->arrUTF8ToUTF16BE($unicode, false);
 				}
 			}
-			$txt2 = LIMEPDF_STATIC::_escape($txt2);
+			$txt2 = $this->_escape($txt2);
 			// get current text width (considering general font stretching and spacing)
 			$txwidth = $this->GetStringWidth($txt);
 			$width = $txwidth;
@@ -488,8 +491,8 @@ trait ImageGetterSetterTrait {
 						$xshift += $this->GetArrStringWidth($uniarr); // + shift justification
 					} else {
 						// character to print
-						$topchr = LIMEPDF_FONT::arrUTF8ToUTF16BE($uniarr, false);
-						$topchr = LIMEPDF_STATIC::_escape($topchr);
+						$topchr = $this->arrUTF8ToUTF16BE($uniarr, false);
+						$topchr = $this->_escape($topchr);
 						$s .= sprintf(' BT %F %F Td [(%s)] TJ ET', ($xdk + ($xshift * $k)), $ty, $topchr);
 					}
 				}

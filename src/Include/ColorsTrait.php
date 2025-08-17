@@ -428,7 +428,7 @@ trait ColorsTrait {
 	}
 
 
-} // END OF LIMEPDF_COLORS CLASS
+} 
 
 //============================================================+
 // END OF FILE

@@ -424,7 +424,7 @@ trait FiltersTrait {
 		throw new Exception('TCPDF_PARSER ERROR: '.$msg);
 	}
 
-} // END OF LIMEPDF_FILTERS CLASS
+} 
 
 //============================================================+
 // END OF FILE

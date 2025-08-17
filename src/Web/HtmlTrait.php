@@ -4,7 +4,7 @@ namespace LimePDF\Web;
 
 use LimePDF\Include\FontTrait;
 use LimePDF\Include\FontDataTrait;
-use LimePDF\Include\ImagesTrait;
+use LimePDF\Include\ImageTrait;
 use LimePDF\Support\StaticTrait;
 
 trait HtmlTrait {
@@ -1301,7 +1301,7 @@ trait HtmlTrait {
 				}
 				// text
 				$this->htmlvspace = 0;
-				$isRTLString = preg_match($this->$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match($this->$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
+				$isRTLString = preg_match(self::$uni_RE_PATTERN_RTL, $dom[$key]['value']) || preg_match(self::$uni_RE_PATTERN_ARABIC, $dom[$key]['value']);
 				if ((!$this->premode) AND $this->isRTLTextDir() AND !$isRTLString) {
 					// reverse spaces order
 					$lsp = ''; // left spaces

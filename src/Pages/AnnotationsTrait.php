@@ -2,6 +2,9 @@
 
 namespace LimePDF\Pages;
 
+use LimePDF\Include\ColorsTrait;
+use LimePDF\Support\StaticTrait;
+
 trait AnnotationsTrait {
 
 		/**
@@ -127,20 +130,20 @@ trait AnnotationsTrait {
 		}
 		$this->PageAnnots[$page][] = array('n' => ++$this->n, 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'txt' => $text, 'opt' => $opt, 'numspaces' => $spaces);
 		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
-			if ((($opt['Subtype'] == 'FileAttachment') OR ($opt['Subtype'] == 'Sound')) AND (!LIMEPDF_STATIC::empty_string($opt['FS']))
-				AND (@LIMEPDF_STATIC::file_exists($opt['FS']) OR LIMEPDF_STATIC::isValidURL($opt['FS']))
+			if ((($opt['Subtype'] == 'FileAttachment') OR ($opt['Subtype'] == 'Sound')) AND (!$this->empty_string($opt['FS']))
+				AND (@$this->file_exists($opt['FS']) OR $this->isValidURL($opt['FS']))
 				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
 				$this->embeddedfiles[basename($opt['FS'])] = array('f' => ++$this->n, 'n' => ++$this->n, 'file' => $opt['FS']);
 			}
 		}
 		// Add widgets annotation's icons
-		if (isset($opt['mk']['i']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['i'])) {
+		if (isset($opt['mk']['i']) AND @$this->file_exists($opt['mk']['i'])) {
 			$this->Image($opt['mk']['i'], '', '', 10, 10, '', '', '', false, 300, '', false, false, 0, false, true);
 		}
-		if (isset($opt['mk']['ri']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['ri'])) {
+		if (isset($opt['mk']['ri']) AND @$this->file_exists($opt['mk']['ri'])) {
 			$this->Image($opt['mk']['ri'], '', '', 0, 0, '', '', '', false, 300, '', false, false, 0, false, true);
 		}
-		if (isset($opt['mk']['ix']) AND @LIMEPDF_STATIC::file_exists($opt['mk']['ix'])) {
+		if (isset($opt['mk']['ix']) AND @$this->file_exists($opt['mk']['ix'])) {
 			$this->Image($opt['mk']['ix'], '', '', 0, 0, '', '', '', false, 300, '', false, false, 0, false, true);
 		}
 	}
@@ -152,8 +155,8 @@ trait AnnotationsTrait {
 	 */
 	public function EmbedFile($opt) {
 		if (!$this->pdfa_mode || ($this->pdfa_mode && $this->pdfa_version == 3)) {
-			if ((($opt['Subtype'] == 'FileAttachment')) AND (!LIMEPDF_STATIC::empty_string($opt['FS']))
-				AND (@LIMEPDF_STATIC::file_exists($opt['FS']) OR LIMEPDF_STATIC::isValidURL($opt['FS']))
+			if ((($opt['Subtype'] == 'FileAttachment')) AND (!$this->empty_string($opt['FS']))
+				AND (@$this->file_exists($opt['FS']) OR $this->isValidURL($opt['FS']))
 				AND (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
 				$this->embeddedfiles[basename($opt['FS'])] = array('f' => ++$this->n, 'n' => ++$this->n, 'file' => $opt['FS']);
 			}
@@ -390,7 +393,7 @@ trait AnnotationsTrait {
 	// 					$annots .= '>>';
 	// 				}
 	// 				if (isset($pl['opt']['c']) AND (is_array($pl['opt']['c'])) AND !empty($pl['opt']['c'])) {
-	// 					$annots .= ' /C '.LIMEPDF_COLORS::getColorStringFromArray($pl['opt']['c']);
+	// 					$annots .= ' /C '.$this->getColorStringFromArray($pl['opt']['c']);
 	// 				}
 	// 				//$annots .= ' /StructParent ';
 	// 				//$annots .= ' /OC ';
@@ -461,7 +464,7 @@ trait AnnotationsTrait {
 	// 						if (is_string($pl['txt']) && !empty($pl['txt'])) {
 	// 							if ($pl['txt'][0] == '#') {
 	// 								// internal destination
-	// 								$annots .= ' /A <</S /GoTo /D /'.LIMEPDF_STATIC::encodeNameObject(substr($pl['txt'], 1)).'>>';
+	// 								$annots .= ' /A <</S /GoTo /D /'.$this->encodeNameObject(substr($pl['txt'], 1)).'>>';
 	// 							} elseif ($pl['txt'][0] == '%') {
 	// 								// embedded PDF file
 	// 								$filename = basename(substr($pl['txt'], 1));
@@ -633,10 +636,10 @@ trait AnnotationsTrait {
 	// 								$annots .= ' /R '.$pl['opt']['mk']['r'];
 	// 							}
 	// 							if (isset($pl['opt']['mk']['bc']) AND (is_array($pl['opt']['mk']['bc']))) {
-	// 								$annots .= ' /BC '.LIMEPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bc']);
+	// 								$annots .= ' /BC '.$this->getColorStringFromArray($pl['opt']['mk']['bc']);
 	// 							}
 	// 							if (isset($pl['opt']['mk']['bg']) AND (is_array($pl['opt']['mk']['bg']))) {
-	// 								$annots .= ' /BG '.LIMEPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bg']);
+	// 								$annots .= ' /BG '.$this->getColorStringFromArray($pl['opt']['mk']['bg']);
 	// 							}
 	// 							if (isset($pl['opt']['mk']['ca'])) {
 	// 								$annots .= ' /CA '.$pl['opt']['mk']['ca'];

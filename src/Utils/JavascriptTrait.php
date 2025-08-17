@@ -2,6 +2,8 @@
 
 namespace LimePDF\Utils;
 
+use LimePDF\Include\ColorsTrait;
+
 trait JavascriptTrait {
 
 	// --- JAVASCRIPT ------------------------------------------------------
@@ -62,7 +64,7 @@ trait JavascriptTrait {
 		$this->javascript .= 'f'.$name.'.textSize='.$this->FontSizePt.";\n";
 		foreach($prop as $key => $val) {
 			if (strcmp(substr($key, -5), 'Color') == 0) {
-				$val = LIMEPDF_COLORS::_JScolor($val);
+				$val = $this->_JScolor($val);
 			} else {
 				$val = "'".$val."'";
 			}

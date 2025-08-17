@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait TransformationsTrait {
 
 	// START TRANSFORMATIONS SECTION -----------------------
@@ -103,10 +105,10 @@ trait TransformationsTrait {
 	 * @see StartTransform(), StopTransform()
 	 */
 	public function Scale($s_x, $s_y, $x=null, $y=null) {
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		if (($s_x == 0) OR ($s_y == 0)) {
@@ -229,10 +231,10 @@ trait TransformationsTrait {
 	 * @see StartTransform(), StopTransform()
 	 */
 	public function Rotate($angle, $x=null, $y=null) {
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		$y = ($this->h - $y) * $this->k;
@@ -286,10 +288,10 @@ trait TransformationsTrait {
 	 * @see StartTransform(), StopTransform()
 	 */
 	public function Skew($angle_x, $angle_y, $x=null, $y=null) {
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		if (($angle_x <= -90) OR ($angle_x >= 90) OR ($angle_y <= -90) OR ($angle_y >= 90)) {

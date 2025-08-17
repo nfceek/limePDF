@@ -2,6 +2,10 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Include\ColorsTrait;
+use LimePDF\Include\ImageTrait;
+use LimePDF\Support\StaticTrait;
+
 trait SvgTrait {
 
 	// --- SVG METHODS ---------------------------------------------------------
@@ -52,10 +56,10 @@ trait SvgTrait {
 		if ($svgdata === FALSE) {
 			$this->Error('SVG file not found: '.$file);
 		}
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -407,10 +411,10 @@ trait SvgTrait {
 			$this->setAlpha($svgstyle['opacity'], 'Normal', $svgstyle['opacity'], false);
 		}
 		// color
-		$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
+		$fill_color = $this->convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
 		$this->setFillColorArray($fill_color);
 		// text color
-		$text_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
+		$text_color = $this->convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
 		$this->setTextColorArray($text_color);
 		// clip
 		if (preg_match('/rect\(([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)\)/si', $svgstyle['clip'], $regs)) {
@@ -534,7 +538,7 @@ trait SvgTrait {
 				$this->Gradient($gradient['type'], $gradient['coords'], $gradient['stops']);
 			}
 		} elseif ($svgstyle['fill'] != 'none') {
-			$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
+			$fill_color = $this->convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
 			if ($svgstyle['fill-opacity'] != 1) {
 				$this->setAlpha($this->alpha['CA'], 'Normal', $svgstyle['fill-opacity'], false);
 			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['fill'], $rgba_matches)) {
@@ -555,7 +559,7 @@ trait SvgTrait {
 				$this->setAlpha($rgba_matches[1], 'Normal', $this->alpha['ca'], false);
 			}
 			$stroke_style = array(
-				'color' => LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
+				'color' => $this->convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
 				'width' => $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false),
 				'cap' => $svgstyle['stroke-linecap'],
 				'join' => $svgstyle['stroke-linejoin']
@@ -687,7 +691,7 @@ trait SvgTrait {
 			return;
 		}
 		// set fill/stroke style
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style, '');
+		$op = $this->getPathPaintOperator($style, '');
 		if (empty($op)) {
 			return;
 		}
@@ -988,8 +992,8 @@ trait SvgTrait {
 								$cx = ($cax * $cos_ang) - ($cay * $sin_ang) + (($x0 + $x) / 2);
 								$cy = ($cax * $sin_ang) + ($cay * $cos_ang) + (($y0 + $y) / 2);
 								// get angles
-								$angs = LIMEPDF_STATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
-								$dang = LIMEPDF_STATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
+								$angs = $this->getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
+								$dang = $this->getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
 								if (($fs == 0) AND ($dang > 0)) {
 									$dang -= (2 * M_PI);
 								} elseif (($fs == 1) AND ($dang < 0)) {
@@ -1098,23 +1102,23 @@ trait SvgTrait {
 			// default fill attribute for clipping
 			$attribs['fill'] = 'none';
 		}
-		if (isset($attribs['style']) AND !LIMEPDF_STATIC::empty_string($attribs['style']) AND ($attribs['style'][0] != ';')) {
+		if (isset($attribs['style']) AND !$this->empty_string($attribs['style']) AND ($attribs['style'][0] != ';')) {
 			// fix style for regular expression
 			$attribs['style'] = ';'.$attribs['style'];
 		}
 		foreach ($prev_svgstyle as $key => $val) {
-			if (in_array($key, LIMEPDF_IMAGES::$svginheritprop)) {
+			if (in_array($key, $this->$svginheritprop)) {
 				// inherit previous value
 				$svgstyle[$key] = $val;
 			}
-			if (isset($attribs[$key]) AND !LIMEPDF_STATIC::empty_string($attribs[$key])) {
+			if (isset($attribs[$key]) AND !$this->empty_string($attribs[$key])) {
 				// specific attribute settings
 				if ($attribs[$key] == 'inherit') {
 					$svgstyle[$key] = $val;
 				} else {
 					$svgstyle[$key] = $attribs[$key];
 				}
-			} elseif (isset($attribs['style']) AND !LIMEPDF_STATIC::empty_string($attribs['style'])) {
+			} elseif (isset($attribs['style']) AND !$this->empty_string($attribs['style'])) {
 				// CSS style syntax
 				$attrval = array();
 				if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval) AND isset($attrval[1])) {
@@ -1133,7 +1137,7 @@ trait SvgTrait {
 			$tm = array(1,0,0,1,0,0);
 		}
 		if (isset($attribs['transform']) AND !empty($attribs['transform'])) {
-			$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, LIMEPDF_STATIC::getSVGTransformMatrix($attribs['transform']));
+			$tm = $this->getTransformationMatrixProduct($tm, $this->getSVGTransformMatrix($attribs['transform']));
 		}
 		$svgstyle['transfmatrix'] = $tm;
 		$invisible = false;
@@ -1174,7 +1178,7 @@ trait SvgTrait {
 				$svgW = (isset($attribs['width'])?$attribs['width']:0);
 				$svgH = (isset($attribs['height'])?$attribs['height']:0);
 				// set x, y position using transform matrix
-				$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array( 1, 0, 0, 1, $svgX, $svgY));
+				$tm = $this->getTransformationMatrixProduct($tm, array( 1, 0, 0, 1, $svgX, $svgY));
 				$this->SVGTransform($tm);
 				// set clipping for width and height
 				$x = 0;
@@ -1232,7 +1236,7 @@ trait SvgTrait {
 							$hr = $wr;
 						}
 						$newtm = array($wr, 0, 0, $hr, (($wr * ($ax - $vx)) - $svgX), (($hr * ($ay - $vy)) - $svgY));
-						$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, $newtm);
+						$tm = $this->getTransformationMatrixProduct($tm, $newtm);
 						$this->SVGTransform($tm);
 					}
 				}
@@ -1247,7 +1251,7 @@ trait SvgTrait {
 				$y = (isset($attribs['y'])?$attribs['y']:0);
 				$w = 1;//(isset($attribs['width'])?$attribs['width']:1);
 				$h = 1;//(isset($attribs['height'])?$attribs['height']:1);
-				$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
+				$tm = $this->getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
 				$this->SVGTransform($tm);
 				$this->setSVGStyles($svgstyle, $prev_svgstyle);
 				break;
@@ -1283,7 +1287,7 @@ trait SvgTrait {
 				$x2 = (isset($attribs['x2'])?$attribs['x2']:'100');
 				$y2 = (isset($attribs['y2'])?$attribs['y2']:'0');
 				if (isset($attribs['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = LIMEPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
+					$this->svggradients[$this->svggradientid]['gradientTransform'] = $this->getSVGTransformMatrix($attribs['gradientTransform']);
 				}
 				$this->svggradients[$this->svggradientid]['coords'] = array($x1, $y1, $x2, $y2);
 				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
@@ -1324,7 +1328,7 @@ trait SvgTrait {
 				$fy = (isset($attribs['fy']) ? $attribs['fy'] : $cy);
 				$r = (isset($attribs['r']) ? $attribs['r'] : 0.5);
 				if (isset($attribs['gradientTransform'])) {
-					$this->svggradients[$this->svggradientid]['gradientTransform'] = LIMEPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
+					$this->svggradients[$this->svggradientid]['gradientTransform'] = $this->getSVGTransformMatrix($attribs['gradientTransform']);
 				}
 				$this->svggradients[$this->svggradientid]['coords'] = array($cx, $cy, $fx, $fy, $r);
 				if (isset($attribs['xlink:href']) AND !empty($attribs['xlink:href'])) {
@@ -1343,7 +1347,7 @@ trait SvgTrait {
 						$offset /= 100;
 					}
 				}
-				$stop_color = isset($svgstyle['stop-color'])?LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
+				$stop_color = isset($svgstyle['stop-color'])?$this->convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
 				$opacity = isset($svgstyle['stop-opacity'])?$svgstyle['stop-opacity']:1;
 				$this->svggradients[$this->svggradientid]['stops'][] = array('offset' => $offset, 'color' => $stop_color, 'opacity' => $opacity);
 				break;
@@ -1360,7 +1364,7 @@ trait SvgTrait {
 						$y = (isset($attribs['y'])?$attribs['y']:0);
 						$w = (isset($attribs['width'])?$attribs['width']:1);
 						$h = (isset($attribs['height'])?$attribs['height']:1);
-						$tm = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
+						$tm = $this->getTransformationMatrixProduct($tm, array($w, 0, 0, $h, $x, $y));
 						if ($clipping) {
 							$this->SVGTransform($tm);
 							$this->SVGPath($d, 'CNZ');
@@ -1556,7 +1560,7 @@ trait SvgTrait {
 						if ($this->isRelativePath($img) || $this->hasExtForbiddenProtocol($img)) {
 							break;
 						}
-						if (!LIMEPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
+						if (!$this->empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
 							// replace relative path with full server path
 							$img = $this->svgdir.'/'.$img;
 						}
@@ -1581,7 +1585,7 @@ trait SvgTrait {
 						}
 					}
 					// get image type
-					$imgtype = LIMEPDF_IMAGES::getImageFileType($img);
+					$imgtype = $this->getImageFileType($img);
 					if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
 						$this->ImageEps($img, $x, $y, $w, $h);
 					} elseif ($imgtype == 'svg') {

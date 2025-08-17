@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait GraphicsTrait {
 
 	// START GRAPHIC FUNCTIONS SECTION ---------------------
@@ -271,7 +273,7 @@ trait GraphicsTrait {
 			}
 		}
 		if (!empty($style)) {
-			$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+			$op = $this->getPathPaintOperator($style);
 			$this->_outRect($x, $y, $w, $h, $op);
 		}
 		if (!empty($border_style)) {
@@ -324,7 +326,7 @@ trait GraphicsTrait {
 		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($line_style) {
 			$this->setLineStyle($line_style);
 		}
@@ -354,7 +356,7 @@ trait GraphicsTrait {
 		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($op == 'f') {
 			$line_style = array();
 		}
@@ -391,13 +393,13 @@ trait GraphicsTrait {
 		if ($this->state != 2) {
 			return;
 		}
-		if (LIMEPDF_STATIC::empty_string($ry) OR ($ry == 0)) {
+		if ($this->empty_string($ry) OR ($ry == 0)) {
 			$ry = $rx;
 		}
 		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($op == 'f') {
 			$line_style = array();
 		}
@@ -616,7 +618,7 @@ trait GraphicsTrait {
 		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($op == 'f') {
 			$line_style = array();
 		}
@@ -819,7 +821,7 @@ trait GraphicsTrait {
 		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($op == 'f') {
 			$border_style = array();
 		}
@@ -1108,7 +1110,7 @@ trait GraphicsTrait {
 		if ($this->rtl) {
 			$xc = ($this->w - $xc);
 		}
-		$op = LIMEPDF_STATIC::getPathPaintOperator($style);
+		$op = $this->getPathPaintOperator($style);
 		if ($op == 'f') {
 			$line_style = array();
 		}
@@ -1153,10 +1155,10 @@ trait GraphicsTrait {
 			// convert EPS to raster image using GD or ImageMagick libraries
 			return $this->Image($file, $x, $y, $w, $h, 'EPS', $link, $align, true, 300, $palign, false, false, $border, false, false, $fitonpage);
 		}
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary

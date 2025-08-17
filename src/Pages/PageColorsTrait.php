@@ -2,6 +2,8 @@
 
 namespace LimePDF\Pages;
 
+use LimePDF\Include\ColorsTrait;
+
 trait PageColorsTrait {
 
 	/**
@@ -44,7 +46,7 @@ trait PageColorsTrait {
 	 * @since 5.9.125 (2011-10-03)
 	 */
 	public function setSpotColor($type, $name, $tint=100) {
-		$spotcolor = LIMEPDF_COLORS::getSpotColor($name, $this->spot_colors);
+		$spotcolor = $this->getSpotColor($name, $this->spot_colors);
 		if ($spotcolor === false) {
 			$this->Error('Undefined spot color: '.$name.', you must add it using the AddSpotColor() method.');
 		}

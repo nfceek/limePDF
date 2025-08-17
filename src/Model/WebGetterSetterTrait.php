@@ -2,6 +2,10 @@
 
 namespace LimePDF\Model;
 
+use LimePDF\Include\ColorsTrait;
+use LimePDF\Include\FontTrait;
+use LimePDF\Support\StaticTrait;
+
 trait WebGetterSetterTrait {
 
     /**
@@ -112,7 +116,7 @@ trait WebGetterSetterTrait {
 			return array();
 		}
 		$border['width'] = $this->getCSSBorderWidth($width);
-		$border['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($color, $this->spot_colors);
+		$border['color'] = $this->convertHTMLColorToDec($color, $this->spot_colors);
 		return $border;
 	}
 
@@ -370,8 +374,8 @@ trait WebGetterSetterTrait {
 	 * @public
 	 */
 	public function getHTMLFontUnits($val, $refsize=12, $parent_size=12, $defaultunit='pt') {
-		$refsize = LIMEPDF_FONT::getFontRefSize($refsize);
-		$parent_size = LIMEPDF_FONT::getFontRefSize($parent_size, $refsize);
+		$refsize = $this->getFontRefSize($refsize);
+		$parent_size = $this->getFontRefSize($parent_size, $refsize);
 		switch ($val) {
 			case 'xx-small': {
 				$size = ($refsize - 4);
@@ -498,7 +502,7 @@ trait WebGetterSetterTrait {
 							// read CSS data file
                             $cssdata = $this->getCachedFileContents(trim($type[1]));
 							if (($cssdata !== FALSE) AND (strlen($cssdata) > 0)) {
-								$css = array_merge($css, LIMEPDF_STATIC::extractCSSproperties($cssdata));
+								$css = array_merge($css, $this->extractCSSproperties($cssdata));
 							}
 						}
 					}
@@ -515,7 +519,7 @@ trait WebGetterSetterTrait {
 				// (all, braille, embossed, handheld, print, projection, screen, speech, tty, tv)
 				if (empty($type) OR (isset($type[1]) AND (($type[1] == 'all') OR ($type[1] == 'print')))) {
 					$cssdata = $matches[2][$key];
-					$css = array_merge($css, LIMEPDF_STATIC::extractCSSproperties($cssdata));
+					$css = array_merge($css, $this->extractCSSproperties($cssdata));
 				}
 			}
 		}
@@ -693,7 +697,7 @@ trait WebGetterSetterTrait {
 						&& !empty($dom[($dom[$key]['parent'])]['thead'])
 						&& ($dom[($dom[$key]['parent'])]['thead'] === true)
 					) {
-						if (LIMEPDF_STATIC::empty_string($dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'])) {
+						if ($this->empty_string($dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'])) {
 							$dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'] = $csstagarray.$a[$dom[($dom[($dom[$key]['parent'])]['parent'])]['elkey']];
 						}
 						for ($i = $dom[$key]['parent']; $i <= $key; ++$i) {
@@ -705,7 +709,7 @@ trait WebGetterSetterTrait {
 						// header elements must be always contained in a single page
 						$dom[($dom[$key]['parent'])]['attribute']['nobr'] = 'true';
 					}
-					if (($dom[$key]['value'] == 'table') AND (!LIMEPDF_STATIC::empty_string($dom[($dom[$key]['parent'])]['thead']))) {
+					if (($dom[$key]['value'] == 'table') AND (!$this->empty_string($dom[($dom[$key]['parent'])]['thead']))) {
 						// remove the nobr attributes from the table header
 						$dom[($dom[$key]['parent'])]['thead'] = str_replace(' nobr="true"', '', $dom[($dom[$key]['parent'])]['thead']);
 						$dom[($dom[$key]['parent'])]['thead'] .= '</tablehead>';
@@ -754,8 +758,8 @@ trait WebGetterSetterTrait {
                     }
 					if (!empty($css)) {
 						// merge CSS style to current style
-						list($dom[$key]['csssel'], $dom[$key]['cssdata']) = LIMEPDF_STATIC::getCSSdataArray($dom, $key, $css);
-						$dom[$key]['attribute']['style'] = LIMEPDF_STATIC::getTagStyleFromCSSarray($dom[$key]['cssdata']);
+						list($dom[$key]['csssel'], $dom[$key]['cssdata']) = $this->getCSSdataArray($dom, $key, $css);
+						$dom[$key]['attribute']['style'] = $this->getTagStyleFromCSSarray($dom[$key]['cssdata']);
 					}
 					// split style attributes
 					if (isset($dom[$key]['attribute']['style']) AND !empty($dom[$key]['attribute']['style'])) {
@@ -852,21 +856,21 @@ trait WebGetterSetterTrait {
 							$dom[$key]['fontstyle'] .= 'I';
 						}
 						// font color
-						if (isset($dom[$key]['style']['color']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['style']['color']))) {
-							$dom[$key]['fgcolor'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['color'], $this->spot_colors);
+						if (isset($dom[$key]['style']['color']) AND (!$this->empty_string($dom[$key]['style']['color']))) {
+							$dom[$key]['fgcolor'] = $this->convertHTMLColorToDec($dom[$key]['style']['color'], $this->spot_colors);
 						} elseif ($dom[$key]['value'] == 'a') {
 							$dom[$key]['fgcolor'] = $this->htmlLinkColorArray;
 						}
 						// background color
-						if (isset($dom[$key]['style']['background-color']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['style']['background-color']))) {
-							$dom[$key]['bgcolor'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['background-color'], $this->spot_colors);
+						if (isset($dom[$key]['style']['background-color']) AND (!$this->empty_string($dom[$key]['style']['background-color']))) {
+							$dom[$key]['bgcolor'] = $this->convertHTMLColorToDec($dom[$key]['style']['background-color'], $this->spot_colors);
 						}
 						// text-decoration
 						if (isset($dom[$key]['style']['text-decoration'])) {
 							$decors = explode(' ', strtolower($dom[$key]['style']['text-decoration']));
 							foreach ($decors as $dec) {
 								$dec = trim($dec);
-								if (!LIMEPDF_STATIC::empty_string($dec)) {
+								if (!$this->empty_string($dec)) {
 									if ($dec[0] == 'u') {
 										// underline
 										$dom[$key]['fontstyle'] .= 'U';
@@ -904,16 +908,16 @@ trait WebGetterSetterTrait {
 						if (isset($dom[$key]['style']['border-color'])) {
 							$brd_colors = preg_split('/[\s]+/', trim($dom[$key]['style']['border-color']));
 							if (isset($brd_colors[3])) {
-								$dom[$key]['border']['L']['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($brd_colors[3], $this->spot_colors);
+								$dom[$key]['border']['L']['color'] = $this->convertHTMLColorToDec($brd_colors[3], $this->spot_colors);
 							}
 							if (isset($brd_colors[1])) {
-								$dom[$key]['border']['R']['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($brd_colors[1], $this->spot_colors);
+								$dom[$key]['border']['R']['color'] = $this->convertHTMLColorToDec($brd_colors[1], $this->spot_colors);
 							}
 							if (isset($brd_colors[0])) {
-								$dom[$key]['border']['T']['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($brd_colors[0], $this->spot_colors);
+								$dom[$key]['border']['T']['color'] = $this->convertHTMLColorToDec($brd_colors[0], $this->spot_colors);
 							}
 							if (isset($brd_colors[2])) {
-								$dom[$key]['border']['B']['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($brd_colors[2], $this->spot_colors);
+								$dom[$key]['border']['B']['color'] = $this->convertHTMLColorToDec($brd_colors[2], $this->spot_colors);
 							}
 						}
 						if (isset($dom[$key]['style']['border-width'])) {
@@ -975,7 +979,7 @@ trait WebGetterSetterTrait {
 								}
 							}
 							if (isset($dom[$key]['style']['border-'.$bsv.'-color'])) {
-								$dom[$key]['border'][$bsk]['color'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['border-'.$bsv.'-color'], $this->spot_colors);
+								$dom[$key]['border'][$bsk]['color'] = $this->convertHTMLColorToDec($dom[$key]['style']['border-'.$bsv.'-color'], $this->spot_colors);
 							}
 							if (isset($dom[$key]['style']['border-'.$bsv.'-width'])) {
 								$dom[$key]['border'][$bsk]['width'] = $this->getCSSBorderWidth($dom[$key]['style']['border-'.$bsv.'-width']);
@@ -1070,7 +1074,7 @@ trait WebGetterSetterTrait {
 					}
 					// force natural alignment for lists
 					if ((($dom[$key]['value'] == 'ul') OR ($dom[$key]['value'] == 'ol') OR ($dom[$key]['value'] == 'dl'))
-						AND (!isset($dom[$key]['align']) OR LIMEPDF_STATIC::empty_string($dom[$key]['align']) OR ($dom[$key]['align'] != 'J'))) {
+						AND (!isset($dom[$key]['align']) OR $this->empty_string($dom[$key]['align']) OR ($dom[$key]['align'] != 'J'))) {
 						if ($this->rtl) {
 							$dom[$key]['align'] = 'R';
 						} else {
@@ -1152,18 +1156,18 @@ trait WebGetterSetterTrait {
 						$dom[$key]['dir'] = $dom[$key]['attribute']['dir'];
 					}
 					// set foreground color attribute
-					if (isset($dom[$key]['attribute']['color']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['attribute']['color']))) {
-						$dom[$key]['fgcolor'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['color'], $this->spot_colors);
+					if (isset($dom[$key]['attribute']['color']) AND (!$this->empty_string($dom[$key]['attribute']['color']))) {
+						$dom[$key]['fgcolor'] = $this->convertHTMLColorToDec($dom[$key]['attribute']['color'], $this->spot_colors);
 					} elseif (!isset($dom[$key]['style']['color']) AND ($dom[$key]['value'] == 'a')) {
 						$dom[$key]['fgcolor'] = $this->htmlLinkColorArray;
 					}
 					// set background color attribute
-					if (isset($dom[$key]['attribute']['bgcolor']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['attribute']['bgcolor']))) {
-						$dom[$key]['bgcolor'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['bgcolor'], $this->spot_colors);
+					if (isset($dom[$key]['attribute']['bgcolor']) AND (!$this->empty_string($dom[$key]['attribute']['bgcolor']))) {
+						$dom[$key]['bgcolor'] = $this->convertHTMLColorToDec($dom[$key]['attribute']['bgcolor'], $this->spot_colors);
 					}
 					// set stroke color attribute
-					if (isset($dom[$key]['attribute']['strokecolor']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['attribute']['strokecolor']))) {
-						$dom[$key]['strokecolor'] = LIMEPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['strokecolor'], $this->spot_colors);
+					if (isset($dom[$key]['attribute']['strokecolor']) AND (!$this->empty_string($dom[$key]['attribute']['strokecolor']))) {
+						$dom[$key]['strokecolor'] = $this->convertHTMLColorToDec($dom[$key]['attribute']['strokecolor'], $this->spot_colors);
 					}
 					// check for width attribute
 					if (isset($dom[$key]['attribute']['width'])) {
@@ -1174,7 +1178,7 @@ trait WebGetterSetterTrait {
 						$dom[$key]['height'] = $dom[$key]['attribute']['height'];
 					}
 					// check for text alignment
-					if (isset($dom[$key]['attribute']['align']) AND (!LIMEPDF_STATIC::empty_string($dom[$key]['attribute']['align'])) AND ($dom[$key]['value'] !== 'img')) {
+					if (isset($dom[$key]['attribute']['align']) AND (!$this->empty_string($dom[$key]['attribute']['align'])) AND ($dom[$key]['value'] !== 'img')) {
 						$dom[$key]['align'] = strtoupper($dom[$key]['attribute']['align'][0]);
 					}
 					// check for text rendering mode (the following attributes do not exist in HTML)

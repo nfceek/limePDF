@@ -2,6 +2,10 @@
 
 namespace LimePDF\Utils;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\ColorsTrait;
+use LimePDF\Support\StaticTrait;
+
 trait MiscTrait {
 
 	/**
@@ -105,7 +109,7 @@ trait MiscTrait {
 					if ($type == 'u') {
 						$chrdiff = floor(($diff + 12) * $ratio);
 						$shift = str_repeat(' ', $chrdiff);
-						$shift = LIMEPDF_FONT::UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
+						$shift = $this->UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
 					} else {
 						$chrdiff = floor(($diff + 11) * $ratio);
 						$shift = str_repeat(' ', $chrdiff);
@@ -129,7 +133,7 @@ trait MiscTrait {
 		if ((empty($timestamp)) OR ($timestamp < 0)) {
 			$timestamp = $this->doc_creation_timestamp;
 		}
-		return $this->_datastring('D:'.LIMEPDF_STATIC::getFormattedDate($timestamp), $n);
+		return $this->_datastring('D:'.$this->getFormattedDate($timestamp), $n);
 	}
 
 	/**
@@ -142,7 +146,7 @@ trait MiscTrait {
 	protected function _textstring($s, $n=0) {
 		if ($this->isunicode) {
 			//Convert string to UTF-16BE
-			$s = LIMEPDF_FONT::UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
+			$s = $this->UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
 		}
 		return $this->_datastring($s, $n);
 	}
@@ -387,7 +391,7 @@ trait MiscTrait {
 				}
 				default: { // SPECIFIC SPOT COLOR NAME
 					$col_a = array(0,0,0,0,'None');
-					$col_b = LIMEPDF_COLORS::getSpotColor($col, $this->spot_colors);
+					$col_b = $this->getSpotColor($col, $this->spot_colors);
 					if ($col_b === false) {
 						// in case of error defaults to the registration color
 						$col_b = array(100,100,100,100,'All');
@@ -712,7 +716,7 @@ trait MiscTrait {
 		$this->start_transaction_page = $this->page;
 		$this->start_transaction_y = $this->y;
 		// clone current object
-		$this->objcopy = LIMEPDF_STATIC::objclone($this);
+		$this->objcopy = $this->objclone($this);
 	}
 
 	
@@ -741,7 +745,7 @@ trait MiscTrait {
 			if (isset($this->imagekeys)) {
 				foreach($this->imagekeys as $file) {
 					if ((strpos($file,  K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_') === 0)
-						&& LIMEPDF_STATIC::file_exists($file)) {
+						&& $this->file_exists($file)) {
 							$this->_unlink($file);
 					}
 				}

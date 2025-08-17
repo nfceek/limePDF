@@ -66,7 +66,7 @@ trait FontTrait {
 		$fmetric['originalsize'] = strlen($font);
 		// autodetect font type
 		if (empty($fonttype)) {
-			if ($this->_getULONG($font, 0) == 0x10000) {
+			if (self::_getULONG($font, 0) == 0x10000) {
 				// True Type (Unicode or not)
 				$fonttype = 'TrueTypeUnicode';
 			} elseif (substr($font, 0, 4) == 'OTTO') {
@@ -316,7 +316,7 @@ trait FontTrait {
 		} else {
 			// ---------- TRUE TYPE ----------
 			$offset = 0; // offset position of the font data
-			if ($this->_getULONG($font, $offset) != 0x10000) {
+			if (self::_getULONG($font, $offset) != 0x10000) {
 				// sfnt version must be 0x00010000 for TrueType version 1.0.
 				return false;
 			}
@@ -334,7 +334,7 @@ trait FontTrait {
 			}
 			$offset += 4;
 			// get number of tables
-			$numTables = $this->_getUSHORT($font, $offset);
+			$numTables = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			// skip searchRange, entrySelector and rangeShift
 			$offset += 6;
@@ -346,23 +346,23 @@ trait FontTrait {
 				$tag = substr($font, $offset, 4);
 				$offset += 4;
 				$table[$tag] = array();
-				$table[$tag]['checkSum'] = $this->_getULONG($font, $offset);
+				$table[$tag]['checkSum'] = self::_getULONG($font, $offset);
 				$offset += 4;
-				$table[$tag]['offset'] = $this->_getULONG($font, $offset);
+				$table[$tag]['offset'] = self::_getULONG($font, $offset);
 				$offset += 4;
-				$table[$tag]['length'] = $this->_getULONG($font, $offset);
+				$table[$tag]['length'] = self::_getULONG($font, $offset);
 				$offset += 4;
 			}
 			// check magicNumber
 			$offset = $table['head']['offset'] + 12;
-			if ($this->_getULONG($font, $offset) != 0x5F0F3CF5) {
+			if (self::_getULONG($font, $offset) != 0x5F0F3CF5) {
 				// magicNumber must be 0x5F0F3CF5
 				return false;
 			}
 			$offset += 4;
 			$offset += 2; // skip flags
 			// get FUnits
-			$fmetric['unitsPerEm'] = $this->_getUSHORT($font, $offset);
+			$fmetric['unitsPerEm'] = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			// units ratio constant
 			$urk = (1000 / $fmetric['unitsPerEm']);
@@ -376,7 +376,7 @@ trait FontTrait {
 			$yMax = round($this->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$fmetric['bbox'] = ''.$xMin.' '.$yMin.' '.$xMax.' '.$yMax.'';
-			$macStyle = $this->_getUSHORT($font, $offset);
+			$macStyle = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			// PDF font flags
 			$fmetric['Flags'] = $flags;
@@ -386,7 +386,7 @@ trait FontTrait {
 			}
 			// get offset mode (indexToLocFormat : 0 = short, 1 = long)
 			$offset = $table['head']['offset'] + 50;
-			$short_offset = ($this->_getSHORT($font, $offset) == 0);
+			$short_offset = (self::_getSHORT($font, $offset) == 0);
 			$offset += 2;
 			// get the offsets to the locations of the glyphs in the font, relative to the beginning of the glyphData table
 			$indexToLoc = array();
@@ -395,7 +395,7 @@ trait FontTrait {
 				// short version
 				$tot_num_glyphs = floor($table['loca']['length'] / 2); // numGlyphs + 1
 				for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-					$indexToLoc[$i] = $this->_getUSHORT($font, $offset) * 2;
+					$indexToLoc[$i] = self::_getUSHORT($font, $offset) * 2;
 					if (isset($indexToLoc[($i - 1)]) && ($indexToLoc[$i] == $indexToLoc[($i - 1)])) {
 						// the last glyph didn't have an outline
 						unset($indexToLoc[($i - 1)]);
@@ -406,7 +406,7 @@ trait FontTrait {
 				// long version
 				$tot_num_glyphs = floor($table['loca']['length'] / 4); // numGlyphs + 1
 				for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-					$indexToLoc[$i] = $this->_getULONG($font, $offset);
+					$indexToLoc[$i] = self::_getULONG($font, $offset);
 					if (isset($indexToLoc[($i - 1)]) && ($indexToLoc[$i] == $indexToLoc[($i - 1)])) {
 						// the last glyph didn't have an outline
 						unset($indexToLoc[($i - 1)]);
@@ -416,15 +416,15 @@ trait FontTrait {
 			}
 			// get glyphs indexes of chars from cmap table
 			$offset = $table['cmap']['offset'] + 2;
-			$numEncodingTables = $this->_getUSHORT($font, $offset);
+			$numEncodingTables = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			$encodingTables = array();
 			for ($i = 0; $i < $numEncodingTables; ++$i) {
-				$encodingTables[$i]['platformID'] = $this->_getUSHORT($font, $offset);
+				$encodingTables[$i]['platformID'] = self::_getUSHORT($font, $offset);
 				$offset += 2;
-				$encodingTables[$i]['encodingID'] = $this->_getUSHORT($font, $offset);
+				$encodingTables[$i]['encodingID'] = self::_getUSHORT($font, $offset);
 				$offset += 2;
-				$encodingTables[$i]['offset'] = $this->_getULONG($font, $offset);
+				$encodingTables[$i]['offset'] = self::_getULONG($font, $offset);
 				$offset += 4;
 			}
 			// ---------- get os/2 metrics ----------
@@ -440,7 +440,7 @@ trait FontTrait {
 			$fmetric['StemH'] = round((30 * $usWeightClass) / 400);
 			$offset += 2;
 			$offset += 2; // usWidthClass
-			$fsType = $this->_getSHORT($font, $offset);
+			$fsType = self::_getSHORT($font, $offset);
 			$offset += 2;
 			if ($fsType == 2) {
 				// This Font cannot be modified, embedded or exchanged in any manner without first obtaining permission of the legal owner.
@@ -451,22 +451,22 @@ trait FontTrait {
 			$offset = $table['name']['offset'];
 			$offset += 2; // skip Format selector (=0).
 			// Number of NameRecords that follow n.
-			$numNameRecords = $this->_getUSHORT($font, $offset);
+			$numNameRecords = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			// Offset to start of string storage (from start of table).
-			$stringStorageOffset = $this->_getUSHORT($font, $offset);
+			$stringStorageOffset = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			for ($i = 0; $i < $numNameRecords; ++$i) {
 				$offset += 6; // skip Platform ID, Platform-specific encoding ID, Language ID.
 				// Name ID.
-				$nameID = $this->_getUSHORT($font, $offset);
+				$nameID = self::_getUSHORT($font, $offset);
 				$offset += 2;
 				if ($nameID == 6) {
 					// String length (in bytes).
-					$stringLength = $this->_getUSHORT($font, $offset);
+					$stringLength = self::_getUSHORT($font, $offset);
 					$offset += 2;
 					// String offset from start of storage area (in bytes).
-					$stringOffset = $this->_getUSHORT($font, $offset);
+					$stringOffset = self::_getUSHORT($font, $offset);
 					$offset += 2;
 					$offset = ($table['name']['offset'] + $stringStorageOffset + $stringOffset);
 					$fmetric['name'] = substr($font, $offset, $stringLength);
@@ -488,7 +488,7 @@ trait FontTrait {
 			$offset += 2;
 			$fmetric['underlineThickness'] = round($this->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$isFixedPitch = ($this->_getULONG($font, $offset) == 0) ? false : true;
+			$isFixedPitch = (self::_getULONG($font, $offset) == 0) ? false : true;
 			$offset += 2;
 			if ($isFixedPitch) {
 				$fmetric['Flags'] |= 1;
@@ -510,12 +510,12 @@ trait FontTrait {
 			$offset += 2;
 			$offset += 22; // skip some values
 			// get the number of hMetric entries in hmtx table
-			$numberOfHMetrics = $this->_getUSHORT($font, $offset);
+			$numberOfHMetrics = self::_getUSHORT($font, $offset);
 			// ---------- get maxp data ----------
 			$offset = $table['maxp']['offset'];
 			$offset += 4; // skip Table version number
 			// get the the number of glyphs in the font.
-			$numGlyphs = $this->_getUSHORT($font, $offset);
+			$numGlyphs = self::_getUSHORT($font, $offset);
 			// ---------- get CIDToGIDMap ----------
 			$ctg = array();
 			$c = 0;
@@ -523,7 +523,7 @@ trait FontTrait {
 				// get only specified Platform ID and Encoding ID
 				if (($enctable['platformID'] == $platid) AND ($enctable['encodingID'] == $encid)) {
 					$offset = $table['cmap']['offset'] + $enctable['offset'];
-					$format = $this->_getUSHORT($font, $offset);
+					$format = self::_getUSHORT($font, $offset);
 					$offset += 2;
 					switch ($format) {
 						case 0: { // Format 0: Byte encoding table
@@ -540,7 +540,7 @@ trait FontTrait {
 							$numSubHeaders = 0;
 							for ($i = 0; $i < 256; ++$i) {
 								// Array that maps high bytes to subHeaders: value is subHeader index * 8.
-								$subHeaderKeys[$i] = ($this->_getUSHORT($font, $offset) / 8);
+								$subHeaderKeys[$i] = (self::_getUSHORT($font, $offset) / 8);
 								$offset += 2;
 								if ($numSubHeaders < $subHeaderKeys[$i]) {
 									$numSubHeaders = $subHeaderKeys[$i];
@@ -552,20 +552,20 @@ trait FontTrait {
 							$subHeaders = array();
 							$numGlyphIndexArray = 0;
 							for ($k = 0; $k < $numSubHeaders; ++$k) {
-								$subHeaders[$k]['firstCode'] = $this->_getUSHORT($font, $offset);
+								$subHeaders[$k]['firstCode'] = self::_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['entryCount'] = $this->_getUSHORT($font, $offset);
+								$subHeaders[$k]['entryCount'] = self::_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['idDelta'] = $this->_getUSHORT($font, $offset);
+								$subHeaders[$k]['idDelta'] = self::_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['idRangeOffset'] = $this->_getUSHORT($font, $offset);
+								$subHeaders[$k]['idRangeOffset'] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 								$subHeaders[$k]['idRangeOffset'] -= (2 + (($numSubHeaders - $k - 1) * 8));
 								$subHeaders[$k]['idRangeOffset'] /= 2;
 								$numGlyphIndexArray += $subHeaders[$k]['entryCount'];
 							}
 							for ($k = 0; $k < $numGlyphIndexArray; ++$k) {
-								$glyphIndexArray[$k] = $this->_getUSHORT($font, $offset);
+								$glyphIndexArray[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							for ($i = 0; $i < 256; ++$i) {
@@ -594,37 +594,37 @@ trait FontTrait {
 							break;
 						}
 						case 4: { // Format 4: Segment mapping to delta values
-							$length = $this->_getUSHORT($font, $offset);
+							$length = self::_getUSHORT($font, $offset);
 							$offset += 2;
 							$offset += 2; // skip version/language
-							$segCount = floor($this->_getUSHORT($font, $offset) / 2);
+							$segCount = floor(self::_getUSHORT($font, $offset) / 2);
 							$offset += 2;
 							$offset += 6; // skip searchRange, entrySelector, rangeShift
 							$endCount = array(); // array of end character codes for each segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$endCount[$k] = $this->_getUSHORT($font, $offset);
+								$endCount[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$offset += 2; // skip reservedPad
 							$startCount = array(); // array of start character codes for each segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$startCount[$k] = $this->_getUSHORT($font, $offset);
+								$startCount[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$idDelta = array(); // delta for all character codes in segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$idDelta[$k] = $this->_getUSHORT($font, $offset);
+								$idDelta[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$idRangeOffset = array(); // Offsets into glyphIdArray or 0
 							for ($k = 0; $k < $segCount; ++$k) {
-								$idRangeOffset[$k] = $this->_getUSHORT($font, $offset);
+								$idRangeOffset[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$gidlen = (floor($length / 2) - 8 - (4 * $segCount));
 							$glyphIdArray = array(); // glyph index array
 							for ($k = 0; $k < $gidlen; ++$k) {
-								$glyphIdArray[$k] = $this->_getUSHORT($font, $offset);
+								$glyphIdArray[$k] = self::_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							for ($k = 0; $k < $segCount - 1; ++$k) {
@@ -645,13 +645,13 @@ trait FontTrait {
 						}
 						case 6: { // Format 6: Trimmed table mapping
 							$offset += 4; // skip length and version/language
-							$firstCode = $this->_getUSHORT($font, $offset);
+							$firstCode = self::_getUSHORT($font, $offset);
 							$offset += 2;
-							$entryCount = $this->_getUSHORT($font, $offset);
+							$entryCount = self::_getUSHORT($font, $offset);
 							$offset += 2;
 							for ($k = 0; $k < $entryCount; ++$k) {
 								$c = ($k + $firstCode);
-								$g = $this->_getUSHORT($font, $offset);
+								$g = self::_getUSHORT($font, $offset);
 								$offset += 2;
 								$ctg[$c] = $g;
 							}
@@ -663,14 +663,14 @@ trait FontTrait {
 								$is32[$k] = $this->_getBYTE($font, $offset);
 								++$offset;
 							}
-							$nGroups = $this->_getULONG($font, $offset);
+							$nGroups = self::_getULONG($font, $offset);
 							$offset += 4;
 							for ($i = 0; $i < $nGroups; ++$i) {
-								$startCharCode = $this->_getULONG($font, $offset);
+								$startCharCode = self::_getULONG($font, $offset);
 								$offset += 4;
-								$endCharCode = $this->_getULONG($font, $offset);
+								$endCharCode = self::_getULONG($font, $offset);
 								$offset += 4;
-								$startGlyphID = $this->_getULONG($font, $offset);
+								$startGlyphID = self::_getULONG($font, $offset);
 								$offset += 4;
 								for ($k = $startCharCode; $k <= $endCharCode; ++$k) {
 									$is32idx = floor($c / 8);
@@ -691,13 +691,13 @@ trait FontTrait {
 						}
 						case 10: { // Format 10: Trimmed array
 							$offset += 10; // skip reserved, length and version/language
-							$startCharCode = $this->_getULONG($font, $offset);
+							$startCharCode = self::_getULONG($font, $offset);
 							$offset += 4;
-							$numChars = $this->_getULONG($font, $offset);
+							$numChars = self::_getULONG($font, $offset);
 							$offset += 4;
 							for ($k = 0; $k < $numChars; ++$k) {
 								$c = ($k + $startCharCode);
-								$g = $this->_getUSHORT($font, $offset);
+								$g = self::_getUSHORT($font, $offset);
 								$ctg[$c] = $g;
 								$offset += 2;
 							}
@@ -705,14 +705,14 @@ trait FontTrait {
 						}
 						case 12: { // Format 12: Segmented coverage
 							$offset += 10; // skip length and version/language
-							$nGroups = $this->_getULONG($font, $offset);
+							$nGroups = self::_getULONG($font, $offset);
 							$offset += 4;
 							for ($k = 0; $k < $nGroups; ++$k) {
-								$startCharCode = $this->_getULONG($font, $offset);
+								$startCharCode = self::_getULONG($font, $offset);
 								$offset += 4;
-								$endCharCode = $this->_getULONG($font, $offset);
+								$endCharCode = self::_getULONG($font, $offset);
 								$offset += 4;
-								$startGlyphCode = $this->_getULONG($font, $offset);
+								$startGlyphCode = self::_getULONG($font, $offset);
 								$offset += 4;
 								for ($c = $startCharCode; $c <= $endCharCode; ++$c) {
 									$ctg[$c] = $startGlyphCode;
@@ -983,14 +983,14 @@ trait FontTrait {
 	public static function _getTrueTypeFontSubset($font, $subsetchars) {
 		ksort($subsetchars);
 		$offset = 0; // offset position of the font data
-		if ($this->_getULONG($font, $offset) != 0x10000) {
+		if (self::_getULONG($font, $offset) != 0x10000) {
 			// sfnt version must be 0x00010000 for TrueType version 1.0.
 			return $font;
 		}
 		$c = 0;
 		$offset += 4;
 		// get number of tables
-		$numTables = $this->_getUSHORT($font, $offset);
+		$numTables = self::_getUSHORT($font, $offset);
 		$offset += 2;
 		// skip searchRange, entrySelector and rangeShift
 		$offset += 6;
@@ -1002,23 +1002,23 @@ trait FontTrait {
 			$tag = substr($font, $offset, 4);
 			$offset += 4;
 			$table[$tag] = array();
-			$table[$tag]['checkSum'] = $this->_getULONG($font, $offset);
+			$table[$tag]['checkSum'] = self::_getULONG($font, $offset);
 			$offset += 4;
-			$table[$tag]['offset'] = $this->_getULONG($font, $offset);
+			$table[$tag]['offset'] = self::_getULONG($font, $offset);
 			$offset += 4;
-			$table[$tag]['length'] = $this->_getULONG($font, $offset);
+			$table[$tag]['length'] = self::_getULONG($font, $offset);
 			$offset += 4;
 		}
 		// check magicNumber
 		$offset = $table['head']['offset'] + 12;
-		if ($this->_getULONG($font, $offset) != 0x5F0F3CF5) {
+		if (self::_getULONG($font, $offset) != 0x5F0F3CF5) {
 			// magicNumber must be 0x5F0F3CF5
 			return $font;
 		}
 		$offset += 4;
 		// get offset mode (indexToLocFormat : 0 = short, 1 = long)
 		$offset = $table['head']['offset'] + 50;
-		$short_offset = ($this->_getSHORT($font, $offset) == 0);
+		$short_offset = (self::_getSHORT($font, $offset) == 0);
 		$offset += 2;
 		// get the offsets to the locations of the glyphs in the font, relative to the beginning of the glyphData table
 		$indexToLoc = array();
@@ -1027,14 +1027,14 @@ trait FontTrait {
 			// short version
 			$tot_num_glyphs = floor($table['loca']['length'] / 2); // numGlyphs + 1
 			for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-				$indexToLoc[$i] = $this->_getUSHORT($font, $offset) * 2;
+				$indexToLoc[$i] = self::_getUSHORT($font, $offset) * 2;
 				$offset += 2;
 			}
 		} else {
 			// long version
 			$tot_num_glyphs = ($table['loca']['length'] / 4); // numGlyphs + 1
 			for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-				$indexToLoc[$i] = $this->_getULONG($font, $offset);
+				$indexToLoc[$i] = self::_getULONG($font, $offset);
 				$offset += 4;
 			}
 		}
@@ -1042,21 +1042,21 @@ trait FontTrait {
 		$subsetglyphs = array(); // glyph IDs on key
 		$subsetglyphs[0] = true; // character codes that do not correspond to any glyph in the font should be mapped to glyph index 0
 		$offset = $table['cmap']['offset'] + 2;
-		$numEncodingTables = $this->_getUSHORT($font, $offset);
+		$numEncodingTables = self::_getUSHORT($font, $offset);
 		$offset += 2;
 		$encodingTables = array();
 		for ($i = 0; $i < $numEncodingTables; ++$i) {
-			$encodingTables[$i]['platformID'] = $this->_getUSHORT($font, $offset);
+			$encodingTables[$i]['platformID'] = self::_getUSHORT($font, $offset);
 			$offset += 2;
-			$encodingTables[$i]['encodingID'] = $this->_getUSHORT($font, $offset);
+			$encodingTables[$i]['encodingID'] = self::_getUSHORT($font, $offset);
 			$offset += 2;
-			$encodingTables[$i]['offset'] = $this->_getULONG($font, $offset);
+			$encodingTables[$i]['offset'] = self::_getULONG($font, $offset);
 			$offset += 4;
 		}
 		foreach ($encodingTables as $enctable) {
 			// get all platforms and encodings
 			$offset = $table['cmap']['offset'] + $enctable['offset'];
-			$format = $this->_getUSHORT($font, $offset);
+			$format = self::_getUSHORT($font, $offset);
 			$offset += 2;
 			switch ($format) {
 				case 0: { // Format 0: Byte encoding table
@@ -1075,7 +1075,7 @@ trait FontTrait {
 					$numSubHeaders = 0;
 					for ($i = 0; $i < 256; ++$i) {
 						// Array that maps high bytes to subHeaders: value is subHeader index * 8.
-						$subHeaderKeys[$i] = ($this->_getUSHORT($font, $offset) / 8);
+						$subHeaderKeys[$i] = (self::_getUSHORT($font, $offset) / 8);
 						$offset += 2;
 						if ($numSubHeaders < $subHeaderKeys[$i]) {
 							$numSubHeaders = $subHeaderKeys[$i];
@@ -1087,20 +1087,20 @@ trait FontTrait {
 					$subHeaders = array();
 					$numGlyphIndexArray = 0;
 					for ($k = 0; $k < $numSubHeaders; ++$k) {
-						$subHeaders[$k]['firstCode'] = $this->_getUSHORT($font, $offset);
+						$subHeaders[$k]['firstCode'] = self::_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['entryCount'] = $this->_getUSHORT($font, $offset);
+						$subHeaders[$k]['entryCount'] = self::_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['idDelta'] = $this->_getUSHORT($font, $offset);
+						$subHeaders[$k]['idDelta'] = self::_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['idRangeOffset'] = $this->_getUSHORT($font, $offset);
+						$subHeaders[$k]['idRangeOffset'] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 						$subHeaders[$k]['idRangeOffset'] -= (2 + (($numSubHeaders - $k - 1) * 8));
 						$subHeaders[$k]['idRangeOffset'] /= 2;
 						$numGlyphIndexArray += $subHeaders[$k]['entryCount'];
 					}
 					for ($k = 0; $k < $numGlyphIndexArray; ++$k) {
-						$glyphIndexArray[$k] = $this->_getUSHORT($font, $offset);
+						$glyphIndexArray[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					for ($i = 0; $i < 256; ++$i) {
@@ -1133,37 +1133,37 @@ trait FontTrait {
 					break;
 				}
 				case 4: { // Format 4: Segment mapping to delta values
-					$length = $this->_getUSHORT($font, $offset);
+					$length = self::_getUSHORT($font, $offset);
 					$offset += 2;
 					$offset += 2; // skip version/language
-					$segCount = floor($this->_getUSHORT($font, $offset) / 2);
+					$segCount = floor(self::_getUSHORT($font, $offset) / 2);
 					$offset += 2;
 					$offset += 6; // skip searchRange, entrySelector, rangeShift
 					$endCount = array(); // array of end character codes for each segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$endCount[$k] = $this->_getUSHORT($font, $offset);
+						$endCount[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$offset += 2; // skip reservedPad
 					$startCount = array(); // array of start character codes for each segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$startCount[$k] = $this->_getUSHORT($font, $offset);
+						$startCount[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$idDelta = array(); // delta for all character codes in segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$idDelta[$k] = $this->_getUSHORT($font, $offset);
+						$idDelta[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$idRangeOffset = array(); // Offsets into glyphIdArray or 0
 					for ($k = 0; $k < $segCount; ++$k) {
-						$idRangeOffset[$k] = $this->_getUSHORT($font, $offset);
+						$idRangeOffset[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$gidlen = (floor($length / 2) - 8 - (4 * $segCount));
 					$glyphIdArray = array(); // glyph index array
 					for ($k = 0; $k < $gidlen; ++$k) {
-						$glyphIdArray[$k] = $this->_getUSHORT($font, $offset);
+						$glyphIdArray[$k] = self::_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					for ($k = 0; $k < $segCount; ++$k) {
@@ -1186,14 +1186,14 @@ trait FontTrait {
 				}
 				case 6: { // Format 6: Trimmed table mapping
 					$offset += 4; // skip length and version/language
-					$firstCode = $this->_getUSHORT($font, $offset);
+					$firstCode = self::_getUSHORT($font, $offset);
 					$offset += 2;
-					$entryCount = $this->_getUSHORT($font, $offset);
+					$entryCount = self::_getUSHORT($font, $offset);
 					$offset += 2;
 					for ($k = 0; $k < $entryCount; ++$k) {
 						$c = ($k + $firstCode);
 						if (isset($subsetchars[$c])) {
-							$g = $this->_getUSHORT($font, $offset);
+							$g = self::_getUSHORT($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						$offset += 2;
@@ -1206,14 +1206,14 @@ trait FontTrait {
 						$is32[$k] = $this->_getBYTE($font, $offset);
 						++$offset;
 					}
-					$nGroups = $this->_getULONG($font, $offset);
+					$nGroups = self::_getULONG($font, $offset);
 					$offset += 4;
 					for ($i = 0; $i < $nGroups; ++$i) {
-						$startCharCode = $this->_getULONG($font, $offset);
+						$startCharCode = self::_getULONG($font, $offset);
 						$offset += 4;
-						$endCharCode = $this->_getULONG($font, $offset);
+						$endCharCode = self::_getULONG($font, $offset);
 						$offset += 4;
-						$startGlyphID = $this->_getULONG($font, $offset);
+						$startGlyphID = self::_getULONG($font, $offset);
 						$offset += 4;
 						for ($k = $startCharCode; $k <= $endCharCode; ++$k) {
 							$is32idx = floor($c / 8);
@@ -1236,14 +1236,14 @@ trait FontTrait {
 				}
 				case 10: { // Format 10: Trimmed array
 					$offset += 10; // skip reserved, length and version/language
-					$startCharCode = $this->_getULONG($font, $offset);
+					$startCharCode = self::_getULONG($font, $offset);
 					$offset += 4;
-					$numChars = $this->_getULONG($font, $offset);
+					$numChars = self::_getULONG($font, $offset);
 					$offset += 4;
 					for ($k = 0; $k < $numChars; ++$k) {
 						$c = ($k + $startCharCode);
 						if (isset($subsetchars[$c])) {
-							$g = $this->_getUSHORT($font, $offset);
+							$g = self::_getUSHORT($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						$offset += 2;
@@ -1252,14 +1252,14 @@ trait FontTrait {
 				}
 				case 12: { // Format 12: Segmented coverage
 					$offset += 10; // skip length and version/language
-					$nGroups = $this->_getULONG($font, $offset);
+					$nGroups = self::_getULONG($font, $offset);
 					$offset += 4;
 					for ($k = 0; $k < $nGroups; ++$k) {
-						$startCharCode = $this->_getULONG($font, $offset);
+						$startCharCode = self::_getULONG($font, $offset);
 						$offset += 4;
-						$endCharCode = $this->_getULONG($font, $offset);
+						$endCharCode = self::_getULONG($font, $offset);
 						$offset += 4;
-						$startGlyphCode = $this->_getULONG($font, $offset);
+						$startGlyphCode = self::_getULONG($font, $offset);
 						$offset += 4;
 						for ($c = $startCharCode; $c <= $endCharCode; ++$c) {
 							if (isset($subsetchars[$c])) {
@@ -1288,14 +1288,14 @@ trait FontTrait {
 			foreach ($sga as $key => $val) {
 				if (isset($indexToLoc[$key])) {
 					$offset = ($table['glyf']['offset'] + $indexToLoc[$key]);
-					$numberOfContours = $this->_getSHORT($font, $offset);
+					$numberOfContours = self::_getSHORT($font, $offset);
 					$offset += 2;
 					if ($numberOfContours < 0) { // composite glyph
 						$offset += 8; // skip xMin, yMin, xMax, yMax
 						do {
-							$flags = $this->_getUSHORT($font, $offset);
+							$flags = self::_getUSHORT($font, $offset);
 							$offset += 2;
-							$glyphIndex = $this->_getUSHORT($font, $offset);
+							$glyphIndex = self::_getUSHORT($font, $offset);
 							$offset += 2;
 							if (!isset($subsetglyphs[$glyphIndex])) {
 								// add missing glyphs
@@ -2051,7 +2051,7 @@ trait FontTrait {
 		$str = is_null($str) ? '' : $str;
 		if ($isunicode) {
 			// requires PCRE unicode support turned on
-			$chars = $this->pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
+			$chars = self::pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
 			$carr = array_map(static::class.'::uniord', $chars);
 		} else {
 			$chars = str_split($str);

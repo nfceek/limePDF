@@ -2,6 +2,8 @@
 
 namespace LimePDF\Graphics;
 
+use LimePDF\Support\StaticTrait;
+
 trait XObjectsTemplatesTrait{
 
 	/**
@@ -129,10 +131,10 @@ trait XObjectsTemplatesTrait{
 			}
 		}
 		// set default values
-		if (LIMEPDF_STATIC::empty_string($x)) {
+		if ($this->empty_string($x)) {
 			$x = $this->x;
 		}
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		// check page for no-write regions and adapt page margins if necessary
@@ -202,10 +204,10 @@ trait XObjectsTemplatesTrait{
 		if (!empty($this->xobjects[$id]['annotations'])) {
 			foreach ($this->xobjects[$id]['annotations'] as $annot) {
 				// transform original coordinates
-				$coordlt = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array(1, 0, 0, 1, ($annot['x'] * $this->k), (-$annot['y'] * $this->k)));
+				$coordlt = $this->getTransformationMatrixProduct($tm, array(1, 0, 0, 1, ($annot['x'] * $this->k), (-$annot['y'] * $this->k)));
 				$ax = ($coordlt[4] / $this->k);
 				$ay = ($this->h - $h - ($coordlt[5] / $this->k));
-				$coordrb = LIMEPDF_STATIC::getTransformationMatrixProduct($tm, array(1, 0, 0, 1, (($annot['x'] + $annot['w']) * $this->k), ((-$annot['y'] - $annot['h']) * $this->k)));
+				$coordrb = $this->getTransformationMatrixProduct($tm, array(1, 0, 0, 1, (($annot['x'] + $annot['w']) * $this->k), ((-$annot['y'] - $annot['h']) * $this->k)));
 				$aw = ($coordrb[4] / $this->k) - $ax;
 				$ah = ($this->h - $h - ($coordrb[5] / $this->k)) - $ay;
 				$this->Annotation($ax, $ay, $aw, $ah, $annot['text'], $annot['opt'], $annot['spaces']);
@@ -456,7 +458,7 @@ trait XObjectsTemplatesTrait{
     protected function getCachedFileContents($file)
     {
         if (!isset($this->fileContentCache[$file])) {
-            $this->fileContentCache[$file] = LIMEPDF_STATIC::fileGetContents($file);
+            $this->fileContentCache[$file] = $this->fileGetContents($file);
         }
         return $this->fileContentCache[$file];
     }
@@ -472,7 +474,7 @@ trait XObjectsTemplatesTrait{
             return true;
         }
 
-        return LIMEPDF_STATIC::file_exists($file);
+        return $this->file_exists($file);
     }
 
 	/**

@@ -15,7 +15,7 @@ namespace LimePDF;
 	use LimePDF\Graphics\ColumnsTrait;
 	use LimePDF\Graphics\DrawTrait;
 	use LimePDF\Graphics\GraphicsTrait;
-	use LimePDF\Graphics\ImageTrait;	
+	use LimePDF\Graphics\ImageAddTrait;	
 	use LimePDF\Graphics\SVGTrait;
 	use LimePDF\Graphics\TransformationsTrait;
 	use LimePDF\Graphics\XObjectsTemplatesTrait;
@@ -24,7 +24,7 @@ namespace LimePDF;
 	use LimePDF\Include\FiltersTrait;	
 	use LimePDF\Include\FontTrait;
 	use LimePDF\Include\FontDataTrait;
-	use LimePDF\Include\ImagesTrait;
+	use LimePDF\Include\ImageTrait;
 
 	use LimePDF\Model\BarcodeGetterSetterTrait;
 	use LimePDF\Model\FontGetterSetterTrait;	
@@ -71,7 +71,7 @@ class PDF {
 	use FiltersTrait;	
 	use FontTrait;
 	use FontDataTrait;
-	use ImagesTrait;
+	use ImageTrait;
 
 	use AnnotationsTrait;
 
@@ -92,7 +92,7 @@ class PDF {
 
 	use GraphicsTrait;
 
-	use ImageTrait;
+	use ImageAddTrait;
 
 	use HtmlTrait;
 

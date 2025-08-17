@@ -2,7 +2,9 @@
 
 namespace LimePDF\Include;
 
-trait ImagesTrait {
+use LimePDF\Support\StaticTrait;
+
+trait ImageTrait {
 
 	public static $svginheritprop = array('clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cursor', 'direction', 'display', 'fill', 'fill-opacity', 'fill-rule', 'font', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'glyph-orientation-horizontal', 'glyph-orientation-vertical', 'image-rendering', 'kerning', 'letter-spacing', 'marker', 'marker-end', 'marker-mid', 'marker-start', 'pointer-events', 'shape-rendering', 'stroke', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'text-anchor', 'text-rendering', 'visibility', 'word-spacing', 'writing-mode');
 
@@ -106,7 +108,7 @@ trait ImagesTrait {
 	 */
 	public static function _parsejpeg($file) {
 		// check if is a local file
-		if (!@LIMEPDF_STATIC::file_exists($file)) {
+		if (!@$this->file_exists($file)) {
 			return false;
 		}
 		$a = getimagesize($file);
@@ -153,7 +155,7 @@ trait ImagesTrait {
 		$offset = 0;
 		while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
 			// get ICC sequence length
-			$length = (LIMEPDF_STATIC::_getUSHORT($data, ($pos - 2)) - 16);
+			$length = ($this->_getUSHORT($data, ($pos - 2)) - 16);
 			// marker sequence number
 			$msn = max(1, ord($data[($pos + 12)]));
 			// number of markers (total of APP2 used)
@@ -200,8 +202,8 @@ trait ImagesTrait {
 			//Incorrect PNG file
 			return false;
 		}
-		$w = LIMEPDF_STATIC::_freadint($f);
-		$h = LIMEPDF_STATIC::_freadint($f);
+		$w = self::_freadint($f);
+		$h = self::_freadint($f);
 		$bpc = ord(fread($f, 1));
 		$ct = ord(fread($f, 1));
 		if ($ct == 0) {
@@ -238,16 +240,16 @@ trait ImagesTrait {
 		$trns = '';
 		$data = '';
 		$icc = false;
-		$n = LIMEPDF_STATIC::_freadint($f);
+		$n = self::_freadint($f);
 		do {
 			$type = fread($f, 4);
 			if ($type == 'PLTE') {
 				// read palette
-				$pal = LIMEPDF_STATIC::rfread($f, $n);
+				$pal = self::rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'tRNS') {
 				// read transparency info
-				$t = LIMEPDF_STATIC::rfread($f, $n);
+				$t = self::rfread($f, $n);
 				if ($ct == 0) { // DeviceGray
 					$trns = array(ord($t[1]));
 				} elseif ($ct == 2) { // DeviceRGB
@@ -263,7 +265,7 @@ trait ImagesTrait {
 				fread($f, 4);
 			} elseif ($type == 'IDAT') {
 				// read image data block
-				$data .= LIMEPDF_STATIC::rfread($f, $n);
+				$data .= self::rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'iCCP') {
 				// skip profile name
@@ -278,16 +280,16 @@ trait ImagesTrait {
 					return false;
 				}
 				// read ICC Color Profile
-				$icc = LIMEPDF_STATIC::rfread($f, ($n - $len - 2));
+				$icc = self::rfread($f, ($n - $len - 2));
 				// decompress profile
 				$icc = gzuncompress($icc);
 				fread($f, 4);
 			} elseif ($type == 'IEND') {
 				break;
 			} else {
-				LIMEPDF_STATIC::rfread($f, $n + 4);
+				self::rfread($f, $n + 4);
 			}
-			$n = LIMEPDF_STATIC::_freadint($f);
+			$n = self::_freadint($f);
 		} while ($n);
 		if (($colspace == 'Indexed') AND (empty($pal))) {
 			// Missing palette
@@ -298,7 +300,7 @@ trait ImagesTrait {
 		return array('w' => $w, 'h' => $h, 'ch' => $channels, 'icc' => $icc, 'cs' => $colspace, 'bpc' => $bpc, 'f' => 'FlateDecode', 'parms' => $parms, 'pal' => $pal, 'trns' => $trns, 'data' => $data);
 	}
 
-} // END OF LIMEPDF_IMAGES CLASS
+} 
 
 //============================================================+
 // END OF FILE

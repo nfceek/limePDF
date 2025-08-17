@@ -2,6 +2,9 @@
 
 namespace LimePDF\Model;
 
+use LimePDF\Include\FontTrait;
+use LimePDF\Support\StaticTrait;
+
 trait PageGetterSetterTrait {
 
 	/**
@@ -219,7 +222,7 @@ trait PageGetterSetterTrait {
 	 */
 	public function getAliasRightShift() {
 		// calculate aproximatively the ratio between widths of aliases and replacements.
-		$ref = '{'.LIMEPDF_STATIC::$alias_right_shift.'}{'.LIMEPDF_STATIC::$alias_tot_pages.'}{'.LIMEPDF_STATIC::$alias_num_page.'}';
+		$ref = '{'.self::$alias_right_shift.'}{'.self::$alias_tot_pages.'}{'.self::$alias_num_page.'}';
 		$rep = str_repeat(' ', $this->GetNumChars($ref));
 		$wrep = $this->GetStringWidth($rep);
 		if ($wrep > 0) {
@@ -228,7 +231,7 @@ trait PageGetterSetterTrait {
 			$wdiff = 1;
 		}
 		$sdiff = sprintf('%F', $wdiff);
-		$alias = LIMEPDF_STATIC::$alias_right_shift.$sdiff.'}';
+		$alias = self::$alias_right_shift.$sdiff.'}';
 		if ($this->isUnicodeFont()) {
 			$alias = '{'.$alias;
 		}
@@ -245,9 +248,9 @@ trait PageGetterSetterTrait {
 	 */
 	public function getAliasNbPages() {
 		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_tot_pages.'}';
+			return '{'.$this->$alias_tot_pages.'}';
 		}
-		return LIMEPDF_STATIC::$alias_tot_pages;
+		return self::$alias_tot_pages;
 	}
 
 	/**
@@ -260,9 +263,9 @@ trait PageGetterSetterTrait {
 	 */
 	public function getAliasNumPage() {
 		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_num_page.'}';
+			return '{'.$this->alias_num_page.'}';
 		}
-		return LIMEPDF_STATIC::$alias_num_page;
+		return self::$alias_num_page;
 	}
 
 	/**
@@ -275,9 +278,9 @@ trait PageGetterSetterTrait {
 	 */
 	public function getPageGroupAlias() {
 		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_group_tot_pages.'}';
+			return '{'.$this->$alias_group_tot_pages.'}';
 		}
-		return LIMEPDF_STATIC::$alias_group_tot_pages;
+		return $this->$alias_group_tot_pages;
 	}
 
 	/**
@@ -290,9 +293,9 @@ trait PageGetterSetterTrait {
 	 */
 	public function getPageNumGroupAlias() {
 		if ($this->isUnicodeFont()) {
-			return '{'.LIMEPDF_STATIC::$alias_group_num_page.'}';
+			return '{'.$this->$alias_group_num_page.'}';
 		}
-		return LIMEPDF_STATIC::$alias_group_num_page;
+		return $this->$alias_group_num_page;
 	}
 
 	/**
@@ -312,7 +315,7 @@ trait PageGetterSetterTrait {
 	 * @see PaneNo(), formatPageNumber()
 	 */
 	public function getGroupPageNoFormatted() {
-		return LIMEPDF_STATIC::formatPageNumber($this->getGroupPageNo());
+		return $this->formatPageNumber($this->getGroupPageNo());
 	}
 
 	/**
@@ -326,14 +329,14 @@ trait PageGetterSetterTrait {
 		// build array of Unicode + ASCII variants (the order is important)
 		$alias = array('u' => array(), 'a' => array());
 		$u = '{'.$a.'}';
-		$alias['u'][] = LIMEPDF_STATIC::_escape($u);
+		$alias['u'][] = $this->_escape($u);
 		if ($this->isunicode) {
-			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
-			$alias['u'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = LIMEPDF_STATIC::_escape(LIMEPDF_FONT::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+			$alias['u'][] = $this->_escape($this->UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
+			$alias['u'][] = $this->_escape($this->utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = $this->_escape($this->UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = $this->_escape($this->utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
 		}
-		$alias['a'][] = LIMEPDF_STATIC::_escape($a);
+		$alias['a'][] = $this->_escape($a);
 		return $alias;
 	}
 
@@ -343,7 +346,7 @@ trait PageGetterSetterTrait {
 	 * @protected
 	 */
 	protected function getAllInternalPageNumberAliases() {
-		$basic_alias = array(LIMEPDF_STATIC::$alias_tot_pages, LIMEPDF_STATIC::$alias_num_page, LIMEPDF_STATIC::$alias_group_tot_pages, LIMEPDF_STATIC::$alias_group_num_page, LIMEPDF_STATIC::$alias_right_shift);
+		$basic_alias = array(self::$alias_tot_pages, self::$alias_num_page, self::$alias_group_tot_pages, self::$alias_group_num_page, self::$alias_right_shift);
 		$pnalias = array();
 		foreach($basic_alias as $k => $a) {
 			$pnalias[$k] = $this->getInternalPageNumberAliases($a);

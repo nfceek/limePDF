@@ -2,6 +2,8 @@
 
 namespace LimePDF\Text;
 
+use LimePDF\Support\StaticTrait;
+
 trait TextTrait {
 
 	/**
@@ -94,7 +96,7 @@ trait TextTrait {
 		} else {
 			$this->x = $this->lMargin + $cellpadding;
 		}
-		if (LIMEPDF_STATIC::empty_string($h)) {
+		if ($this->empty_string($h)) {
 			$h = $this->lasth;
 		}
 		$this->y += $h;
@@ -243,7 +245,7 @@ trait TextTrait {
 	 * @protected
 	 */
 	protected function checkPageBreak($h=0, $y=null, $addpage=true) {
-		if (LIMEPDF_STATIC::empty_string($y)) {
+		if ($this->empty_string($y)) {
 			$y = $this->y;
 		}
 		$current_page = $this->page;

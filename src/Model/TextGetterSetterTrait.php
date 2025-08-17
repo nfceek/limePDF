@@ -1,6 +1,11 @@
 <?php
 
 namespace LimePDF\Model;
+
+use LimePDF\Include\FontTrait;
+use LimePDF\Include\FontDataTrait;
+use LimePDF\Support\StaticTrait;
+
 trait TextGetterSetterTrait {
 
 	/**
@@ -75,7 +80,7 @@ trait TextGetterSetterTrait {
 		if ($numchars <= $charmin) {
 			return $word;
 		}
-		$word_string = LIMEPDF_FONT::UTF8ArrSubString($word, '', '', $this->isunicode);
+		$word_string = $this->UTF8ArrSubString($word, '', '', $this->isunicode);
 		// some words will be returned as-is
 		$pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
 		if (preg_match($pattern, $word_string) > 0) {
@@ -88,7 +93,7 @@ trait TextGetterSetterTrait {
 			return $word;
 		}
 		if (isset($dictionary[$word_string])) {
-			return LIMEPDF_FONT::UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
+			return $this->UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
 		}
 		// surround word with '_' characters
 		$tmpword = array_merge(array(46), $word, array(46));
@@ -97,9 +102,9 @@ trait TextGetterSetterTrait {
 		for ($pos = 0; $pos < $maxpos; ++$pos) {
 			$imax = min(($tmpnumchars - $pos), $charmax);
 			for ($i = 1; $i <= $imax; ++$i) {
-				$subword = strtolower(LIMEPDF_FONT::UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
+				$subword = strtolower($this->UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
 				if (isset($patterns[$subword])) {
-					$pattern = LIMEPDF_FONT::UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
+					$pattern = $this->UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
 					$pattern_length = count($pattern);
 					$digits = 1;
 					for ($j = 0; $j < $pattern_length; ++$j) {
@@ -156,18 +161,18 @@ trait TextGetterSetterTrait {
 		$intag = false; // true if we are inside an HTML tag
 		$skip = false; // true to skip hyphenation
 		if (!is_array($patterns)) {
-			$patterns = LIMEPDF_STATIC::getHyphenPatternsFromTEX($patterns);
+			$patterns = $this->getHyphenPatternsFromTEX($patterns);
 		}
 		// get array of characters
-		$unichars = LIMEPDF_FONT::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+		$unichars = $this->UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
 		// for each char
 		foreach ($unichars as $char) {
-			if ((!$intag) AND (!$skip) AND LIMEPDF_FONT_DATA::$uni_type[$char] == 'L') {
+			if ((!$intag) AND (!$skip) AND $this->$uni_type[$char] == 'L') {
 				// letter character
 				$word[] = $char;
 			} else {
 				// other type of character
-				if (!LIMEPDF_STATIC::empty_string($word)) {
+				if (!$this->empty_string($word)) {
 					// hypenate the word
 					$txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
 					$word = array();
@@ -199,12 +204,12 @@ trait TextGetterSetterTrait {
 				}
 			}
 		}
-		if (!LIMEPDF_STATIC::empty_string($word)) {
+		if (!$this->empty_string($word)) {
 			// hypenate the word
 			$txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
 		}
 		// convert char array to string and return
-		return LIMEPDF_FONT::UTF8ArrSubString($txtarr, '', '', $this->isunicode);
+		return $this->UTF8ArrSubString($txtarr, '', '', $this->isunicode);
 	}
 
 	/**

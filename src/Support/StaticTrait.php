@@ -2,6 +2,8 @@
 
 namespace LimePDF\Support;
 
+use LimePDF\Support\StaticTrait;
+
 trait StaticTrait {
 
 	/**
@@ -241,7 +243,7 @@ trait StaticTrait {
 	 * @public static
 	 */
 	public static function getObjFilename($type='tmp', $file_id='') {
-		return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(LIMEPDF_STATIC::getRandomSeed()).'_');
+		return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_');
 	}
 
 	/**
@@ -1139,7 +1141,7 @@ trait StaticTrait {
 	 */
 	public static function fixHTMLCode($html, $default_css, $tagvs, $tidy_options, &$tagvspaces) {
 		// configure parameters for HTML Tidy
-		if (LIMEPDF_STATIC::empty_string($tidy_options)) {
+		if ($this->empty_string($tidy_options)) {
 			$tidy_options = array (
 				'clean' => 1,
 				'drop-empty-paras' => 0,
@@ -1186,7 +1188,7 @@ trait StaticTrait {
 		// remove some empty tag blocks
 		$html = preg_replace('/<div([^\>]*)><\/div>/', '', $html);
 		$html = preg_replace('/<p([^\>]*)><\/p>/', '', $html);
-		if (!LIMEPDF_STATIC::empty_string($tagvs)) {
+		if (!$this->empty_string($tagvs)) {
 			// set vertical space for some XHTML tags
 			$tagvspaces = $tagvs;
 		}
@@ -1539,7 +1541,7 @@ trait StaticTrait {
 		// create new language array of patterns
 		$patterns = array();
 		foreach($patterns_array as $val) {
-			if (!LIMEPDF_STATIC::empty_string($val)) {
+			if (!$this->empty_string($val)) {
 				$val = trim($val);
 				$val = str_replace('\'', '\\\'', $val);
 				$key = preg_replace('/[0-9]+/', '', $val);
@@ -2647,7 +2649,7 @@ trait StaticTrait {
 		return $page_mode;
 	}
 
-} // END OF LIMEPDF_STATIC CLASS
+}
 
 //============================================================+
 // END OF FILE

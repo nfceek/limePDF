@@ -3,7 +3,7 @@
 namespace LimePDF\Pages;
 
 use LimePDF\Include\FontTrait;
-use LimePDF\Include\ImagesTrait;
+use LimePDF\Include\ImageTrait;
 use LimePDF\Support\StaticTrait;
 
 trait SectionsTrait {
