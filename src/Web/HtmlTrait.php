@@ -3509,19 +3509,19 @@ trait HtmlTrait {
 		return @html_entity_decode($text_to_convert, ENT_QUOTES, $this->encoding);
 	}
 
-    /**
-	 * Cleanup HTML code (requires HTML Tidy library).
-	 * @param string $html htmlcode to fix
-	 * @param string $default_css CSS commands to add
-	 * @param array|null $tagvs parameters for setHtmlVSpace method
-	 * @param array|null $tidy_options options for tidy_parse_string function
-	 * @return string XHTML code cleaned up
-	 * @author Nicola Asuni
-	 * @public
-	 * @since 5.9.017 (2010-11-16)
-	 * @see setHtmlVSpace()
-	 */
-	public function fixHTMLCode($html, $default_css='', $tagvs=null, $tidy_options=null) {
-		return LIMEPDF_STATIC::fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
-	}
+//     /**
+// 	 * Cleanup HTML code (requires HTML Tidy library).
+// 	 * @param string $html htmlcode to fix
+// 	 * @param string $default_css CSS commands to add
+// 	 * @param array|null $tagvs parameters for setHtmlVSpace method
+// 	 * @param array|null $tidy_options options for tidy_parse_string function
+// 	 * @return string XHTML code cleaned up
+// 	 * @author Nicola Asuni
+// 	 * @public
+// 	 * @since 5.9.017 (2010-11-16)
+// 	 * @see setHtmlVSpace()
+// 	 */
+// 	public function fixHTMLCode($html, $default_css='', $tagvs=null, $tidy_options=null) {
+// 		return LIMEPDF_STATIC::fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
+// 	}
 }

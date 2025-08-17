@@ -2,7 +2,7 @@
 
 namespace LimePDF\Support;
 
-class StaticTrait {
+trait StaticTrait {
 
 	/**
 	 * Current limePDF version.

@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Include;
 
-class LIMEPDF_COLORS {
+trait ColorsTrait {
 
 	public static $webcolor = array (
 		'aliceblue' => 'f0f8ff',

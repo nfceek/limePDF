@@ -1,6 +1,8 @@
 <?php
 
 namespace LimePDF\Model;
+// Include the static file
+use LimePDF\Support\StaticTrait;
 
 trait UtilGetterSetterTrait {
 
@@ -12,7 +14,7 @@ trait UtilGetterSetterTrait {
 	 */
 	public function setDocCreationTimestamp($time) {
 		if (is_string($time)) {
-			$time = LIMEPDF_STATIC::getTimestamp($time);
+			$time = $this->getTimestamp($time);
 		}
 		$this->doc_creation_timestamp = intval($time);
 	}
@@ -25,7 +27,7 @@ trait UtilGetterSetterTrait {
 	 */
 	public function setDocModificationTimestamp($time) {
 		if (is_string($time)) {
-			$time = LIMEPDF_STATIC::getTimestamp($time);
+			$time = $this->getTimestamp($time);
 		}
 		$this->doc_modification_timestamp = intval($time);
 	}
@@ -134,8 +136,8 @@ trait UtilGetterSetterTrait {
 	 */
 	public function setDestination($name, $y=-1, $page='', $x=-1) {
 		// remove unsupported characters
-		$name = LIMEPDF_STATIC::encodeNameObject($name);
-		if (LIMEPDF_STATIC::empty_string($name)) {
+		$name = $this->encodeNameObject($name);
+		if ($this->empty_string($name)) {
 			return false;
 		}
 		if ($y == -1) {
@@ -664,7 +666,7 @@ trait UtilGetterSetterTrait {
 			return;
 		}
 		$stroking = floatval($stroking);
-		if (LIMEPDF_STATIC::empty_string($nonstroking)) {
+		if ($this->empty_string($nonstroking)) {
 			// default value if not set
 			$nonstroking = $stroking;
 		} else {
@@ -819,8 +821,8 @@ trait UtilGetterSetterTrait {
 		} else {
 			$this->Error('Incorrect zoom display mode: '.$zoom);
 		}
-		$this->LayoutMode = LIMEPDF_STATIC::getPageLayoutMode($layout);
-		$this->PageMode = LIMEPDF_STATIC::getPageMode($mode);
+		$this->LayoutMode = $this->getPageLayoutMode($layout);
+		$this->PageMode = $this->getPageMode($mode);
 	}
 
 	/**
@@ -927,7 +929,7 @@ trait UtilGetterSetterTrait {
 	protected function setPageBoxTypes($boxes) {
 		$this->page_boxes = array();
 		foreach ($boxes as $box) {
-			if (in_array($box, LIMEPDF_STATIC::$pageboxes)) {
+			if (in_array($box, $this->$pageboxes)) {
 				$this->page_boxes[] = $box;
 			}
 		}
@@ -994,7 +996,7 @@ trait UtilGetterSetterTrait {
 			return;
 		}
 		$stroking = $stroking ? true : false;
-		if (LIMEPDF_STATIC::empty_string($nonstroking)) {
+		if ($this->empty_string($nonstroking)) {
 			// default value if not set
 			$nonstroking = $stroking;
 		} else {

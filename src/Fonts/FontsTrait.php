@@ -2,6 +2,9 @@
 
 namespace LimePDF\Fonts;
 
+// Include the static file
+use LimePDF\Support\StaticTrait;
+
 trait FontsTrait {	
 
 	/**
@@ -24,8 +27,8 @@ trait FontsTrait {
 		if ($this->pdfa_mode) {
 			$subset = false;
 		}
-		if (LIMEPDF_STATIC::empty_string($family)) {
-			if (!LIMEPDF_STATIC::empty_string($this->FontFamily)) {
+		if ($this->empty_string($family)) {
+			if (!$this->empty_string($this->FontFamily)) {
 				$family = $this->FontFamily;
 			} else {
 				$this->Error('Empty font family');
@@ -95,9 +98,9 @@ trait FontsTrait {
 		}
 		// get specified font directory (if any)
 		$fontdir = false;
-		if (!LIMEPDF_STATIC::empty_string($fontfile)) {
+		if (!$this->empty_string($fontfile)) {
 			$fontdir = dirname($fontfile);
-			if (LIMEPDF_STATIC::empty_string($fontdir) OR ($fontdir == '.')) {
+			if ($this->empty_string($fontdir) OR ($fontdir == '.')) {
 				$fontdir = '';
 			} else {
 				$fontdir .= '/';
@@ -106,11 +109,11 @@ trait FontsTrait {
 		// true when the font style variation is missing
 		$missing_style = false;
 		// search and include font file
-		if (LIMEPDF_STATIC::empty_string($fontfile) OR (!@LIMEPDF_STATIC::file_exists($fontfile))) {
+		if ($this->empty_string($fontfile) OR (!@$this->file_exists($fontfile))) {
 			// build a standard filenames for specified font
 			$tmp_fontfile = str_replace(' ', '', $family).strtolower($style).'.php';
 			$fontfile = LIMEPDF_FONT::getFontFullPath($tmp_fontfile, $fontdir);
-			if (LIMEPDF_STATIC::empty_string($fontfile)) {
+			if ($this->empty_string($fontfile)) {
 				$missing_style = true;
 				// try to remove the style part
 				$tmp_fontfile = str_replace(' ', '', $family).'.php';
@@ -118,7 +121,7 @@ trait FontsTrait {
 			}
 		}
 		// include font file
-		if (!LIMEPDF_STATIC::empty_string($fontfile) AND (@LIMEPDF_STATIC::file_exists($fontfile))) {
+		if (!$this->empty_string($fontfile) AND (@$this->file_exists($fontfile))) {
 			$type=null;
 			$name=null;
 			$desc=null;
@@ -144,32 +147,32 @@ trait FontsTrait {
 			$this->Error('The font definition file has a bad format: '.$fontfile.'');
 		}
 		// SET default parameters
-		if (!isset($file) OR LIMEPDF_STATIC::empty_string($file)) {
+		if (!isset($file) OR $this->empty_string($file)) {
 			$file = '';
 		}
-		if (!isset($enc) OR LIMEPDF_STATIC::empty_string($enc)) {
+		if (!isset($enc) OR $this->empty_string($enc)) {
 			$enc = '';
 		}
-		if (!isset($cidinfo) OR LIMEPDF_STATIC::empty_string($cidinfo)) {
+		if (!isset($cidinfo) OR $this->empty_string($cidinfo)) {
 			$cidinfo = array('Registry'=>'Adobe', 'Ordering'=>'Identity', 'Supplement'=>0);
 			$cidinfo['uni2cid'] = array();
 		}
-		if (!isset($ctg) OR LIMEPDF_STATIC::empty_string($ctg)) {
+		if (!isset($ctg) OR $this->empty_string($ctg)) {
 			$ctg = '';
 		}
-		if (!isset($desc) OR LIMEPDF_STATIC::empty_string($desc)) {
+		if (!isset($desc) OR $this->empty_string($desc)) {
 			$desc = array();
 		}
-		if (!isset($up) OR LIMEPDF_STATIC::empty_string($up)) {
+		if (!isset($up) OR $this->empty_string($up)) {
 			$up = -100;
 		}
-		if (!isset($ut) OR LIMEPDF_STATIC::empty_string($ut)) {
+		if (!isset($ut) OR $this->empty_string($ut)) {
 			$ut = 50;
 		}
-		if (!isset($cw) OR LIMEPDF_STATIC::empty_string($cw)) {
+		if (!isset($cw) OR $this->empty_string($cw)) {
 			$cw = array();
 		}
-		if (!isset($dw) OR LIMEPDF_STATIC::empty_string($dw)) {
+		if (!isset($dw) OR $this->empty_string($dw)) {
 			// set default width
 			if (isset($desc['MissingWidth']) AND ($desc['MissingWidth'] > 0)) {
 				$dw = $desc['MissingWidth'];
@@ -254,7 +257,7 @@ trait FontsTrait {
 			}
 			$this->setFontSubBuffer($fontkey, 'diff', $d);
 		}
-		if (!LIMEPDF_STATIC::empty_string($file)) {
+		if (!$this->empty_string($file)) {
 			if (!isset($this->FontFiles[$file])) {
 				if ((strcasecmp($type,'TrueType') == 0) OR (strcasecmp($type, 'TrueTypeUnicode') == 0)) {
 					$this->FontFiles[$file] = array('length1' => $originalsize, 'fontdir' => $fontdir, 'subset' => $subset, 'fontkeys' => array($fontkey));

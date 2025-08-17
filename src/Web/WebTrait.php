@@ -1,9 +1,7 @@
 <?php
-
 namespace LimePDF\Web;
 
 trait WebTrait {
-
 	/**
 	 * Converts pixels to User's Units.
 	 * @param int $px pixels
@@ -83,6 +81,4 @@ trait WebTrait {
 	public function Link($x, $y, $w, $h, $link, $spaces=0) {
 		$this->Annotation($x, $y, $w, $h, $link, array('Subtype'=>'Link'), $spaces);
 	}
-
-
 } 

@@ -31,10 +31,10 @@ $OutputFile = 'example_001.pdf';
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
 
-require_once __DIR__ . '/../../src/Core/Pdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\Core\Pdf;
+use LimePDF\Pdf;
 
 $pdf = new Pdf();
 

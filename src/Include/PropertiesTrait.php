@@ -1,13 +1,13 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Include;
 
 /**
  * limePDF Properties Configuration
  * Auto-generated on 2025-07-21 13:50:35
  * Contains 246 properties extracted from TCPDF
  */
-class LIMEPDF_PROPERTIES{ 
+trait PropertiesTrait { 
 
     /**
      * Get all default property values

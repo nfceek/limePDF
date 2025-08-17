@@ -1,12 +1,14 @@
 <?php
 
-namespace LimePDF\Core;
+namespace LimePDF;
 
-	// // limePDF configuration
+	// Include Composer autoloader FIRST
+	require_once dirname(__FILE__, 2) . '/vendor/autoload.php';
+
+	// limePDF configuration
 	require_once(dirname(__FILE__) . '/AutoConfig.php');
 
-	// // includes Vars
-
+	// includes Vars
 	use LimePDF\Encryption\EncryptionTrait;
 
 	use LimePDF\Fonts\FontManagerTrait;
@@ -21,16 +23,22 @@ namespace LimePDF\Core;
 	use LimePDF\Graphics\TransformationsTrait;
 	use LimePDF\Graphics\XObjectsTemplatesTrait;
 
-	use LimePDFModel\Model\BarcodeGetterSetterTrait;
-	use LimePDFModel\Model\FontGetterSetterTrait;	
-	use LimePDFModel\Model\ImageGetterSetterTrait;		
-	use LimePDFModel\Model\PageGetterSetterTrait;
-	use LimePDFModel\Model\TextGetterSetterTrait;	
-	use LimePDFModel\Model\UtilGetterSetterTrait;
-	use LimePDFModel\Model\VarsGetterSetterTrait;
-	use LimePDFModel\Model\WebGetterSetterTrait;
+	use LimePDF\Include\ColorsTrait;
+	use LimePDF\Include\FiltersTrait;	
+	use LimePDF\Include\FontTrait;
+	use LimePDF\Include\FontDataTrait;
+	use LimePDF\Include\ImagesTrait;
 
-	//use LimePDF\Pages\AnnotationsTrait;
+	use LimePDF\Model\BarcodeGetterSetterTrait;
+	use LimePDF\Model\FontGetterSetterTrait;	
+	use LimePDF\Model\ImageGetterSetterTrait;		
+	use LimePDF\Model\PageGetterSetterTrait;
+	use LimePDF\Model\TextGetterSetterTrait;	
+	use LimePDF\Model\UtilGetterSetterTrait;
+	use LimePDF\Model\VarsGetterSetterTrait;
+	use LimePDF\Model\WebGetterSetterTrait;
+
+	use LimePDF\Pages\AnnotationsTrait;
 	use LimePDF\Pages\BookmarksTrait;	
 	use LimePDF\Pages\MarginsTrait;
 	use LimePDF\Pages\PagesTrait;
@@ -44,29 +52,27 @@ namespace LimePDF\Core;
 	use LimePDF\Text\TextTrait;	
 	use LimePDF\Text\WriteTrait;
 
-	use LimePDFModel\Utils\JavascriptTrait;
-	use LimePDFModel\Utils\EnvironmentTrait;
-	use LimePDFModel\Utils\MiscTrait;	
-	use LimePDFModel\Utils\PutTrait;
-	use LimePDFModel\Utils\SignatureTrait;
+	use LimePDF\Utils\JavascriptTrait;
+	use LimePDF\Utils\EnvironmentTrait;
+	use LimePDF\Utils\MiscTrait;	
+	use LimePDF\Utils\PutTrait;
+	use LimePDF\Utils\SignatureTrait;
 
-	use LimePDF\Views\FormsTrait;
-	use LimePDF\Views\OutPutTrait;
-	use LimePDF\Views\SetupTrait;
+	use LimePDF\View\FormsTrait;
+	use LimePDF\View\OutPutTrait;
+	use LimePDF\View\SetupTrait;
 
 	use LimePDF\Web\CellTrait;
 	use LimePDF\Web\HtmlTrait;
 	use LimePDF\Web\WebTrait;	
 
-	use LimePDF\LIMEPDF_COLORS;
-	use LimePDF\LIMEPDF_FILTERS;	
-	use LimePDF\LIMEPDF_FONT;
-	use LimePDF\LIMEPDF_FONT_DATA;
-	use LimePDF\LIMEPDF_IMAGES;
-
-	
-	
 class PDF {
+
+	use ColorsTrait;
+	use FiltersTrait;	
+	use FontTrait;
+	use FontDataTrait;
+	use ImagesTrait;
 
 	use AnnotationsTrait;
 
@@ -110,7 +116,7 @@ class PDF {
 	use SVGTrait;
 
 	use TextTrait;
-	use LTransformationsTrait;
+	use TransformationsTrait;
 
 	use VarsTrait;
 
@@ -132,8 +138,8 @@ class PDF {
     
 		// set file ID for trailer
 		$serformat = (is_array($format) ? json_encode($format) : $format);
-		$this->file_id = md5(LIMEPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
-		$this->hash_key = hash_hmac('sha256', LIMEPDF_STATIC::getRandomSeed($this->file_id), LIMEPDF_STATIC::getRandomSeed('TCPDF'), false);
+		$this->file_id = md5($this->getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
+		$this->hash_key = hash_hmac('sha256', $this->getRandomSeed($this->file_id), $this->getRandomSeed('TCPDF'), false);
 		$this->font_obj_ids = array();
 		$this->page_obj_id = array();
 		$this->form_obj_id = array();
@@ -365,7 +371,7 @@ class PDF {
 	 * @since 5.8.009 (2010-08-20)
 	 */
 	public function _getobj($objid=null) {
-		if (LIMEPDF_STATIC::empty_string($objid)) {
+		if (StaticTrait::empty_string($objid)) {
 			++$this->n;
 			$objid = $this->n;
 		}

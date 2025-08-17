@@ -2,6 +2,8 @@
 
 namespace LimePDF\Pages;
 
+use LimePDF\LIMEPDF_FONT;
+
 trait SectionsTrait {
 
 

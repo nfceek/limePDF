@@ -1,8 +1,8 @@
 <?php
 
-namespace LimePDF;
+namespace LimePDF\Include;
 
-class LIMEPDF_FONT_DATA {
+trait FontDataTrait {
 
 /**
  * Unicode code for Left-to-Right Mark.
