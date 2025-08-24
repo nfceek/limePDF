@@ -60,7 +60,8 @@ class ConfigManager
     {
         return [
             'allowedTcpdfTags' => '',           
-            'author' => 'limePdf',
+            'author' => 'limePDF',
+            'title' => 'limePDF',
             'blankimage' => '_blank.png',
 
             'cellHeightRatio' => 1.25,

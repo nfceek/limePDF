@@ -16,31 +16,12 @@
 //               info@tecnick.com
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Removing Header and Footer
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group header
- * @group footer
- * @group page
- * @group pdf
- */
-// ---------- ONLY EDIT THIS AREA --------------------------------
+require_once __DIR__ . '/../../src/PDF.php';
+require_once '../../vendor/autoload.php'; 
 
-// set Output File Name
-$OutputFile = 'example_002.pdf';
+use LimePDF\Pdf;
 
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
-require_once '../../vendor/autoload.php';  
-
-use LimePDF\TCPDF;
-
-$pdf = new TCPDF();
+$pdf = new Pdf();
 
 use LimePDF\Config\ConfigManager;
 
@@ -49,31 +30,89 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
+
+// 1) set Output File Name
+	$outputFile = 'example_002.pdf';
+
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'I';
+
+// 2) set Text
+	$pdfText = "LimePDF Example 002\n\n";
+	$pdfText .= "Default page header and footer are disabled using\nsetPrintHeader()\nand\nsetPrintFooter()\nmethods.";
+
+// ---------- Dont Edit below here -----------------------------
+
+// Change the $config array vars to be injected or used as necessary
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],
+    'logo' => [
+		'file' => '',
+        'width' => '',
+    ],
+    'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
+
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 002');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setAuthor($pdfConfig['author']);
+$pdf->setTitle($pdfConfig['title']);
+$pdf->setSubject($pdfConfig['meta']['subject']);
+$pdf->setKeywords($pdfConfig['meta']['keywords']);
 
 // remove default header/footer
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);;
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
@@ -90,11 +129,7 @@ $pdf->setFont('times', 'BI', 20);
 $pdf->AddPage();
 
 // set some text to print
-$txt = <<<EOD
-TCPDF Example 002
-
-Default page header and footer are disabled using setPrintHeader() and setPrintFooter() methods.
-EOD;
+$txt = $pdfText;
 
 // print a block of text using Write()
 $pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
@@ -102,7 +137,7 @@ $pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

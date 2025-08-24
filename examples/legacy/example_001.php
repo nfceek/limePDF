@@ -1,18 +1,18 @@
 <?php
 //============================================================+
-// File name   : sample_001.php
-// Begin       : 2025-07-19
-// Last Update : 2025-07-19
-//
-// Description : Sample 001 for limePDF class
-//               Default Header and Footer
+// File name   : example_001.php
 //
 // Author: Brad Smith
-//
 // (c) Copyright 2025, Brad Smith - LimePDF.com
 //
 //  * Original TCPDF Copyright (c) 2002-2023:
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
+//
+//
+// Description : Sample 001 for limePDF class
+//               Default Header and Footer
+//
+// Last Update : 8-24-2025
 //============================================================+
 
 require_once __DIR__ . '/../../src/PDF.php';
@@ -28,6 +28,7 @@ use LimePDF\Config\ConfigManager;
 $config = new ConfigManager();
 $config->loadFromArray([
 ]);
+
 //-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
 
 /*
@@ -39,18 +40,23 @@ $config->loadFromArray([
 
 // 1) What is the File name to create:
     $outputFile = 'example_001.pdf';
-// 2) Set the doc Title 
+
+// 2) set Output type ( I = In Browser & D = Download )
+    $outputType = 'I';
+
+// 3) Set the doc Title 
     $pdfTitle = 'limePDF Example 001';
-// 3) Set the Header logo
+
+// 4) Set the Header logo
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
-// 4) Set a Logo   
+
+// 5) Set a Logo   
     $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
 
-
-// 5) Set the Text    
-    $pdfText = '<br /><h2>Sample # 001</h2>';
+// 6) Set the Text    
+    $pdfText = '<h1>Example # 001</h1>';
     $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
-    $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
+    $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Example file for the limePDF library.</i>';
     $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
     $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';
     $pdfText .= '1) Here is the Logo as an inline HTML Img:<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><br />';
@@ -58,11 +64,12 @@ $config->loadFromArray([
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
 
-// Change the $config array ars to be injected or used as necessary
+// Change the $config array vars to be injected or used as necessary
 $cfgArray = $config->toArray();
 $pdfConfig = [
     'author' => $cfgArray['author'],
     'creator' => $cfgArray['creator'],
+    'title' => $cfgArray['title'],
     'font' => [
         'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
         'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
@@ -73,7 +80,6 @@ $pdfConfig = [
         'width' => '',
     ],
     'headerString' => $cfgArray['headerString'],
-	'headerLogo' => $cfgArray['headerLogo'],
     'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
     'margins' => [
         'header' => $cfgArray['marginHeader'],
@@ -189,7 +195,7 @@ $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
 // Close and output PDF document
 // This method has several options, check the source code documentation for more information.
-$pdf->Output($outputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE
