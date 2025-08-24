@@ -15,12 +15,12 @@
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //============================================================+
 
-require_once __DIR__ . '/../tcpdf.php';
+require_once __DIR__ . '/../src/PDF.php';
 require_once '../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Pdf;
 
-$pdf = new TCPDF();
+$pdf = new Pdf();
 
 use LimePDF\Config\ConfigManager;
 
@@ -42,9 +42,15 @@ $config->loadFromArray([
 // 2) set the doc title 
     $pdfTitle = 'limePDF Sample 001A';
 // 3) set the Logo   
-    $pdfLogo = '../images/limePDF_logo.png';
+    $pdfLogo = 'images/limePDF_logo.png';
 // 3) set the Text    
-    $pdfText = '<br /><br />Sample # 001<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
+    $pdfText = '<br /><h2>Sample # 001</h2>';
+    $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
+    $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
+    $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
+    $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';
+    $pdfText .= '1) Here is the Logo as an inline HTML Img:<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><br />';
+    $pdfText .= '2) Here is an embedded Logo File in the config file:<br /><img src="' . $pdfLogo . '">';
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
 
@@ -59,10 +65,8 @@ $pdfConfig = [
         'mono' => $cfgArray['fontMonospaced'],
     ],
     'logo' => [
-		'file' => 'test.png',
-        //'file' => __DIR__ . '/images/limePDF_logo.png',
-		//'file' => $pdfLogo,
-        'width' => $cfgArray['headerLogoWidth'],
+		'file' => $pdfLogo,
+        'width' => '',
     ],
     'headerString' => $cfgArray['headerString'],
 	'headerLogo' => $cfgArray['headerLogo'],
@@ -87,7 +91,7 @@ $pdfConfig = [
 ];
 
 // create new PDF document
-$pdf = new TCPDF(
+$pdf = new PDF(
     $pdfConfig['layout']['orientation'],
     $pdfConfig['layout']['unit'],
     $pdfConfig['layout']['pageFormat'],
@@ -110,8 +114,9 @@ if (!file_exists($pdfConfig['headerString'])) {
 }
 $wtf = "images/logo_example.jpg";
 $pdf->setHeaderData(
-	$pdfLogo, 	//$pdfConfig['headerString'], 		//$pdfConfig['logo']['file'],								//<--- error here with logo
-	60,				//$pdfConfig['logo']['width'],
+    $pdfConfig['logo']['file'],	
+	//$pdfLogo, 	//$pdfConfig['headerString'], 		$pdfConfig['logo']['file'],								//<--- error here with logo
+	30,				//$pdfConfig['logo']['width'],
 	$pdfTitle,
 	$pdfConfig['headerString'],
 	array(0,64,255),

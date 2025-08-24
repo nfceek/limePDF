@@ -15,22 +15,6 @@
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //============================================================+
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// 1) set the doc title 
-    $pdfTitle = 'limePDF Example 001';
-
-// 2) set the Logo   
-    $pdfLogo = '../images/limePDF_logo.png';
-
-// 3) set the Text    
-    $pdfText = '<br /><br />Example # 001<br /><br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i><p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.</p><p>Please check the source code documentation and other examples for further information.</p><br />here<img src="' . $pdfLogo . '">';
-
-// 4) Set Output File Name
-$OutputFile = 'example_001.pdf';
-
-//-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
-
 require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
@@ -44,8 +28,33 @@ use LimePDF\Config\ConfigManager;
 $config = new ConfigManager();
 $config->loadFromArray([
 ]);
+//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
 
-// Change the $config array vars to be injected or used as necessary
+/*
+*
+* ONLY EDIT THIS AREA
+* Use it to set the unique props for this page
+*
+*/
+
+// 1) what is the file name to create:
+    $outputFile = 'sample_001.pdf';
+// 2) set the doc title 
+    $pdfTitle = 'limePDF Sample 001A';
+// 3) set the Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+// 3) set the Text    
+    $pdfText = '<br /><h2>Sample # 001</h2>';
+    $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
+    $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
+    $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
+    $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';
+    $pdfText .= '1) Here is the Logo as an inline HTML Img:<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><br />';
+    $pdfText .= '2) Here is an embedded Logo File in the config file:<br /><img src="' . $pdfLogo . '">';
+
+//-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
+
+// Change the $config array ars to be injected or used as necessary
 $cfgArray = $config->toArray();
 $pdfConfig = [
     'author' => $cfgArray['author'],
@@ -56,10 +65,8 @@ $pdfConfig = [
         'mono' => $cfgArray['fontMonospaced'],
     ],
     'logo' => [
-		'file' => 'test.png',
-        //'file' => __DIR__ . '/images/limePDF_logo.png',
-		//'file' => $pdfLogo,
-        'width' => $cfgArray['headerLogoWidth'],
+		'file' => $pdfLogo,
+        'width' => '',
     ],
     'headerString' => $cfgArray['headerString'],
 	'headerLogo' => $cfgArray['headerLogo'],
@@ -103,12 +110,13 @@ $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
 // set default header data
 if (!file_exists($pdfConfig['headerString'])) {
-	//throw new Exception("Logo file not found: " . $pdfConfig['logo']['file']);
+	//throw new Exception("Logo file not found: " .  $pdfLogo);
 }
-
+$wtf = "images/logo_example.jpg";
 $pdf->setHeaderData(
-	$pdfConfig['headerLogo'],
-	$pdfConfig['logo']['width'],
+    //$pdfConfig['logo']['file'],	
+	$pdfLogo,   //$pdfConfig['headerLogo'], 
+	(float)30,				//$pdfConfig['logo']['width'],
 	$pdfTitle,
 	$pdfConfig['headerString'],
 	array(0,64,255),
@@ -164,7 +172,6 @@ $pdf->setFontSubsetting(true);
 // dejavusans is a UTF-8 Unicode font, if you only need to
 // print standard ASCII chars, you can use core fonts like
 // helvetica or times to reduce file size.
-//$pdf->setFont('helvetica', '', 14, '', true);
 $pdf->setFont('dejavusans', '', 14, '', true);
 
 // Add a page
@@ -184,7 +191,7 @@ $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
 // Close and output PDF document
 // This method has several options, check the source code documentation for more information.
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, 'I');
 
 //============================================================+
 // END OF FILE

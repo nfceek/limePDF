@@ -39,7 +39,7 @@
 
 // 2) Set Logo File: PDF_HEADER_LOGO
 //     * Logo file should be in the ./examples/images folder
-	$LogoFile = 'limePDF_logo.png';
+	$LogoFile = 'img.png';
 
 /*
 *

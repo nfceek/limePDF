@@ -7,6 +7,10 @@ use LimePDF\Support\StaticTrait;
 
 trait PageGetterSetterTrait {
 
+	public function setLogo($title) {
+		$this->title = $title;
+	}
+
 	/**
 	 * Defines the title of the document.
 	 * @param string $title The title.

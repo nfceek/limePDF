@@ -74,7 +74,7 @@ class ConfigManager
             'fontMonospaced' => 'courier',
 
             'headMagnification' => 1.1,
-            'headerLogo' => 'limePDF_logo.png',
+            'headerLogo' => 'images/limePDF_logo.png',
             'headerTitle' => 'limePDF Example',
             'headerString' => 'limePDF.com',
             'headerLogoWidth' => 30,
