@@ -37,13 +37,17 @@ $config->loadFromArray([
 *
 */
 
-// 1) what is the file name to create:
-    $outputFile = 'sample_001.pdf';
-// 2) set the doc title 
-    $pdfTitle = 'limePDF Sample 001A';
-// 3) set the Logo   
+// 1) What is the File name to create:
+    $outputFile = 'example_001.pdf';
+// 2) Set the doc Title 
+    $pdfTitle = 'limePDF Example 001';
+// 3) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+// 4) Set a Logo   
     $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
-// 3) set the Text    
+
+
+// 5) Set the Text    
     $pdfText = '<br /><h2>Sample # 001</h2>';
     $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
     $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
@@ -70,6 +74,7 @@ $pdfConfig = [
     ],
     'headerString' => $cfgArray['headerString'],
 	'headerLogo' => $cfgArray['headerLogo'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
@@ -107,16 +112,9 @@ $pdf->setTitle($pdfTitle);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
-
-// set default header data
-if (!file_exists($pdfConfig['headerString'])) {
-	//throw new Exception("Logo file not found: " .  $pdfLogo);
-}
-$wtf = "images/logo_example.jpg";
 $pdf->setHeaderData(
-    //$pdfConfig['logo']['file'],	
-	$pdfLogo,   //$pdfConfig['headerLogo'], 
-	(float)30,				//$pdfConfig['logo']['width'],
+	$imgHeader,
+	$pdfConfig['headerLogoWidth'],
 	$pdfTitle,
 	$pdfConfig['headerString'],
 	array(0,64,255),

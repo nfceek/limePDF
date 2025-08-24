@@ -37,15 +37,19 @@ $config->loadFromArray([
 *
 */
 
-// 1) what is the file name to create:
+// 1) What is the File name to create:
     $outputFile = 'sample_001.pdf';
-// 2) set the doc title 
+// 2) Set the doc Title 
     $pdfTitle = 'limePDF Sample 001A';
-// 3) set the Logo   
-    $pdfLogo = 'images/limePDF_logo.png';
-// 3) set the Text    
-    $pdfText = '<br /><h2>Sample # 001</h2>';
-    $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
+// 3) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+// 4) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+
+// 5) Set the Text    
+    $pdfText = '<h2>Sample # 001</h2>';
+    $pdfText .= '<h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
     $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
     $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
     $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';
@@ -70,6 +74,7 @@ $pdfConfig = [
     ],
     'headerString' => $cfgArray['headerString'],
 	'headerLogo' => $cfgArray['headerLogo'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
@@ -107,16 +112,29 @@ $pdf->setTitle($pdfTitle);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
+// if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+//     $imgPath = $headerdata['logo'];
+//     if (!file_exists($imgPath)) {
+//         $imgPath = __DIR__ . '/images/limePDF_logo.png'; // K_PATH_IMAGES . $headerdata['logo'];
+//         throw new Exception("Logo file not found: " .  $imgPath);
+//     }else{
+//          $imgPath = __DIR__ . '/images/limePDF_logo.png'; // K_PATH_IMAGES . $headerdata['logo'];
+//     }
+//     // then use $imgPath in Image()
+// }else{
+//         $imgPath = __DIR__ . '/images/limePDF_logo.png'; // K_PATH_IMAGES . $headerdata['logo'];
+//     }
 
-// set default header data
-if (!file_exists($pdfConfig['headerString'])) {
-	//throw new Exception("Logo file not found: " . $pdfConfig['logo']['file']);
-}
-$wtf = "images/logo_example.jpg";
+// // set default header data
+// if (!file_exists($pdfConfig['headerString'])) {
+// 	//throw new Exception("Logo file not found: " . $imgPath);
+// }
+
+
+
 $pdf->setHeaderData(
-    $pdfConfig['logo']['file'],	
-	//$pdfLogo, 	//$pdfConfig['headerString'], 		$pdfConfig['logo']['file'],								//<--- error here with logo
-	30,				//$pdfConfig['logo']['width'],
+	$imgHeader,
+	50, //$pdfConfig['headerLogoWidth'],
 	$pdfTitle,
 	$pdfConfig['headerString'],
 	array(0,64,255),
