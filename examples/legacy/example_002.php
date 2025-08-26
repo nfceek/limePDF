@@ -38,9 +38,9 @@ $config->loadFromArray([
 // 2) set Output type ( I = In Browser & D = Download )
 	$outputType = 'I';
 
-// 2) set Text
+// 3) set Text
 	$pdfText = "LimePDF Example 002\n\n";
-	$pdfText .= "Default page header and footer are disabled using\nsetPrintHeader()\nand\nsetPrintFooter()\nmethods.";
+	$pdfText .= "Hi Dave, Default page header and footer are disabled using\nsetPrintHeader()\nand\nsetPrintFooter()\nmethods.";
 
 // ---------- Dont Edit below here -----------------------------
 
@@ -85,7 +85,7 @@ $pdfConfig = [
 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setCreator($pdfConfig['creator']);
 $pdf->setAuthor($pdfConfig['author']);
 $pdf->setTitle($pdfConfig['title']);
 $pdf->setSubject($pdfConfig['meta']['subject']);
