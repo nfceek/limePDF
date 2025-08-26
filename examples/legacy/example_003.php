@@ -45,7 +45,6 @@ $config->loadFromArray([
 ]);
 
 //-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
-
 $cfgArray = $config->toArray();
 $pdfConfig = [
     'author' => $cfgArray['author'],
@@ -55,13 +54,7 @@ $pdfConfig = [
         'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
         'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
         'mono' => $cfgArray['fontMonospaced'],
-    ],
-    'logo' => [
-		'file' => '',
-        'width' => '',
-    ],
-    'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
+    ],  
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
