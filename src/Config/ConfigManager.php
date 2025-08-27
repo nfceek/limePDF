@@ -91,7 +91,7 @@ class ConfigManager
             'marginRight' => 15,
 
             'pageFormat' => 'A4',
-            'pageOrientation' => 'P',
+            'pageOrientation' => 'P',   // P = Portrait & L = Landscape
 
             'pathMain' => dirname(__FILE__) . '/',
             'pathFonts' => dirname(__FILE__) . '/fonts/',

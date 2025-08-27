@@ -41,6 +41,15 @@ $config->loadFromArray([
 // 3) set text for cell(s)
 	$pdfText = 'TEST CELL STRETCH:';
 
+// 4) Set the doc Title 
+    $pdfTitle = 'limePDF Example 001';
+
+// 5) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// 56) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+
 // ---------- Dont Edit below here -----------------------------
 
 $cfgArray = $config->toArray();
@@ -53,6 +62,8 @@ $pdfConfig = [
         'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
         'mono' => $cfgArray['fontMonospaced'],
     ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
@@ -73,9 +84,8 @@ $pdfConfig = [
     ]
 ];
 
-
 // create new PDF document
-$pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
 
 // set document information
 $pdf->setCreator( $pdfConfig['creator']);
@@ -85,25 +95,47 @@ $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
 // set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
+//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
+$pdf->setHeaderData(
+	$imgHeader,
+	$pdfConfig['headerLogoWidth'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
+	array(0,64,255),
+	array(0,64,128)
+);
 
 // set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {

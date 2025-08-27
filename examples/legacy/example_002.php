@@ -81,7 +81,7 @@ $pdfConfig = [
 ];
 
 // create new PDF document
-$pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
 
 // set document information
 $pdf->setCreator($pdfConfig['creator']);

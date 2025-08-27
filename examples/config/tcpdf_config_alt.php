@@ -87,7 +87,7 @@ define ('PDF_PAGE_FORMAT', 'A4');
 /**
  * Page orientation (P=portrait, L=landscape).
  */
-define ('PDF_PAGE_ORIENTATION', 'P');
+define ('PDF_PAGE_ORIENTATION', 'L');
 
 /**
  * Document creator.
