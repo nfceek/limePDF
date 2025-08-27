@@ -1,19 +1,18 @@
 <?php
 //============================================================+
-// File name   : example_002.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
+// File name   : example_003.php
 //
-// Description : Example 002 for TCPDF class
-//               Removing Header and Footer
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Custom page header and footer
+//               
+//
+// Last Update : 8-26-2025
 //============================================================+
 
 declare(strict_types=1);

@@ -20,7 +20,6 @@ trait SectionsTrait {
 	 */
 public function Header() {
     if ($this->header_xobjid === false) {
-        // start a new XObject Template
         $this->header_xobjid = $this->startTemplate($this->w, $this->tMargin);
         $headerfont = $this->getHeaderFont();
         $headerdata = $this->getHeaderData();
@@ -28,46 +27,29 @@ public function Header() {
         $this->y = $this->header_margin;
         $this->x = $this->rtl ? $this->w - $this->original_rMargin : $this->original_lMargin;
 
-        // normalize logo width for arithmetic (safe for PHP 7 & 8+)
+        // normalize logo width
         $logoWidth = isset($headerdata['logo_width']) ? (float) $headerdata['logo_width'] : 0.0;
 
-		if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
-			$imgPath = $headerdata['logo'];
+        // ✅ Always define $imgy safely
+        $imgy = $this->y;
 
-			// If they only gave us a filename, try K_PATH_IMAGES
-			if (!file_exists($imgPath)) {
-				$imgPath = K_PATH_IMAGES . $headerdata['logo'];
-			}
+        if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+            $imgPath = $headerdata['logo'];
 
-			if (file_exists($imgPath)) {
-				$this->Image(
-					$imgPath,
-					$this->GetX(),
-					$this->GetY(),
-					$headerdata['logo_width']
-				);
-				$imgy = $this->getImageRBY();
-			} else {
-				$imgy = $this->y;
-				//throw new \Exception("Header logo not found: " . $headerdata['logo']);
-			}
-}
-        // logo -- TODO remove after testing
-        // if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
-        //     $imgPath = K_PATH_IMAGES . $headerdata['logo'];
-        //     $imgtype = $this->getImageFileType($imgPath);
+            if (!file_exists($imgPath)) {
+                $imgPath = K_PATH_IMAGES . $headerdata['logo'];
+            }
 
-        //     if ($imgtype === 'eps' || $imgtype === 'ai') {
-        //         $this->ImageEps($imgPath, '', '', $logoWidth);
-        //     } elseif ($imgtype === 'svg') {
-        //         $this->ImageSVG($imgPath, '', '', $logoWidth);
-        //     } else {
-        //         $this->Image($imgPath, '', '', $logoWidth);
-        //     }
-        //     $imgy = $this->getImageRBY();
-        // } else {
-        //     $imgy = $this->y;
-        // }
+            if (file_exists($imgPath)) {
+                $this->Image(
+                    $imgPath,
+                    $this->GetX(),
+                    $this->GetY(),
+                    $headerdata['logo_width']
+                );
+                $imgy = $this->getImageRBY();
+            }
+        }
 
         // text
         $cell_height = $this->getCellHeight($headerfont[2] / $this->k);
@@ -121,6 +103,205 @@ public function Header() {
 
         $this->endTemplate();
     }
+
+
+// --	
+// public function Header() {
+//     if ($this->header_xobjid === false) {
+//         // start a new XObject Template
+//         $this->header_xobjid = $this->startTemplate($this->w, $this->tMargin);
+//         $headerfont = $this->getHeaderFont();
+//         $headerdata = $this->getHeaderData();
+
+//         $this->y = $this->header_margin;
+//         $this->x = $this->rtl ? $this->w - $this->original_rMargin : $this->original_lMargin;
+
+//         // normalize logo width for arithmetic (safe for PHP 7 & 8+)
+//         $logoWidth = isset($headerdata['logo_width']) ? (float) $headerdata['logo_width'] : 0.0;
+
+// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+// 			$imgPath = $headerdata['logo'];
+
+// 			// If they only gave us a filename, try K_PATH_IMAGES
+// 			if (!file_exists($imgPath)) {
+// 				$imgPath = K_PATH_IMAGES . $headerdata['logo'];
+// 			}
+
+// 			if (file_exists($imgPath)) {
+// 				$this->Image(
+// 					$imgPath,
+// 					$this->GetX(),
+// 					$this->GetY(),
+// 					$headerdata['logo_width']
+// 				);
+// 				$imgy = $this->getImageRBY();
+// 			} else {
+// 				$imgy = $this->y;
+// 				//throw new \Exception("Header logo not found: " . $headerdata['logo']);
+// 			}
+
+//         // logo -- TODO remove after testing
+//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+//         //     $imgPath = K_PATH_IMAGES . $headerdata['logo'];
+//         //     $imgtype = $this->getImageFileType($imgPath);
+
+//         //     if ($imgtype === 'eps' || $imgtype === 'ai') {
+//         //         $this->ImageEps($imgPath, '', '', $logoWidth);
+//         //     } elseif ($imgtype === 'svg') {
+//         //         $this->ImageSVG($imgPath, '', '', $logoWidth);
+//         //     } else {
+//         //         $this->Image($imgPath, '', '', $logoWidth);
+//         //     }
+//         //     $imgy = $this->getImageRBY();
+//         // } else {
+//         //     $imgy = $this->y;
+//         // }
+
+//         // text
+//         $cell_height = $this->getCellHeight($headerfont[2] / $this->k);
+//         $header_x = $this->getRTL()
+//             ? $this->original_rMargin + ($logoWidth * 1.1)
+//             : $this->original_lMargin + ($logoWidth * 1.1);
+
+//         $cw = $this->w - $this->original_lMargin - $this->original_rMargin - ($logoWidth * 1.1);
+
+//         $this->setTextColorArray($this->header_text_color);
+
+//         // title
+//         $this->setFont($headerfont[0], 'B', $headerfont[2] + 1);
+//         $this->setX($header_x);
+//         $this->Cell($cw, $cell_height, $headerdata['title'], 0, 1, '', 0, '', 0);
+
+//         // string
+//         $this->setFont($headerfont[0], $headerfont[1], $headerfont[2]);
+//         $this->setX($header_x);
+//         $this->MultiCell(
+//             $cw,
+//             $cell_height,
+//             $headerdata['string'],
+//             0,
+//             '',
+//             0,
+//             1,
+//             '',
+//             '',
+//             true,
+//             0,
+//             false,
+//             true,
+//             0,
+//             'T',
+//             false
+//         );
+
+//         // ending line
+//         $this->setLineStyle([
+//             'width' => 0.85 / $this->k,
+//             'cap'   => 'butt',
+//             'join'  => 'miter',
+//             'dash'  => 0,
+//             'color' => $headerdata['line_color'],
+//         ]);
+
+//         $this->setY((2.835 / $this->k) + max($imgy, $this->y));
+//         $this->setX($this->rtl ? $this->original_rMargin : $this->original_lMargin);
+//         $this->Cell($this->w - $this->original_lMargin - $this->original_rMargin, 0, '', 'T', 0, 'C');
+
+//         $this->endTemplate();
+//     }
+//         // normalize logo width for arithmetic (safe for PHP 7 & 8+)
+//         $logoWidth = isset($headerdata['logo_width']) ? (float) $headerdata['logo_width'] : 0.0;
+
+// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+// 			$imgPath = $headerdata['logo'];
+
+// 			// If they only gave us a filename, try K_PATH_IMAGES
+// 			if (!file_exists($imgPath)) {
+// 				$imgPath = K_PATH_IMAGES . $headerdata['logo'];
+// 			}
+
+// 			if (file_exists($imgPath)) {
+// 				$this->Image(
+// 					$imgPath,
+// 					$this->GetX(),
+// 					$this->GetY(),
+// 					$headerdata['logo_width']
+// 				);
+// 				$imgy = $this->getImageRBY();
+// 			} else {
+// 				$imgy = $this->y;
+// 				//throw new \Exception("Header logo not found: " . $headerdata['logo']);
+// 			}
+// }
+//         // logo -- TODO remove after testing
+//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+//         //     $imgPath = K_PATH_IMAGES . $headerdata['logo'];
+//         //     $imgtype = $this->getImageFileType($imgPath);
+
+//         //     if ($imgtype === 'eps' || $imgtype === 'ai') {
+//         //         $this->ImageEps($imgPath, '', '', $logoWidth);
+//         //     } elseif ($imgtype === 'svg') {
+//         //         $this->ImageSVG($imgPath, '', '', $logoWidth);
+//         //     } else {
+//         //         $this->Image($imgPath, '', '', $logoWidth);
+//         //     }
+//         //     $imgy = $this->getImageRBY();
+//         // } else {
+//         //     $imgy = $this->y;
+//         // }
+
+//         // text
+//         $cell_height = $this->getCellHeight($headerfont[2] / $this->k);
+//         $header_x = $this->getRTL()
+//             ? $this->original_rMargin + ($logoWidth * 1.1)
+//             : $this->original_lMargin + ($logoWidth * 1.1);
+
+//         $cw = $this->w - $this->original_lMargin - $this->original_rMargin - ($logoWidth * 1.1);
+
+//         $this->setTextColorArray($this->header_text_color);
+
+//         // title
+//         $this->setFont($headerfont[0], 'B', $headerfont[2] + 1);
+//         $this->setX($header_x);
+//         $this->Cell($cw, $cell_height, $headerdata['title'], 0, 1, '', 0, '', 0);
+
+//         // string
+//         $this->setFont($headerfont[0], $headerfont[1], $headerfont[2]);
+//         $this->setX($header_x);
+//         $this->MultiCell(
+//             $cw,
+//             $cell_height,
+//             $headerdata['string'],
+//             0,
+//             '',
+//             0,
+//             1,
+//             '',
+//             '',
+//             true,
+//             0,
+//             false,
+//             true,
+//             0,
+//             'T',
+//             false
+//         );
+
+//         // ending line
+//         $this->setLineStyle([
+//             'width' => 0.85 / $this->k,
+//             'cap'   => 'butt',
+//             'join'  => 'miter',
+//             'dash'  => 0,
+//             'color' => $headerdata['line_color'],
+//         ]);
+
+//         $this->setY((2.835 / $this->k) + max($imgy, $this->y));
+//         $this->setX($this->rtl ? $this->original_rMargin : $this->original_lMargin);
+//         $this->Cell($this->w - $this->original_lMargin - $this->original_rMargin, 0, '', 'T', 0, 'C');
+
+//         $this->endTemplate();
+//     }
 
     // print header template
     $dx = 0;

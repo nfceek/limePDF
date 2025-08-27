@@ -9,8 +9,8 @@
 //  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
 //
-// Description : Sample 001 for limePDF class
-//               Default Header and Footer
+// Description : Default Header and Footer
+//               
 //
 // Last Update : 8-24-2025
 //============================================================+
