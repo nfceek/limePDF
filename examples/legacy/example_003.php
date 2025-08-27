@@ -43,7 +43,13 @@ $config->loadFromArray([
     'headerTitle'     => 'LimePDF Example 003',
 ]);
 
-//-------- do not edit below (make changes in ConfigManager file) ------------------------------------------------
+// 5) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// 6) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// ---------- Dont Edit below here ----------------------------------------------------------------------------
 $cfgArray = $config->toArray();
 $pdfConfig = [
     'author' => $cfgArray['author'],
@@ -54,6 +60,8 @@ $pdfConfig = [
         'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
         'mono' => $cfgArray['fontMonospaced'],
     ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
     'margins' => [
         'header' => $cfgArray['marginHeader'],
         'footer' => $cfgArray['marginFooter'],
@@ -130,11 +138,49 @@ $pdf->setTitle($pdfConfig['title']);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
-// Page Setup
-$pdf->SetMargins(15, 27, 15);
-$pdf->SetHeaderMargin(5);
-$pdf->SetFooterMargin(10);
-$pdf->SetAutoPageBreak(true, 25);
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
+
+// set header and footer fonts
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
+
+// set default monospaced font
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
+
+// set margins
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
+
+// set auto page breaks
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
+
+// set image scale factor
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
+
+// set some language-dependent strings (optional)
+if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+	require_once(dirname(__FILE__).'/lang/eng.php');
+	$pdf->setLanguageArray($l);
+}
+
+
 $pdf->SetFont('times', '', 12);
 
 // Add Page + Content

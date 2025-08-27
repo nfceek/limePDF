@@ -118,6 +118,10 @@ $pdf->setTitle($pdfTitle);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
+
 $pdf->setHeaderData(
 	$imgHeader,
 	$pdfConfig['headerLogoWidth'],

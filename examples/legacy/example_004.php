@@ -42,15 +42,15 @@ $config->loadFromArray([
 	$pdfText = 'TEST CELL STRETCH:';
 
 // 4) Set the doc Title 
-    $pdfTitle = 'limePDF Example 001';
+    $pdfTitle = 'limePDF Example 004';
 
 // 5) Set the Header logo
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
 
-// 56) Set a Logo   
+// 6) Set a Logo   
     $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
 
-// ---------- Dont Edit below here -----------------------------
+// ---------- Dont Edit below here ----------------------------------------------------------------------------
 
 $cfgArray = $config->toArray();
 $pdfConfig = [
@@ -93,6 +93,10 @@ $pdf->setAuthor($pdfConfig['author']);
 $pdf->setTitle($pdfConfig['title']);
 $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
+
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
 
 // set default header data
 //$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);

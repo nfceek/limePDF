@@ -1,45 +1,27 @@
 <?php
 //============================================================+
-// File name   : example_005.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
+// File name   : example_004.php
 //
-// Description : Example 005 for TCPDF class
-//               Multicell
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Multicell
+//               
+//
+// Last Update : 8-27-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Multicell
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group cell
- * @group pdf
- */
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// set Output File Name
-$OutputFile = 'example_005.pdf';
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Pdf;
 
-$pdf = new TCPDF();
+$pdf = new Pdf();
 
 use LimePDF\Config\ConfigManager;
 
@@ -48,36 +30,123 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) set Output File Name
+	$outputFile = 'example_004.pdf';
+
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'I';
+
+// 3) set text for cell(s)
+	$pdfText1 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+	$pdfText2 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. Vivamus sed risus lectus, nec interdum nunc.';
+	$pdfText2 .= '\n';
+	$pdfText2 .= 'Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa.';
+	$pdfText2 .= '\n';
+	$pdfText3 = '"CUSTOM PADDING:\nLeft=2, Top=4, Right=6, Bottom=8\nLorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue.\n";';
+
+
+// 4) Set the doc Title 
+    $pdfTitle = 'limePDF Example 005';
+
+// 5) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// 6) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// ---------- Dont Edit below here -----------------------------
+
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
+
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 005');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setAuthor($pdfConfig['author']);
+$pdf->setTitle($pdfConfig['title']);
+$pdf->setSubject($pdfConfig['meta']['subject']);
+$pdf->setKeywords($pdfConfig['meta']['keywords']);
+
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
 
 // set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 005', PDF_HEADER_STRING);
+//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
+$pdf->setHeaderData(
+	$imgHeader,
+	$pdfConfig['headerLogoWidth'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
+	array(0,64,255),
+	array(0,64,128)
+);
 
 // set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
@@ -105,7 +174,7 @@ $pdf->setFillColor(255, 255, 127);
 // MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
 
 // set some text for example
-$txt = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+$txt = $pdfText1;
 
 // Multicell test
 $pdf->MultiCell(55, 5, '[LEFT] '.$txt, 1, 'L', 1, 0, '', '', true);
@@ -132,9 +201,7 @@ $pdf->Ln(4);
 $pdf->setFillColor(215, 235, 255);
 
 // set some text for example
-$txt = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. Vivamus sed risus lectus, nec interdum nunc.
-
-Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa.';
+$txt = $pdfText2;
 
 // print a blox of text using multicell()
 $pdf->MultiCell(80, 5, $txt."\n", 1, 'J', 1, 1, '' ,'', true);
@@ -162,7 +229,7 @@ $pdf->setFont('helvetica', '', 8);
 // set cell padding
 $pdf->setCellPaddings(2, 4, 6, 8);
 
-$txt = "CUSTOM PADDING:\nLeft=2, Top=4, Right=6, Bottom=8\nLorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue.\n";
+$txt = $pdfText3;
 
 $pdf->MultiCell(55, 5, $txt, 1, 'J', 1, 2, 125, 210, true);
 
@@ -172,7 +239,7 @@ $pdf->lastPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE
