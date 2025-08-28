@@ -47,7 +47,9 @@
  * @version 1.0.027
  * @author Nicola Asuni
  */
-class TCPDFBarcode {
+namespace LimePDF;
+
+class BarCodes1D {
 
 	/**
 	 * Array representation of barcode.

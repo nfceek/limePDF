@@ -43,10 +43,13 @@
  */
 
 // include 2D barcode class (search for installation path)
-require_once(dirname(__FILE__).'/tcpdf_barcodes_2d_include.php');
+require_once __DIR__ . '/../../src/Barcodes/BarCodes2D.php';
+
+
+use LimePDF\BarCodes2D;
 
 // set the barcode content and type
-$barcodeobj = new TCPDF2DBarcode('http://www.tcpdf.org', 'QRCODE,H');
+$barcodeobj = new BarCodes2D('http://www.tcpdf.org', 'QRCODE,H');
 
 // output the barcode as PNG image
 $barcodeobj->getBarcodePNG(6, 6, array(0,0,0));

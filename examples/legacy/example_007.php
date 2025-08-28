@@ -1,45 +1,28 @@
 <?php
 //============================================================+
-// File name   : example_007.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
+// File name   : example_003.php
 //
-// Description : Example 007 for TCPDF class
-//               Two independent columns with WriteHTMLCell()
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Two independent columns with WriteHTMLCell()
+//               
+//
+// Last Update : 8-26-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Two independent columns with WriteHTMLCell()
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group column
- * @group cell
- * @group html
- * @group pdf
- */
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// set Output File Name
-$OutputFile = 'example_007.pdf';
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Pdf;
+
+$pdf = new Pdf();
+
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
@@ -47,44 +30,102 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 007');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+// 1) set Output File Name
+	$outputFile = 'example_007.pdf';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 007', PDF_HEADER_STRING);
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'I';
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+// 3) col data
+    $left_column = '<b>LEFT COLUMN</b> left column left column left column left column left column left column left column';
+    $left_column .= 'left column left column left column left column left column left column left column left column left column';
+    $left_column .= 'left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column';
+    
+    $right_column = '<b>RIGHT COLUMN</b> right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column';
 
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+// ---------- Dont Edit below here ----------------------------------------------------------------------------
 
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
 
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+class MyPdf extends Pdf
+{
+    protected ConfigManager $config;
 
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+    public function __construct(ConfigManager $config)
+    {
+        parent::__construct();
+        $this->config = $config;
+    }
 
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
+    // Page header
+    public function Header(): void
+    {
+        $logo = $this->config->get('headerLogo');
+        $logoWidth = (float) $this->config->get('headerLogoWidth', 20);
+		$logoType = $this->config->get('headerLogoType');
+
+        if ($logo && file_exists($logo)) {
+            $this->Image(
+                $logo,
+                10, 10,
+                $logoWidth,
+                '', $logoType,
+                '', 'T',
+                false, 300,
+                '', false, false, 0, false, false, false
+            );
+        }
+
+        $this->SetFont('helvetica', 'B', 16);
+        $this->Cell(0, 15, $this->config->get('headerTitle', ''), 0, false, 'C', 0, '', 0, false, 'M', 'M');
+    }
+
+    // Page footer
+    public function Footer(): void
+    {
+        $this->SetY(-15);
+        $this->SetFont('helvetica', 'I', 8);
+        $this->Cell(
+            0, 10,
+            'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(),
+            0, false, 'C', 0, '', 0, false, 'T', 'M'
+        );
+    }
 }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // set font
 $pdf->setFont('times', '', 12);
@@ -93,9 +134,8 @@ $pdf->setFont('times', '', 12);
 $pdf->AddPage();
 
 // create columns content
-$left_column = '<b>LEFT COLUMN</b> left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column left column';
-
-$right_column = '<b>RIGHT COLUMN</b> right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column right column';
+$left_column;
+$right_column;
 
 // writeHTMLCell($w, $h, $x, $y, $html='', $border=0, $ln=0, $fill=0, $reseth=true, $align='', $autopadding=true)
 
@@ -126,7 +166,7 @@ $pdf->lastPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

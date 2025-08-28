@@ -1,45 +1,29 @@
 <?php
 //============================================================+
 // File name   : example_006.php
-// Begin       : 2008-03-04
-// Last Update : 2025-08-15
 //
-// Description : Example 006 for TCPDF class
-//               WriteHTML and RTL support
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
+//
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
+//
+//
+// Description : WriteHTML and RTL support
 //               Updated for PHP 7/8 compatibility
+//               
 //
-// Author: Nicola Asuni
-//
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+// Last Update : 8-27-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: WriteHTML and RTL support
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group html
- * @group rtl
- * @group pdf
- */
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// set Output File Name
-$OutputFile = 'example_006.pdf';
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\PDF;
+use LimePDF\Pdf;
+
+$pdf = new Pdf();
+
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
@@ -47,41 +31,120 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) set Output File Name
+	$outputFile = 'example_006.pdf';
+
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'I';
+
+// 3) set text for cell(s)
+	$pdfText1 = '';
+
+// 4) Set the doc Title 
+    $pdfTitle = 'limePDF Example 006';
+
+// 5) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// 6) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// ---------- Dont Edit below here -----------------------------
+
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
+
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 006');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setAuthor($pdfConfig['author']);
+$pdf->setTitle($pdfConfig['title']);
+$pdf->setSubject($pdfConfig['meta']['subject']);
+$pdf->setKeywords($pdfConfig['meta']['keywords']);
+
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
 
 // set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 006', PDF_HEADER_STRING);
+//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
+$pdf->setHeaderData(
+	$imgHeader,
+	$pdfConfig['headerLogoWidth'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
+	array(0,64,255),
+	array(0,64,128)
+);
 
 // set header and footer fonts
-$pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN]);
-$pdf->setFooterFont([PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA]);
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
 
 // set some language-dependent strings (optional)
-$langFile = dirname(__FILE__).'/lang/eng.php';
-if (file_exists($langFile)) {
-	require_once($langFile);
+if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+	require_once(dirname(__FILE__).'/lang/eng.php');
 	$pdf->setLanguageArray($l);
 }
 
@@ -107,7 +170,7 @@ List example:
 	<li><i>italic text</i></li>
 	<li><u>underlined text</u></li>
 	<li><b>b<i>bi<u>biu</u>bi</i>b</b></li>
-	<li><a href="http://www.tecnick.com" dir="ltr">link to http://www.tecnick.com</a></li>
+	<li><a href="http://www.limePDF.com" dir="ltr">link to http://www.limepdf.com</a></li>
 	<li>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.<br />Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</li>
 	<li>SUBLIST
 		<ol>
@@ -233,9 +296,9 @@ $pdf->AddPage();
 // create some HTML content
 $html = '<h1>Image alignments on HTML table</h1>
 <table cellpadding="1" cellspacing="1" border="1" style="text-align:center;">
-<tr><td><img src="images/logo_example.png" border="0" height="41" width="41" /></td></tr>
+<tr><td><img src="../../images/logo_example.png" border="0" height="41" width="41" /></td></tr>
 <tr style="text-align:left;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="top" /></td></tr>
-<tr style="text-align:center;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="middle" /></td></tr>
+<tr style="text-align:center;"><td><img src="http://limepdf/examples/images/logo_example.png" border="0" height="41" width="41" align="middle" /></td></tr>
 <tr style="text-align:right;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="bottom" /></td></tr>
 <tr><td style="text-align:left;"><img src="images/logo_example.png" border="0" height="41" width="41" align="top" /></td></tr>
 <tr><td style="text-align:center;"><img src="images/logo_example.png" border="0" height="41" width="41" align="middle" /></td></tr>
@@ -416,7 +479,7 @@ $pdf->lastPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE
