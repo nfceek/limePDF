@@ -42,7 +42,7 @@ $config->loadFromArray([
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
 
 // 4) Set the doc Title 
-    $pdfTitle = 'limePDF Example 004';
+    $pdfTitle = 'limePDF Example 011';
 
 // 5) load your table Data
 	$PrintText = dirname(__DIR__) . '/data/table_data_demo.txt';
