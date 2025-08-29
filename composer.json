@@ -30,11 +30,11 @@
             "LimePDF\\": "./src/"
             },
         "classmap": [
-            "src/Barcodes/tcpdf_barcodes_1d.php",
-            "src/Barcodes/tcpdf_barcodes_2d.php",
-            "src/include/barcodes/datamatrix.php",
-            "src/include/barcodes/pdf417.php",
-            "src/include/barcodes/qrcode.php"
+            "src/Barcodes/BarCodes1D.php",
+            "src/Barcodes/BarCodes2D.php",
+            "src/Barcodes/datamatrix.php",
+            "src/Barcodes/pdf417.php",
+            "src/Barcodes/qrcode.php"
         ]
     },
     "require-dev": {

@@ -25,6 +25,7 @@ namespace LimePDF;
 	use LimePDF\Include\FontTrait;
 	use LimePDF\Include\FontDataTrait;
 	use LimePDF\Include\ImageTrait;
+	use LimePDF\Include\ImageToolsTrait;
 
 	use LimePDF\Model\BarcodeGetterSetterTrait;
 	use LimePDF\Model\FontGetterSetterTrait;	
@@ -49,6 +50,7 @@ namespace LimePDF;
 	use LimePDF\Text\TextTrait;	
 	use LimePDF\Text\WriteTrait;
 
+	use LimePDF\Util\BinaryToolsTrait;	
 	use LimePDF\Utils\FontManagerTrait;
 	use LimePDF\Utils\FontAddTrait;	
 	use LimePDF\Utils\JavascriptTrait;
@@ -92,8 +94,10 @@ class PDF {
 
 	use GraphicsTrait;
 
+	use ImageTrait;
 	use ImageAddTrait;
-
+	use ImagetoolsTrait;
+	
 	use HtmlTrait;
 
 	use JavascriptTrait;
