@@ -1,50 +1,28 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_010.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
 //
-// Description : Example 010 for TCPDF class
-//               Text on multiple columns
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Text on multiple columns
+//               
+//               
+//
+// Last Update : 8-29-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Text on multiple columns
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group column
- * @group pdf
- */
-
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// Set Text
-$PrintText = '../data/chapter_demo_1.txt';
-
-// Set HTML
-$PrintHtml = '../data/chapter_demo_2.txt';
-
-//Set Output File Name
-$OutputFile = 'example_010.pdf';
-
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Pdf;
+
+$pdf = new Pdf();
+
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
@@ -52,10 +30,26 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) set Output File Name
+	$outputFile = 'example_009.pdf';
+
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'I';
+
+// 3) Set Text
+$PrintText = '../data/chapter_demo_1.txt';
+
+// 4) Set HTML
+$PrintHtml = '../data/chapter_demo_2.txt';
+
+// ---------- Dont Edit below here -----------------------------
+
 /**
  * Extend TCPDF to work with multiple columns
  */
-class MC_TCPDF extends TCPDF {
+class MC_TCPDF extends PDF {
 
 	/**
 	 * Print chapter
@@ -122,41 +116,85 @@ class MC_TCPDF extends TCPDF {
 // create new PDF document
 $pdf = new MC_TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 010');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 010', PDF_HEADER_STRING);
+class MyPdf extends Pdf
+{
+    protected ConfigManager $config;
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+    public function __construct(ConfigManager $config)
+    {
+        parent::__construct();
+        $this->config = $config;
+    }
 
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+    // Page header
+    public function Header(): void
+    {
+        $logo = $this->config->get('headerLogo');
+        $logoWidth = (float) $this->config->get('headerLogoWidth', 20);
+		$logoType = $this->config->get('headerLogoType');
 
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+        if ($logo && file_exists($logo)) {
+            $this->Image(
+                $logo,
+                10, 10,
+                $logoWidth,
+                '', $logoType,
+                '', 'T',
+                false, 300,
+                '', false, false, 0, false, false, false
+            );
+        }
 
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $this->SetFont('helvetica', 'B', 16);
+        $this->Cell(0, 15, $this->config->get('headerTitle', ''), 0, false, 'C', 0, '', 0, false, 'M', 'M');
+    }
 
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
+    // Page footer
+    public function Footer(): void
+    {
+        $this->SetY(-15);
+        $this->SetFont('helvetica', 'I', 8);
+        $this->Cell(
+            0, 10,
+            'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(),
+            0, false, 'C', 0, '', 0, false, 'T', 'M'
+        );
+    }
 }
 
-// ---------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // print TEXT
 $pdf->PrintChapter(1, 'LOREM IPSUM [TEXT]', $PrintText, false);
@@ -167,7 +205,7 @@ $pdf->PrintChapter(2, 'LOREM IPSUM [HTML]', $PrintHtml, true);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

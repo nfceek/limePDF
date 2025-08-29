@@ -1,6 +1,6 @@
 <?php 
 //============================================================+
-// File name   : example_006.php
+// File name   : example_009.php
 //
 // Author: Brad Smith
 // (c) Copyright 2025, Brad Smith - LimePDF.com
@@ -13,7 +13,7 @@
 //               
 //               
 //
-// Last Update : 8-27-2025
+// Last Update : 8-29-2025
 //============================================================+
 
 require_once __DIR__ . '/../../src/PDF.php';
@@ -33,7 +33,7 @@ $config->loadFromArray([
 // ---------- ONLY EDIT THIS AREA --------------------------------
 
 // 1) set Output File Name
-	$outputFile = 'example_006.pdf';
+	$outputFile = 'example_009.pdf';
 
 // 2) set Output type ( I = In Browser & D = Download )
 	$outputType = 'I';

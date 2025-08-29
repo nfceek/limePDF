@@ -29,7 +29,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <li>Independent columns with WriteHTMLCell: [<a href="legacy/example_007.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>External UTF-8 text file: [<a href="legacy/example_008.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Image: [<a href="legacy/example_009.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
-<li>Multiple columns: [<a href="legacy/example_010.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
+<li>Multiple columns: [<a href="legacy/example_010.php" title="PDF [new window]" target="_blank">PDF</a>] -- fix class MyPdf extends Pdf</li>
 <li>Colored Tables: [<a href="legacy/example_011.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Graphic Functions: [<a href="legacy/example_012.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Graphic Transformations: [<a href="legacy/example_013.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
