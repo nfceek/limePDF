@@ -1,45 +1,28 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_015.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
 //
-// Description : Example 015 for TCPDF class
-//               Bookmarks (Table of Content)
-//               and Named Destinations.
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Bookmarks (Table of Content) and Named Destinations.
+//               
+//               
+//
+// Last Update : 8-29-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Bookmarks (Table of Content)
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group toc
- * @group bookmark
- * @group pdf
- */
-
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// set Output File Name
-$OutputFile = 'example_015.pdf';
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
+require_once __DIR__ . '/../../src/PDF.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\TCPDF;
+use LimePDF\Pdf;
+
+$pdf = new Pdf();
+
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
@@ -47,36 +30,118 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) set Output File Name
+	$outputFile = 'example_015.pdf';
+
+// 2) set Output type ( I = In Browser & D = Download )
+	$outputType = 'D';
+
+// 3) Set the doc Title 
+    $pdfTitle = 'limePDF Example 015';
+
+// 4) Set the Header logo
+    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
+
+// 5) Set a Logo   
+    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png'; 
+
+// 6) Set the Text    
+    $pdfText1 = 'You can set PDF Bookmarks using the Bookmark() method. You can set PDF Named Destinations using the setDestination() method.';
+
+	$pdfText2 = 'Once saved, you can open this document at this page using the link: "example_015.pdf#chapter2".';
+
+// ---------- Dont Edit below here -----------------------------
+
+$cfgArray = $config->toArray();
+$pdfConfig = [
+    'author' => $cfgArray['author'],
+    'creator' => $cfgArray['creator'],
+	'title' => $cfgArray['title'],
+    'font' => [
+        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
+        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
+        'mono' => $cfgArray['fontMonospaced'],
+    ],  
+	'headerString' => $cfgArray['headerString'],
+    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
+    'margins' => [
+        'header' => $cfgArray['marginHeader'],
+        'footer' => $cfgArray['marginFooter'],
+        'top'    => $cfgArray['marginTop'],
+        'bottom' => $cfgArray['marginBottom'],
+        'left'   => $cfgArray['marginLeft'],
+        'right'  => $cfgArray['marginRight'],
+    ],
+    'layout' => [
+        'pageFormat' => $cfgArray['pageFormat'],
+        'orientation' => $cfgArray['pageOrientation'],
+        'unit' => $cfgArray['unit'],
+        'imageScale' => $cfgArray['imageScaleRatio'],
+    ],
+    'meta' => [
+        'subject' => $cfgArray['subject'],
+        'keywords' => $cfgArray['keywords'],
+    ]
+];
+
 // create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 015');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+$pdf->setCreator( $pdfConfig['creator']);
+$pdf->setAuthor($pdfConfig['author']);
+$pdf->setTitle($pdfConfig['title']);
+$pdf->setSubject($pdfConfig['meta']['subject']);
+$pdf->setKeywords($pdfConfig['meta']['keywords']);
+
+// remove default header/footer
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
 
 // set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 015', PDF_HEADER_STRING);
+//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
+$pdf->setHeaderData(
+	$imgHeader,
+	$pdfConfig['headerLogoWidth'],
+	$pdfTitle,
+	$pdfConfig['headerString'],
+	array(0,64,255),
+	array(0,64,128)
+);
 
 // set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+$pdf->setHeaderFont([
+	$pdfConfig['font']['main'][0],
+	'',
+	$pdfConfig['font']['main'][1]]
+);
+
+$pdf->setFooterFont([
+	$pdfConfig['font']['data'][0],
+	'',
+	$pdfConfig['font']['data'][1]]
+);
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
 
 // set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setMargins(
+	$pdfConfig['margins']['left'], 
+	$pdfConfig['margins']['top'], 
+	$pdfConfig['margins']['right']
+);
+
+$pdf->setHeaderMargin($pdfConfig['margins']['header']);
+$pdf->setFooterMargin($pdfConfig['margins']['footer']);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
 
 // set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+$pdf->setImageScale($pdfConfig['layout']['imageScale']);
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
@@ -101,8 +166,7 @@ $pdf->Bookmark('Chapter 1', 0, 0, '', 'B', array(0,64,128));
 $pdf->Cell(0, 10, 'Chapter 1', 0, 1, 'L');
 
 $pdf->setFont('times', 'I', 14);
-$pdf->Write(0, 'You can set PDF Bookmarks using the Bookmark() method.
-You can set PDF Named Destinations using the setDestination() method.');
+$pdf->Write(0, $pdfText1);
 
 $pdf->setFont('times', 'B', 20);
 
@@ -131,7 +195,7 @@ $pdf->setDestination('chapter2', 0, '');
 $pdf->Bookmark('Chapter 2', 0, 0, '', 'BI', array(128,0,0), -1, '#chapter2');
 $pdf->Cell(0, 10, 'Chapter 2', 0, 1, 'L');
 $pdf->setFont('times', 'I', 14);
-$pdf->Write(0, 'Once saved, you can open this document at this page using the link: "example_015.pdf#chapter2".');
+$pdf->Write(0, $pdfText2);
 
 $pdf->AddPage();
 $pdf->setDestination('chapter3', 0, '');
@@ -168,12 +232,12 @@ $pdf->Bookmark('TXT file', 0, 0, '', 'B', array(128,0,255), -1, '*utf8test.txt')
 $pdf->Bookmark('PDF file', 0, 0, '', 'B', array(128,0,255), -1, '%example_012.pdf');
 
 // add a bookmark that points to an external URL
-$pdf->Bookmark('External URL', 0, 0, '', 'B', array(0,0,255), -1, 'http://www.tcpdf.org');
+$pdf->Bookmark('External URL', 0, 0, '', 'B', array(0,0,255), -1, 'https://limepdf.com');
 
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

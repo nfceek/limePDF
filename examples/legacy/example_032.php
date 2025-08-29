@@ -81,7 +81,7 @@ EOD;
 // Print text using writeHTMLCell()
 $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
 
-$pdf->ImageEps('images/tcpdf_box.ai', 10, 40, 150, '', 'http://www.tcpdf.org', true, '', '', 0, false);
+$pdf->ImageEps('images/tcpdf_box.ai', 10, 40, 150, '', 'https://limepdf.com', true, '', '', 0, false);
 
 // ---------------------------------------------------------
 

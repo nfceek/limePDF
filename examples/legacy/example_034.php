@@ -83,7 +83,7 @@ $pdf->StartTransform();
 $pdf->StarPolygon(105, 100, 30, 10, 3, 0, 1, 'CNZ');
 
 // draw jpeg image to be clipped
-$pdf->Image('images/image_demo.jpg', 75, 70, 60, 60, '', 'http://www.tcpdf.org', '', true, 72);
+$pdf->Image('images/image_demo.jpg', 75, 70, 60, 60, '', 'https://limepdf.com', '', true, 72);
 
 //Stop Graphic Transformation
 $pdf->StopTransform();

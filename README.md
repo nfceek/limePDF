@@ -5,7 +5,7 @@
 * **author**       
 * **copyright**             
 * **license**               http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
-* **link**                  http://www.tcpdf.org
+* **link**                  https://limepdf.com
 * **source**                https://github.com/tecnickcom/TCPDF
 
 

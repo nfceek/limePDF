@@ -50,7 +50,7 @@ require_once __DIR__ . '/../../src/Barcodes/BarCodes2D.php';
 use LimePDF\BarCodes2D;
 
 // set the barcode content and type
-$barcodeobj = new BarCodes2D('http://www.tcpdf.org', 'DATAMATRIX');
+$barcodeobj = new BarCodes2D('https://limepdf.com', 'DATAMATRIX');
 
 // output the barcode as HTML object
 echo $barcodeobj->getBarcodeHTML(6, 6, 'black');

@@ -2,7 +2,7 @@
     "name": "tecnickcom/tcpdf-tests",
     "type": "metapackage",
     "description": "Dependencies for the test suite",
-    "homepage": "http://www.tcpdf.org/",
+    "homepage": "https://limepdf.com/",
     "license": "LGPL-3.0-or-later",
     "authors": [
         {

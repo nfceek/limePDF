@@ -78,7 +78,7 @@ $pdf->AddPage();
 // NOTE: Uncomment the following line to rasterize SVG image using the ImageMagick library.
 //$pdf->setRasterizeVectorImages(true);
 
-$pdf->ImageSVG($file='images/testsvg.svg', $x=15, $y=30, $w='', $h='', $link='http://www.tcpdf.org', $align='', $palign='', $border=1, $fitonpage=false);
+$pdf->ImageSVG($file='images/testsvg.svg', $x=15, $y=30, $w='', $h='', $link='https://limepdf.com', $align='', $palign='', $border=1, $fitonpage=false);
 
 $pdf->ImageSVG($file='images/tux.svg', $x=30, $y=100, $w='', $h=100, $link='', $align='', $palign='', $border=0, $fitonpage=false);
 

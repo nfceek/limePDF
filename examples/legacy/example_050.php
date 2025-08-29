@@ -173,7 +173,7 @@ $pdf->Text(80, 85, 'PDF417 (ISO/IEC 15438:2006)');
 // -------------------------------------------------------------------
 // DATAMATRIX (ISO/IEC 16022:2006)
 
-$pdf->write2DBarcode('http://www.tcpdf.org', 'DATAMATRIX', 80, 150, 50, 50, $style, 'N');
+$pdf->write2DBarcode('https://limepdf.com', 'DATAMATRIX', 80, 150, 50, 50, $style, 'N');
 $pdf->Text(80, 145, 'DATAMATRIX (ISO/IEC 16022:2006)');
 
 // -------------------------------------------------------------------
