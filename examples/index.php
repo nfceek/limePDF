@@ -34,8 +34,8 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <li>Graphic Functions: [<a href="legacy/example_012.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Graphic Transformations: [<a href="legacy/example_013.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Javascript and Forms: [<a href="legacy/example_014.php" title="PDF [new window]" target="_blank">PDF</a>] -- fix JS not working</li>
-<li>Bookmarks (Table of Content): ERROR [<a href="legacy/example_015.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
-<li>Document Encryption: [<a href="legacy/example_016.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
+<li>Bookmarks (Table of Content): ERROR [<a href="legacy/example_015.php" title="PDF [new window]" target="_blank">PDF</a>] -- errors</li>
+<li>Document Encryption: [<a href="legacy/example_016.php" title="PDF [new window]" target="_blank">PDF</a>] -- skipped </li>
 <li>Independent columns with MultiCell: [<a href="legacy/example_017.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Persian and Arabic language on RTL document: [<a href="legacy/example_018.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Non unicode / Alternative config file: [<a href="legacy/example_019.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
