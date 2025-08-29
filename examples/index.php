@@ -39,7 +39,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <li>Independent columns with MultiCell: [<a href="legacy/example_017.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Persian and Arabic language on RTL document: [<a href="legacy/example_018.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Non unicode / Alternative config file: [<a href="legacy/example_019.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
-<li>Multicell complex alignment: [<a href="legacy/example_020.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
+<li>Multicell complex alignment: [<a href="legacy/example_020.php" title="PDF [new window]" target="_blank">PDF</a>] -- fix mulirow call</li>
 <li>writeHTML alignment: [<a href="legacy/example_021.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>CMYK colors: [<a href="legacy/example_022.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Page Groups: [<a href="legacy/example_023.php" title="PDF [new window]" target="_blank">PDF</a>]</li>

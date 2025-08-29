@@ -39,7 +39,7 @@ $config->loadFromArray([
 	$outputType = 'I';
 
 // 3) Set the doc Title 
-    $pdfTitle = 'limePDF Example 012';
+    $pdfTitle = 'limePDF Example 017';
 
 // 4) Set the Header logo
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';

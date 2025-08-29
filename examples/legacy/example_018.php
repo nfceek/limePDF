@@ -33,13 +33,13 @@ $config->loadFromArray([
 // ---------- ONLY EDIT THIS AREA --------------------------------
 
 // 1) set Output File Name
-	$outputFile = 'example_017.pdf';
+	$outputFile = 'example_018.pdf';
 
 // 2) set Output type ( I = In Browser & D = Download )
 	$outputType = 'I';
 
 // 3) Set the doc Title 
-    $pdfTitle = 'limePDF Example 012';
+    $pdfTitle = 'limePDF Example 018';
 
 // 4) Set the Header logo
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
@@ -91,8 +91,8 @@ $pdf->setSubject($pdfConfig['meta']['subject']);
 $pdf->setKeywords($pdfConfig['meta']['keywords']);
 
 // remove default header/footer
-$pdf->setPrintHeader(false);
-$pdf->setPrintFooter(false);
+$pdf->setPrintHeader(true);
+$pdf->setPrintFooter(true);
 
 // set default header data
 //$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
