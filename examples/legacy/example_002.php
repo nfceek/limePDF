@@ -15,111 +15,25 @@
 // Last Update : 8-26-2025
 //============================================================+
 
-require_once __DIR__ . '/../../src/PDF.php';
-require_once '../../vendor/autoload.php'; 
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-use LimePDF\Pdf;
+//--Do Not Edit Above - make changes in ConfigManager or Bootstrap file) --
 
-$pdf = new Pdf();
-
-use LimePDF\Config\ConfigManager;
-
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
-
-//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
-
-// 1) set Output File Name
-	$outputFile = 'example_002.pdf';
+// 1) What is the File name to create:
+    $outputFile = 'example_001.pdf';
 
 // 2) set Output type ( I = In Browser & D = Download )
-	$outputType = 'I';
+    $outputType = 'I';
 
 // 3) set Text
 	$pdfText = "LimePDF Example 002\n\n";
 	$pdfText .= "Default page header and footer are disabled using\nsetPrintHeader()\nand\nsetPrintFooter()\nmethods.";
 
-// ---------- Dont Edit below here -----------------------------
+// ---------- Dont Edit below here ---------------------------------------
 
-// Change the $config array vars to be injected or used as necessary
-$cfgArray = $config->toArray();
-$pdfConfig = [
-    'author' => $cfgArray['author'],
-    'creator' => $cfgArray['creator'],
-	'title' => $cfgArray['title'],
-    'font' => [
-        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
-        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
-        'mono' => $cfgArray['fontMonospaced'],
-    ],
-    'logo' => [
-		'file' => '',
-        'width' => '',
-    ],
-    'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],    
-    'margins' => [
-        'header' => $cfgArray['marginHeader'],
-        'footer' => $cfgArray['marginFooter'],
-        'top'    => $cfgArray['marginTop'],
-        'bottom' => $cfgArray['marginBottom'],
-        'left'   => $cfgArray['marginLeft'],
-        'right'  => $cfgArray['marginRight'],
-    ],
-    'layout' => [
-        'pageFormat' => $cfgArray['pageFormat'],
-        'orientation' => $cfgArray['pageOrientation'],
-        'unit' => $cfgArray['unit'],
-        'imageScale' => $cfgArray['imageScaleRatio'],
-    ],
-    'meta' => [
-        'subject' => $cfgArray['subject'],
-        'keywords' => $cfgArray['keywords'],
-    ]
-];
-
-// create new PDF document
-$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
-
-// set document information
-$pdf->setCreator($pdfConfig['creator']);
-$pdf->setAuthor($pdfConfig['author']);
-$pdf->setTitle($pdfConfig['title']);
-$pdf->setSubject($pdfConfig['meta']['subject']);
-$pdf->setKeywords($pdfConfig['meta']['keywords']);
-
-// remove default header/footer
-$pdf->setPrintHeader(false);
-$pdf->setPrintFooter(false);
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
-
-// set margins
-$pdf->setMargins(
-	$pdfConfig['margins']['left'], 
-	$pdfConfig['margins']['top'], 
-	$pdfConfig['margins']['right']
-);
-
-$pdf->setHeaderMargin($pdfConfig['margins']['header']);
-$pdf->setFooterMargin($pdfConfig['margins']['footer']);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
-
-// set image scale factor
-$pdf->setImageScale($pdfConfig['layout']['imageScale']);;
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// filename + type
+$pdf = PdfBootstrap::create($outputFile, $outputType ); 
 
 // set font
 $pdf->setFont('times', 'BI', 20);
