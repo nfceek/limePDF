@@ -47,7 +47,7 @@
 require_once(dirname(__FILE__).'/tcpdf_barcodes_1d_include.php');
 
 // set the barcode content and type
-$barcodeobj = new TCPDFBarcode('https://limepdf.com', 'C128');
+$barcodeobj = new TCPDFBarcode('http://www.tcpdf.org', 'C128');
 
 // output the barcode as SVG image
 $barcodeobj->getBarcodeSVG(2, 30, 'black');

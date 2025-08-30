@@ -83,7 +83,7 @@ $info = array(
 	'Name' => 'TCPDF',
 	'Location' => 'Office',
 	'Reason' => 'Testing TCPDF-Next',
-	'ContactInfo' => 'https://limepdf.com',
+	'ContactInfo' => 'http://www.tcpdf.org',
 	);
 
 // set document signature
@@ -96,7 +96,7 @@ $pdf->setFont('helvetica', '', 12);
 $pdf->AddPage();
 
 // print a line of text
-$text = 'Next This is a <b color="#FF0000">digitally signed document</b> using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />For more information check the source code of this example and the source code documentation for the <i>setSignature()</i> method.<br /><br /><a href="https://limepdf.com">www.tcpdf.org</a>';
+$text = 'Next This is a <b color="#FF0000">digitally signed document</b> using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />For more information check the source code of this example and the source code documentation for the <i>setSignature()</i> method.<br /><br /><a href="http://www.tcpdf.org">www.tcpdf.org</a>';
 $pdf->writeHTML($text, true, 0, true, 0);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

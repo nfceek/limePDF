@@ -73,9 +73,9 @@ $pdf->AddPage();
 
 // Set some content to print
 $html = <<<HTML
-<h1>Example of <a href="https://limepdf.com" style="text-decoration:none;background-color:#CC0000;color:black;">&nbsp;<span style="color:black;">TC</span><span style="color:white;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> PDF/A-3b </span> mode.</h1>
+<h1>Example of <a href="http://www.tcpdf.org" style="text-decoration:none;background-color:#CC0000;color:black;">&nbsp;<span style="color:black;">TC</span><span style="color:white;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> PDF/A-3b </span> mode.</h1>
 <i>This document conforms to the standard <b>Factur-X 1.07 / ZUGFeRD 2.3</b>.</i>
-<p>Please check the source code documentation and other examples for further information (<a href="https://limepdf.com">https://limepdf.com</a>).</p>
+<p>Please check the source code documentation and other examples for further information (<a href="http://www.tcpdf.org">http://www.tcpdf.org</a>).</p>
 HTML;
 
 $invoiceXml = <<<XML
