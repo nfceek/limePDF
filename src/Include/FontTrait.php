@@ -30,7 +30,7 @@ trait FontTrait {
 	 * @public static
 	 */
 	public static function addTTFfont($fontfile, $fonttype='', $enc='', $flags=32, $outpath='', $platid=3, $encid=1, $addcbbox=false, $link=false) {
-		if (!self::file_exists($fontfile)) {
+		if (!$this->file_exists($fontfile)) {
 			// Could not find file
 			return false;
 		}
@@ -55,7 +55,7 @@ trait FontTrait {
 			$outpath = self::_getfontpath();
 		}
 		// check if this font already exist
-		if (@self::file_exists($outpath.$font_name.'.php')) {
+		if (@$this->file_exists($outpath.$font_name.'.php')) {
 			// this font already exist (delete it from fonts folder to rebuild it)
 			return $font_name;
 		}
@@ -108,10 +108,10 @@ trait FontTrait {
 		$fmetric['enc'] = preg_replace('/[^A-Za-z0-9_\-]/', '', $enc);
 		$fmetric['diff'] = '';
 		if (($fmetric['type'] == 'TrueType') OR ($fmetric['type'] == 'Type1')) {
-			if (!empty($enc) AND ($enc != 'cp1252') AND isset(self::$encmap[$enc])) {
+			if (!empty($enc) AND ($enc != 'cp1252') AND isset($this->$encmap[$enc])) {
 				// build differences from reference encoding
-				$enc_ref = self::$encmap['cp1252'];
-				$enc_target = self::$encmap[$enc];
+				$enc_ref = $this->$encmap['cp1252'];
+				$enc_target = $this->$encmap[$enc];
 				$last = 0;
 				for ($i = 32; $i <= 255; ++$i) {
 					if ($enc_target[$i] != $enc_ref[$i]) {
@@ -146,7 +146,7 @@ trait FontTrait {
 			$data .= $encrypted;
 			// store compressed font
 			$fmetric['file'] .= '.z';
-			$fp = self::fopenLocal($outpath.$fmetric['file'], 'wb');
+			$fp = $this->fopenLocal($outpath.$fmetric['file'], 'wb');
 			fwrite($fp, gzcompress($data));
 			fclose($fp);
 			// get font info
@@ -235,8 +235,8 @@ trait FontTrait {
 			// get charstring data
 			$eplain = substr($eplain, (strpos($eplain, '/CharStrings') + 1));
 			preg_match_all('#/([A-Za-z0-9\.]*+)[\s][0-9]+[\s]RD[\s](.*)[\s]ND#sU', $eplain, $matches, PREG_SET_ORDER);
-			if (!empty($enc) AND isset(self::$encmap[$enc])) {
-				$enc_map = self::$encmap[$enc];
+			if (!empty($enc) AND isset($this->$encmap[$enc])) {
+				$enc_map = $this->$encmap[$enc];
 			} else {
 				$enc_map = false;
 			}
@@ -327,7 +327,7 @@ trait FontTrait {
 				} else {
 					// store compressed font
 					$fmetric['file'] .= '.z';
-					$fp = self::fopenLocal($outpath.$fmetric['file'], 'wb');
+					$fp = $this->fopenLocal($outpath.$fmetric['file'], 'wb');
 					fwrite($fp, gzcompress($font));
 					fclose($fp);
 				}
@@ -847,7 +847,7 @@ trait FontTrait {
 					$cidtogidmap = self::updateCIDtoGIDmap($cidtogidmap, $cid, $ctg[$cid]);
 				}
 				// store compressed CIDToGIDMap
-				$fp = self::fopenLocal($outpath.$fmetric['ctg'], 'wb');
+				$fp = $this->fopenLocal($outpath.$fmetric['ctg'], 'wb');
 				fwrite($fp, gzcompress($cidtogidmap));
 				fclose($fp);
 			}
@@ -873,7 +873,7 @@ trait FontTrait {
 		$pfile .= '$cw=array('.substr($fmetric['cw'], 1).');'."\n";
 		$pfile .= '// --- EOF ---'."\n";
 		// store file
-		$fp = self::fopenLocal($outpath.$font_name.'.php', 'w');
+		$fp = $this->fopenLocal($outpath.$font_name.'.php', 'w');
 		fwrite($fp, $pfile);
 		fclose($fp);
 		// return TCPDF font name
@@ -887,35 +887,24 @@ trait FontTrait {
 	 * @param string $style Font style.
 	 * @return bool true if the char is defined, false otherwise.
 	 * @public
-	 * 
-	 * 
-	 * 08-28-2025
-	 * Php 7 / Php 8.2 Compliant
+	 * @since 5.9.153 (2012-03-28)
 	 */
-	public function isCharDefined(string|int $char, string $font = '', string $style = ''): bool {
+	public function isCharDefined($char, $font='', $style='') {
 		if (is_string($char)) {
-			// get character code - ensure CurrentFont is initialized
-			if (self::$CurrentFont === null) {
-				throw new \RuntimeException('CurrentFont not initialized');
-			}
-			$charArray = self::UTF8StringToArray($char, self::$isunicode ?? false, self::$CurrentFont);
-			$char = $charArray[0] ?? 0;
+			// get character code
+			$char = $this->UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
+			$char = $char[0];
 		}
-		
-		if (self::empty_string($font)) {
-			if (self::empty_string($style)) {
-				// Null coalescing for safer array access
-				return isset(self::$CurrentFont['cw'][(int)$char]);
+		if ($this->empty_string($font)) {
+			if ($this->empty_string($style)) {
+				return (isset($this->CurrentFont['cw'][intval($char)]));
 			}
-			$font = self::$FontFamily ?? '';
+			$font = $this->FontFamily;
 		}
-		
-		$fontdata = self::AddFont($font, $style);
-		$fontinfo = self::getFontBuffer($fontdata['fontkey']);
-		
-		// Defensive programming for array access
-		return isset($fontinfo['cw'][(int)$char]);
-}
+		$fontdata = $this->AddFont($font, $style);
+		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
+		return (isset($fontinfo['cw'][intval($char)]));
+	}
 
 	/**
 	 * Replace missing font characters on selected font with specified substitutions.
@@ -931,12 +920,12 @@ trait FontTrait {
 		if (empty($subs)) {
 			return $text;
 		}
-		if (self::empty_string($font)) {
-			$font = self::FontFamily;
+		if ($this->empty_string($font)) {
+			$font = $this->FontFamily;
 		}
-		$fontdata = self::AddFont($font, $style);
-		$fontinfo = self::getFontBuffer($fontdata['fontkey']);
-		$uniarr = self::UTF8StringToArray($text, self::isunicode, self::CurrentFont);
+		$fontdata = $this->AddFont($font, $style);
+		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
+		$uniarr = $this->UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
 		foreach ($uniarr as $k => $chr) {
 			if (!isset($fontinfo['cw'][$chr])) {
 				// this character is missing on the selected font
@@ -955,7 +944,7 @@ trait FontTrait {
 				}
 			}
 		}
-		return self::UniArrSubString(self::UTF8ArrayToUniArray($uniarr, self::isunicode));
+		return $this->UniArrSubString($this->UTF8ArrayToUniArray($uniarr, $this->isunicode));
 	}
 
 
@@ -1586,11 +1575,11 @@ trait FontTrait {
 	// public static function getFontFullPath($file, $fontdir=false) {
 	// 	$fontfile = '';
 	// 	// search files on various directories
-	// 	if (($fontdir !== false) AND @self::file_exists($fontdir.$file)) {
+	// 	if (($fontdir !== false) AND @$this->file_exists($fontdir.$file)) {
 	// 		$fontfile = $fontdir.$file;
-	// 	} elseif (@self::file_exists(self::_getfontpath().$file)) {
+	// 	} elseif (@$this->file_exists(self::_getfontpath().$file)) {
 	// 		$fontfile = self::_getfontpath().$file;
-	// 	} elseif (@self::file_exists($file)) {
+	// 	} elseif (@$this->file_exists($file)) {
 	// 		$fontfile = $file;
 	// 	}
 	// 	return $fontfile;
@@ -1905,9 +1894,9 @@ trait FontTrait {
 		foreach ($unicode as $char) {
 			if ($char < 256) {
 				$outarr[] = $char;
-			} elseif (array_key_exists($char, self::$uni_utf8tolatin)) {
+			} elseif (array_key_exists($char, $this->$uni_utf8tolatin)) {
 				// map from UTF-8
-				$outarr[] = self::$uni_utf8tolatin[$char];
+				$outarr[] = $this->$uni_utf8tolatin[$char];
 			} elseif ($char == 0xFFFD) {
 				// skip
 			} else {
@@ -1930,9 +1919,9 @@ trait FontTrait {
 		foreach ($unicode as $char) {
 			if ($char < 256) {
 				$outstr .= chr($char);
-			} elseif (array_key_exists($char, self::$uni_utf8tolatin)) {
+			} elseif (array_key_exists($char, $this->$uni_utf8tolatin)) {
 				// map from UTF-8
-				$outstr .= chr(self::$uni_utf8tolatin[$char]);
+				$outstr .= chr($this->$uni_utf8tolatin[$char]);
 			} elseif ($char == 0xFFFD) {
 				// skip
 			} else {
@@ -2185,7 +2174,7 @@ trait FontTrait {
 			// P2. In each paragraph, find the first character of type L, AL, or R.
 			// P3. If a character is found in P2 and it is of type AL or R, then set the paragraph embedding level to one; otherwise, set it to zero.
 			for ($i=0; $i < $numchars; ++$i) {
-				$type = self::$uni_type[$ta[$i]];
+				$type = $this->$uni_type[$ta[$i]];
 				if ($type == 'L') {
 					$pel = 0;
 					break;
@@ -2211,62 +2200,62 @@ trait FontTrait {
 		// X1. Begin by setting the current embedding level to the paragraph embedding level. Set the directional override status to neutral. Process each character iteratively, applying rules X2 through X9. Only embedding levels from 0 to 61 are valid in this phase.
 		// In the resolution of levels in rules I1 and I2, the maximum embedding level of 62 can be reached.
 		for ($i=0; $i < $numchars; ++$i) {
-			if ($ta[$i] == self::$uni_RLE) {
+			if ($ta[$i] == $this->$uni_RLE) {
 				// X2. With each RLE, compute the least greater odd embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to neutral.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + ($cel % 2) + 1;
 				if ($next_level < 62) {
-					$remember[] = array('num' => self::$uni_RLE, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_RLE, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'N';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == self::$uni_LRE) {
+			} elseif ($ta[$i] == $this->$uni_LRE) {
 				// X3. With each LRE, compute the least greater even embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to neutral.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + 2 - ($cel % 2);
 				if ( $next_level < 62 ) {
-					$remember[] = array('num' => self::$uni_LRE, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_LRE, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'N';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == self::$uni_RLO) {
+			} elseif ($ta[$i] == $this->$uni_RLO) {
 				// X4. With each RLO, compute the least greater odd embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to right-to-left.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + ($cel % 2) + 1;
 				if ($next_level < 62) {
-					$remember[] = array('num' => self::$uni_RLO, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_RLO, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'R';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == self::$uni_LRO) {
+			} elseif ($ta[$i] == $this->$uni_LRO) {
 				// X5. With each LRO, compute the least greater even embedding level.
 				//	a. If this new level would be valid, then this embedding code is valid. Remember (push) the current embedding level and override status. Reset the current level to this new level, and reset the override status to left-to-right.
 				//	b. If the new level would not be valid, then this code is invalid. Do not change the current level or override status.
 				$next_level = $cel + 2 - ($cel % 2);
 				if ( $next_level < 62 ) {
-					$remember[] = array('num' => self::$uni_LRO, 'cel' => $cel, 'dos' => $dos);
+					$remember[] = array('num' => $this->$uni_LRO, 'cel' => $cel, 'dos' => $dos);
 					$cel = $next_level;
 					$dos = 'L';
 					$sor = $eor;
 					$eor = $cel % 2 ? 'R' : 'L';
 				}
-			} elseif ($ta[$i] == self::$uni_PDF) {
+			} elseif ($ta[$i] == $this->$uni_PDF) {
 				// X7. With each PDF, determine the matching embedding or override code. If there was a valid matching code, restore (pop) the last remembered (pushed) embedding level and directional override.
 				if (count($remember)) {
 					$last = count($remember ) - 1;
-					if (($remember[$last]['num'] == self::$uni_RLE) OR
-						($remember[$last]['num'] == self::$uni_LRE) OR
-						($remember[$last]['num'] == self::$uni_RLO) OR
-						($remember[$last]['num'] == self::$uni_LRO)) {
+					if (($remember[$last]['num'] == $this->$uni_RLE) OR
+						($remember[$last]['num'] == $this->$uni_LRE) OR
+						($remember[$last]['num'] == $this->$uni_RLO) OR
+						($remember[$last]['num'] == $this->$uni_LRO)) {
 						$match = array_pop($remember);
 						$cel = $match['cel'];
 						$dos = $match['dos'];
@@ -2274,19 +2263,19 @@ trait FontTrait {
 						$eor = ($cel > $match['cel'] ? $cel : $match['cel']) % 2 ? 'R' : 'L';
 					}
 				}
-			} elseif (($ta[$i] != self::$uni_RLE) AND
-							 ($ta[$i] != self::$uni_LRE) AND
-							 ($ta[$i] != self::$uni_RLO) AND
-							 ($ta[$i] != self::$uni_LRO) AND
-							 ($ta[$i] != self::$uni_PDF)) {
+			} elseif (($ta[$i] != $this->$uni_RLE) AND
+							 ($ta[$i] != $this->$uni_LRE) AND
+							 ($ta[$i] != $this->$uni_RLO) AND
+							 ($ta[$i] != $this->$uni_LRO) AND
+							 ($ta[$i] != $this->$uni_PDF)) {
 				// X6. For all types besides RLE, LRE, RLO, LRO, and PDF:
 				//	a. Set the level of the current character to the current embedding level.
 				//	b. Whenever the directional override status is not neutral, reset the current character type to the directional override status.
 				if ($dos != 'N') {
 					$chardir = $dos;
 				} else {
-					if (isset(self::$uni_type[$ta[$i]])) {
-						$chardir = self::$uni_type[$ta[$i]];
+					if (isset($this->$uni_type[$ta[$i]])) {
+						$chardir = $this->$uni_type[$ta[$i]];
 					} else {
 						$chardir = 'L';
 					}
@@ -2539,7 +2528,7 @@ trait FontTrait {
 			$charAL = array();
 			$x = 0;
 			for ($i=0; $i < $numchars; ++$i) {
-				if ((self::$uni_type[$chardata[$i]['char']] == 'AL') OR ($chardata[$i]['char'] == 32) OR ($chardata[$i]['char'] == 8204)) {
+				if (($this->$uni_type[$chardata[$i]['char']] == 'AL') OR ($chardata[$i]['char'] == 32) OR ($chardata[$i]['char'] == 8204)) {
 					$charAL[$x] = $chardata[$i];
 					$charAL[$x]['i'] = $i;
 					$chardata[$i]['x'] = $x;
@@ -2559,7 +2548,7 @@ trait FontTrait {
 				} else {
 					$nextchar = false;
 				}
-				if (self::$uni_type[$thischar['char']] == 'AL') {
+				if ($this->$uni_type[$thischar['char']] == 'AL') {
 					$x = $thischar['x'];
 					if ($x > 0) {
 						$prevchar = $charAL[($x-1)];
@@ -2573,7 +2562,7 @@ trait FontTrait {
 					}
 					// if laa letter
 					if (($prevchar !== false) AND ($prevchar['char'] == 1604) AND (in_array($thischar['char'], $alfletter))) {
-						$arabicarr = self::$uni_laa_array;
+						$arabicarr = $this->$uni_laa_array;
 						$laaletter = true;
 						if ($x > 1) {
 							$prevchar = $charAL[($x-2)];
@@ -2581,12 +2570,12 @@ trait FontTrait {
 							$prevchar = false;
 						}
 					} else {
-						$arabicarr = self::$uni_arabicsubst;
+						$arabicarr = $this->$uni_arabicsubst;
 						$laaletter = false;
 					}
 					if (($prevchar !== false) AND ($nextchar !== false) AND
-						((self::$uni_type[$prevchar['char']] == 'AL') OR (self::$uni_type[$prevchar['char']] == 'NSM')) AND
-						((self::$uni_type[$nextchar['char']] == 'AL') OR (self::$uni_type[$nextchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$prevchar['char']] == 'AL') OR ($this->$uni_type[$prevchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$nextchar['char']] == 'AL') OR ($this->$uni_type[$nextchar['char']] == 'NSM')) AND
 						($prevchar['type'] == $thischar['type']) AND
 						($nextchar['type'] == $thischar['type']) AND
 						($nextchar['char'] != 1567)) {
@@ -2602,7 +2591,7 @@ trait FontTrait {
 							}
 						}
 					} elseif (($nextchar !== false) AND
-						((self::$uni_type[$nextchar['char']] == 'AL') OR (self::$uni_type[$nextchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$nextchar['char']] == 'AL') OR ($this->$uni_type[$nextchar['char']] == 'NSM')) AND
 						($nextchar['type'] == $thischar['type']) AND
 						($nextchar['char'] != 1567)) {
 						if (isset($arabicarr[$chardata[$i]['char']][2])) {
@@ -2610,7 +2599,7 @@ trait FontTrait {
 							$chardata2[$i]['char'] = $arabicarr[$thischar['char']][2];
 						}
 					} elseif ((($prevchar !== false) AND
-						((self::$uni_type[$prevchar['char']] == 'AL') OR (self::$uni_type[$prevchar['char']] == 'NSM')) AND
+						(($this->$uni_type[$prevchar['char']] == 'AL') OR ($this->$uni_type[$prevchar['char']] == 'NSM')) AND
 						($prevchar['type'] == $thischar['type'])) OR
 						(($nextchar !== false) AND ($nextchar['char'] == 1567))) {
 						// final
@@ -2651,11 +2640,11 @@ trait FontTrait {
 			 * Putting the combining mark and shadda in the same glyph allows us to avoid the two marks overlapping each other in an illegible manner.
 			 */
 			for ($i = 0; $i < ($numchars-1); ++$i) {
-				if (($chardata2[$i]['char'] == 1617) AND (isset(self::$uni_diacritics[($chardata2[$i+1]['char'])]))) {
+				if (($chardata2[$i]['char'] == 1617) AND (isset($this->$uni_diacritics[($chardata2[$i+1]['char'])]))) {
 					// check if the subtitution font is defined on current font
-					if (isset($currentfont['cw'][(self::$uni_diacritics[($chardata2[$i+1]['char'])])])) {
+					if (isset($currentfont['cw'][($this->$uni_diacritics[($chardata2[$i+1]['char'])])])) {
 						$chardata2[$i]['char'] = false;
-						$chardata2[$i+1]['char'] = self::$uni_diacritics[($chardata2[$i+1]['char'])];
+						$chardata2[$i+1]['char'] = $this->$uni_diacritics[($chardata2[$i+1]['char'])];
 					}
 				}
 			}
@@ -2681,9 +2670,9 @@ trait FontTrait {
 			for ($i=0; $i < $numchars; ++$i) {
 				if ($chardata[$i]['level'] >= $j) {
 					$onlevel = true;
-					if (isset(self::$uni_mirror[$chardata[$i]['char']])) {
+					if (isset($this->$uni_mirror[$chardata[$i]['char']])) {
 						// L4. A character is depicted by a mirrored glyph if and only if (a) the resolved directionality of that character is R, and (b) the Bidi_Mirrored property value of that character is true.
-						$chardata[$i]['char'] = self::$uni_mirror[$chardata[$i]['char']];
+						$chardata[$i]['char'] = $this->$uni_mirror[$chardata[$i]['char']];
 					}
 					$revarr[] = $chardata[$i];
 				} else {

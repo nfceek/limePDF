@@ -92,7 +92,7 @@ trait WriteTrait{
     private function calculateCharacterMetrics(string $text, array $chars): array 
     {
         // Get a char width (dot character)
-        $chrwidth = self::GetCharWidth(46);
+        $chrwidth = $this->GetCharWidth(46);
         
         // Calculate maximum width for a single character
         $chrw = $this->GetArrStringWidth($chars, '', '', 0, true);
@@ -460,45 +460,35 @@ trait WriteTrait{
     
     /**
      * Handle overflow when no separator is found
-     * 
-     *  Php 7 / Php 8.2 Compliant
      */
     private function handleNoSeparatorOverflow(
         array $chars,
         array $uchars,
         int $i,
-        int $j,
+        int $j, 
         float $w,
         array $constraints,
         array $params
     ): array {
-        $margin = $params['margin'] ?? [];
-        
-        // Safely get chrwidth with fallback
-        $chrwidth = $constraints['chrwidth'] ?? 0.0;
+        $margin = $params['margin'];
         
         // Check if line was already started
         $lineStarted = $this->rtl 
-            ? ($this->x <= ($this->w - ($this->rMargin ?? 0) - ($this->cell_padding['R'] ?? 0) - ($margin['R'] ?? 0) - $chrwidth))
-            : ($this->x >= (($this->lMargin ?? 0) + ($this->cell_padding['L'] ?? 0) + ($margin['L'] ?? 0) + $chrwidth));
-        
-        $linebreak = false; // Initialize to avoid undefined variable
+            ? ($this->x <= ($this->w - $this->rMargin - $this->cell_padding['R'] - $margin['R'] - $constraints['chrwidth']))
+            : ($this->x >= ($this->lMargin + $this->cell_padding['L'] + $margin['L'] + $constraints['chrwidth']));
         
         if ($lineStarted) {
             // Print void cell and go to next line
-            $this->Cell($w, $params['h'] ?? 0, '', 0, 1);
+            $this->Cell($w, $params['h'], '', 0, 1);
             $linebreak = true;
             
-            if ($params['firstline'] ?? false) {
-                return [
-                    'return' => $this->UniArrSubString($uchars, $j),
-                    'state' => null
-                ];
+            if ($params['firstline']) {
+                return ['return' => $this->UniArrSubString($uchars, $j), 'state' => null];
             }
         } else {
             // Truncate the word
             $result = $this->renderTruncatedWord($chars, $uchars, $i, $j, $w, $constraints, $params);
-            if (($result['return'] ?? null) !== null) {
+            if ($result['return'] !== null) {
                 return $result;
             }
             $j = $i;
@@ -507,13 +497,13 @@ trait WriteTrait{
         
         $this->handlePageBreakMargins($margin);
         $newW = $this->getRemainingWidth();
-        $newWmax = $newW - ($this->cell_padding['L'] ?? 0) - ($this->cell_padding['R'] ?? 0);
+        $newWmax = $newW - $this->cell_padding['L'] - $this->cell_padding['R'];
         
         return [
             'return' => null,
-            'state' => [$i, $j, -1, false, $newW, $newWmax, $linebreak, 1, 0]
+            'state' => [$i, $j, -1, false, $newW, $newWmax, $linebreak ?? false, 1, 0]
         ];
-}
+    }
     
     /**
      * Handle word wrapping when separator is found

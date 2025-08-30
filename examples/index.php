@@ -93,7 +93,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <h2>Barcodes</h2>
 
 <ol>
-<li>1D barcode HTML format [<a href="barcodes/example_1d_html.php" title="1D barcode [HTML] [new window]" target="_blank">HTML</a>] -- fixed</li>
+<li>1D barcode HTML format [<a href="barcodes/example_1d_html.php" title="1D barcode [HTML] [new window]" target="_blank">HTML</a>]</li>
 <li>1D barcode PNG format [<a href="barcodes/example_1d_png.php" title="1D barcode [PNG] [new window]" target="_blank">PNG</a>]</li>
 <li>1D barcode SVG format [<a href="barcodes/example_1d_svg.php" title="1D barcode [SVG] [new window]" target="_blank">SVG</a>]</li>
 <li>1D barcode SVG INLINE format [<a href="barcodes/example_1d_svgi.php" title="1D barcode [SVGI] [new window]" target="_blank">SVG INLINE</a>]</li>
@@ -109,7 +109,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <li>2D pdf417 barcode SVG INLINE format [<a href="barcodes/example_2d_pdf417_svgi.php" title="2D pdf417 barcode [SVGI] [new window]" target="_blank">SVG INLINE</a>]</li>
 
 <li>2D qrcode barcode HTML format [<a href="barcodes/example_2d_qrcode_html.php" title="2D qrcode barcode [HTML] [new window]" target="_blank">HTML</a>]</li>
-<li>2D qrcode barcode PNG format [<a href="barcodes/example_2d_qrcode_png.php" title="2D qrcode barcode [PNG] [new window]" target="_blank">PNG</a>] -- fixed</li>
+<li>2D qrcode barcode PNG format [<a href="barcodes/example_2d_qrcode_png.php" title="2D qrcode barcode [PNG] [new window]" target="_blank">PNG</a>]</li>
 <li>2D qrcode barcode SVG format [<a href="barcodes/example_2d_qrcode_svg.php" title="2D qrcode barcode [SVG] [new window]" target="_blank">SVG</a>]</li>
 <li>2D qrcode barcode SVG INLINE format [<a href="barcodes/example_2d_qrcode_svgi.php" title="2D qrcode barcode [SVGI] [new window]" target="_blank">SVG INLINE</a>]</li>
 </ol>

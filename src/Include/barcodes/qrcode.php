@@ -79,8 +79,6 @@
  * @version 1.0.010
  */
 
-namespace LimePDF;
-
 // definitions
 if (!defined('QRCODEDEFS')) {
 
@@ -264,9 +262,6 @@ if (!defined('QRCODEDEFS')) {
  * @author Nicola Asuni
  * @version 1.0.010
  */
-
-
-
 class QRcode {
 
 	/**

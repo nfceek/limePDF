@@ -41,16 +41,13 @@
  */
 
 /**
- * @class BarCodes
+ * @class TCPDF2DBarcode
  * PHP class to creates array representations for 2D barcodes to be used with TCPDF (http://www.tcpdf.org).
  * @package com.tecnick.tcpdf
  * @version 1.0.015
  * @author Nicola Asuni
  */
-
-namespace LimePDF;
-
-class BarCodes2D {
+class TCPDF2DBarcode {
 
 	/**
 	 * Array representation of barcode.
@@ -295,7 +292,7 @@ class BarCodes2D {
 				break;
 			}
 			case 'QRCODE': { // QR-CODE
-				require_once(dirname(__FILE__).'/qrcode.php');
+				require_once(dirname(__FILE__).'/include/barcodes/qrcode.php');
 				if (!isset($mode[1]) OR (!in_array($mode[1],array('L','M','Q','H')))) {
 					$mode[1] = 'L'; // Ddefault: Low error correction
 				}

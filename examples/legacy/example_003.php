@@ -34,14 +34,14 @@ use LimePDF\Config\ConfigManager;
 	$pdfText = "LimePDF Example 003\n\n";
 	$pdfText .= "Custom page header and footer are defined by extending the PDF class\n\n and overriding the Header() and Footer() methods.";
 
-// 4) Edit the loadFromArray vars as needed	to customize the header
-    $config = new ConfigManager();
-    $config->loadFromArray([
-        'headerLogo'      => __DIR__ . '/../images/limePDF_logo.png',
-        'headerLogoType'  => 'PNG',	// PNG | JPG
-        'headerLogoWidth' => 20,
-        'headerTitle'     => 'LimePDF Example 003',
-    ]);
+// 4) Edit the loadFromArray vars as needed	
+$config = new ConfigManager();
+$config->loadFromArray([
+    'headerLogo'      => __DIR__ . '/../images/limePDF_logo.png',
+	'headerLogoType'  => 'PNG',	// PNG | JPG
+    'headerLogoWidth' => 20,
+    'headerTitle'     => 'LimePDF Example 003',
+]);
 
 // 5) Set the Header logo
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
@@ -50,7 +50,6 @@ use LimePDF\Config\ConfigManager;
     $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
 
 // ---------- Dont Edit below here ----------------------------------------------------------------------------
-
 $cfgArray = $config->toArray();
 $pdfConfig = [
     'author' => $cfgArray['author'],
@@ -130,7 +129,6 @@ class MyPdf extends Pdf
 }
 
 // -----------------------------------------------------------------------------
-
 $pdf = new MyPdf($config);
 
 // set document information
