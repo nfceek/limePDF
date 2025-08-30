@@ -166,8 +166,7 @@ $pdf->PrintChapter(2, 'LOREM IPSUM [HTML]', $PrintHtml, true);
 
 // ---------------------------------------------------------
 
-//Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE
