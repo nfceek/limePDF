@@ -4,8 +4,133 @@ namespace LimePDF\Graphics;
 
 use LimePDF\Include\ImageTrait;
 use LimePDF\Support\StaticTrait;
+use LimePDF\Include\ImageToolsTrait;
+
+
+
 
 trait ImageAddTrait {
+	use ImageToolsTrait;
+
+	/**
+     * Add an image into the PDF document.
+     *
+     * @param string $file
+     * @param float $x
+     * @param float $y
+     * @param float $w
+     * @param float $h
+     * @param string $type
+     * @param string|null $link
+     * @param bool $resize
+     * @param float|null $dpi
+     * @param string|null $align
+     * @param string|null $palign
+     * @param string|null $filehash
+     * @param bool $ismask
+     * @param bool $imgmask
+     * @return mixed
+     */
+    protected function _addImage(
+        string $file,
+        float $x,
+        float $y,
+        float $w = 0,
+        float $h = 0,
+        string $type = '',
+        ?string $link = null,
+        bool $resize = false,
+        ?float $dpi = null,
+        ?string $align = null,
+        ?string $palign = null,
+        ?string $filehash = null,
+        bool $ismask = false,
+        bool $imgmask = false
+    ) {
+        $newimage = true; // you may already have logic for this outside
+
+        if ($newimage) {
+            // --- Detect image type ---
+            $type = strtolower($type);
+            $imsize = [];
+
+            if ($type === '') {
+                $type = $this->getImageFileType($file, $imsize);
+                if ($type === false) {
+                    throw new \RuntimeException("Unsupported or invalid image file: {$file}");
+                }
+            } elseif ($type === 'jpg') {
+                $type = 'jpeg';
+                $imsize = @getimagesize($file) ?: [];
+            }
+
+            // --- Specific image parser (method inside LimePDF class) ---
+            $mtd = '_parse' . $type;
+
+            // --- GD handler function name ---
+            $gdfunction = 'imagecreatefrom' . $type;
+            $info = false;
+
+            // Use internal parser if it exists and resizing isn’t forced
+            if (
+                method_exists($this, $mtd) &&
+                !($resize && (function_exists($gdfunction) || extension_loaded('imagick')))
+            ) {
+                $info = $this->$mtd($file);
+
+                // PNG alpha channel handling
+                if (
+                    $ismask === false &&
+                    $imgmask === false &&
+                    strpos($file, '__limepdf_' . $this->file_id . '_imgmask_') === false &&
+                    (
+                        $info === 'pngalpha' ||
+                        (is_array($info) && isset($info['trns']) && !empty($info['trns']))
+                    )
+                ) {
+                    return $this->ImagePngAlpha(
+                        $file,
+                        $x,
+                        $y,
+                        $w,
+                        $h,
+                        $w,
+                        $h,
+                        'PNG',
+                        $link,
+                        $align,
+                        $resize,
+                        $dpi,
+                        $palign,
+                        $filehash
+                    );
+                }
+            }
+
+            // --- fallback if no info ---
+            if ($info === false) {
+                // try GD or Imagick if available
+                if (function_exists($gdfunction)) {
+                    $img = @$gdfunction($file);
+                    if (!$img) {
+                        throw new \RuntimeException("Unable to open image with GD: {$file}");
+                    }
+                    $info = $imsize;
+                    imagedestroy($img);
+                } elseif (extension_loaded('imagick')) {
+                    $img = new \Imagick($file);
+                    $info = [$img->getImageWidth(), $img->getImageHeight()];
+                    $img->destroy();
+                } else {
+                    throw new \RuntimeException("No image handler available for: {$file}");
+                }
+            }
+
+            return $info;
+        }
+
+        return false;
+    }
 
 	/**
 	 * Puts an image in the page.

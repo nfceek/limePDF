@@ -51,7 +51,7 @@ $config->loadFromArray([
     $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
 
 // 5) Set a Logo   
-    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
+    $pdfLogo = dirname(__DIR__) . '/examples/images/limePDF_logo.png'; //dirname(__DIR__) . '/images/limePDF_logo.png';
 
 // 6) Set the Text    
     $pdfText = '<h1>Example # 001</h1>';
