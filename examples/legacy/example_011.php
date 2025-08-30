@@ -1,28 +1,51 @@
-<?php 
+<?php
 //============================================================+
 // File name   : example_011.php
+// Begin       : 2008-03-04
+// Last Update : 2013-05-14
 //
-// Author: Brad Smith
-// (c) Copyright 2025, Brad Smith - LimePDF.com
+// Description : Example 011 for TCPDF class
+//               Colored Table (very simple table)
 //
-//  * Original TCPDF Copyright (c) 2002-2023:
-//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
+// Author: Nicola Asuni
 //
-//
-// Description : Colored Table (very simple table)
-//               
-//               
-//
-// Last Update : 8-29-2025
+// (c) Copyright:
+//               Nicola Asuni
+//               Tecnick.com LTD
+//               www.tecnick.com
+//               info@tecnick.com
 //============================================================+
 
-require_once __DIR__ . '/../../src/PDF.php';
+/**
+ * Creates an example PDF TEST document using TCPDF
+ * @package com.tecnick.tcpdf
+ * @abstract TCPDF - Example: Colored Table
+ * @author Nicola Asuni
+ * @since 2008-03-04
+ * @group table
+ * @group color
+ * @group pdf
+ */
+
+// ---------- ONLY EDIT THIS AREA --------------------------------
+
+// 1) load your table Data
+$PrintText = '../data/table_data_demo.txt';
+
+// 2) add Column Titles
+$ColumnTitles = ['Country', 'Capitals', 'Area (sq km)', 'Pop. (thousands)'];
+
+// 3) set Output File Name
+$OutputFile = 'example_011.pdf';
+
+
+// ---------- Dont Edit below here -----------------------------
+
+// Include the main TCPDF library (search for installation path).
+require_once __DIR__ . '/../../tcpdf.php';
 require_once '../../vendor/autoload.php'; 
 
-use LimePDF\Pdf;
-
-$pdf = new Pdf();
-
+use LimePDF\TCPDF;
 use LimePDF\Config\ConfigManager;
 
 // Instantiate and load ConfigManager
@@ -30,61 +53,8 @@ $config = new ConfigManager();
 $config->loadFromArray([
 ]);
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// 1) set Output File Name
-	$outputFile = 'example_011.pdf';
-
-// 2) set Output type ( I = In Browser & D = Download )
-	$outputType = 'I';
-
-// 3) Set the Header logo
-    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
-
-// 4) Set the doc Title 
-    $pdfTitle = 'limePDF Example 004';
-
-// 5) load your table Data
-	$PrintText = dirname(__DIR__) . '/data/table_data_demo.txt';
-
-// 6) add Column Titles
-	$ColumnTitles = ['Country', 'Capitals', 'Area (sq km)', 'Pop. (thousands)'];
-
-// ---------- Dont Edit below here -----------------------------
-
-$cfgArray = $config->toArray();
-$pdfConfig = [
-    'author' => $cfgArray['author'],
-    'creator' => $cfgArray['creator'],
-	'title' => $cfgArray['title'],
-    'font' => [
-        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
-        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
-        'mono' => $cfgArray['fontMonospaced'],
-    ],  
-	'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
-    'margins' => [
-        'header' => $cfgArray['marginHeader'],
-        'footer' => $cfgArray['marginFooter'],
-        'top'    => $cfgArray['marginTop'],
-        'bottom' => $cfgArray['marginBottom'],
-        'left'   => $cfgArray['marginLeft'],
-        'right'  => $cfgArray['marginRight'],
-    ],
-    'layout' => [
-        'pageFormat' => $cfgArray['pageFormat'],
-        'orientation' => $cfgArray['pageOrientation'],
-        'unit' => $cfgArray['unit'],
-        'imageScale' => $cfgArray['imageScaleRatio'],
-    ],
-    'meta' => [
-        'subject' => $cfgArray['subject'],
-        'keywords' => $cfgArray['keywords'],
-    ]
-];
-
-class MyPdf extends PDF {
+// extend TCPF with custom functions
+class MYPDF extends TCPDF {
 
 	// Load table data from file
 	public function LoadData($file) {
@@ -130,63 +100,36 @@ class MyPdf extends PDF {
 	}
 }
 
-
 // create new PDF document
-$pdf = new MyPdf($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
+$pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
-$pdf->setCreator( $pdfConfig['creator']);
-$pdf->setAuthor($pdfConfig['author']);
-$pdf->setTitle($pdfConfig['title']);
-$pdf->setSubject($pdfConfig['meta']['subject']);
-$pdf->setKeywords($pdfConfig['meta']['keywords']);
+$pdf->setCreator(PDF_CREATOR);
+$pdf->setAuthor('Nicola Asuni');
+$pdf->setTitle('TCPDF Example 011');
+$pdf->setSubject('TCPDF Tutorial');
+$pdf->setKeywords('TCPDF, PDF, example, test, guide');
 
-// remove default header/footer
-$pdf->setPrintHeader(true);
-$pdf->setPrintFooter(true);
-
-//set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
-$pdf->setHeaderData(
-	$imgHeader,
-	$pdfConfig['headerLogoWidth'],
-	$pdfTitle,
-	$pdfConfig['headerString'],
-	array(0,64,255),
-	array(0,64,128)
-);
+// set default header data
+$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 011', PDF_HEADER_STRING);
 
 // set header and footer fonts
-$pdf->setHeaderFont([
-	$pdfConfig['font']['main'][0],
-	'',
-	$pdfConfig['font']['main'][1]]
-);
-
-$pdf->setFooterFont([
-	$pdfConfig['font']['data'][0],
-	'',
-	$pdfConfig['font']['data'][1]]
-);
+$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
 // set default monospaced font
-$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
+$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 // set margins
-$pdf->setMargins(
-	$pdfConfig['margins']['left'], 
-	$pdfConfig['margins']['top'], 
-	$pdfConfig['margins']['right']
-);
-
-$pdf->setHeaderMargin($pdfConfig['margins']['header']);
-$pdf->setFooterMargin($pdfConfig['margins']['footer']);
+$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
+$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
 
 // set auto page breaks
-$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
+$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
 // set image scale factor
-$pdf->setImageScale($pdfConfig['layout']['imageScale']);
+$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
 // set some language-dependent strings (optional)
 if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
@@ -203,7 +146,7 @@ $pdf->setFont('helvetica', '', 12);
 $pdf->AddPage();
 
 // column titles
-$header = $ColumnTitles;
+$header = $ColumnTitles;;
 
 // data loading
 $data = $pdf->LoadData($PrintText);
@@ -214,7 +157,7 @@ $pdf->ColoredTable($header, $data);
 // ---------------------------------------------------------
 
 // close and output PDF document
-$pdf->Output($outputFile, $outputType);
+$pdf->Output('example_011.pdf', 'I');
 
 //============================================================+
 // END OF FILE
