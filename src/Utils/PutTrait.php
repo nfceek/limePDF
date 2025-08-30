@@ -552,9 +552,6 @@ trait PutTrait {
 			// embedded files are not allowed in PDF/A mode version 1 and 2
 			return;
 		}
-		// Add debug code to see what's available:
-		// error_log('Available embedded files: ' . print_r(array_keys($this->embeddedfiles ?? []), true));
-		// error_log('Looking for filename: ' . $filename);
 		reset($this->embeddedfiles);
 		foreach ($this->embeddedfiles as $filename => $filedata) {
 			$data = false;
