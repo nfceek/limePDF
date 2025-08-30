@@ -145,7 +145,7 @@ $pdf->Write(0, $txt, '', 0, 'L', true, 0, false, false, 0);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

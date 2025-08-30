@@ -413,7 +413,7 @@ $pdf->write1DBarcode('CODE 39 E+', 'C39E+', '', '', 120, 25, 0.4, $style, 'N');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_027.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

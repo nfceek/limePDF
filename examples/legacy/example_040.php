@@ -111,7 +111,7 @@ $pdf->Cell(0, 0, 'PAGE 4', 1, 1, 'C');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_040.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

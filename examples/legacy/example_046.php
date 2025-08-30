@@ -118,7 +118,7 @@ $pdf->writeHTMLCell(50, 0, '', '', $html, 1, 1, 0, true, 'J');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_046.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

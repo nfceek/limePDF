@@ -80,7 +80,7 @@ $pdf->MultiCell(0, 0, 'DISK CACHING TEST: check the parameters of the class cons
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_043.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

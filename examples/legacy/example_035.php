@@ -106,7 +106,7 @@ $pdf->MultiCell(60, 4, $text, 1, 'C', 1, 1);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_035.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

@@ -121,7 +121,7 @@ $pdf->Cell(0, 10, 'This is the fourth page of group 2', 0, 1, 'L');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

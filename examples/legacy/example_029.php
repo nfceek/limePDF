@@ -119,7 +119,7 @@ $pdf->Cell(0, 12, 'DISPLAY PREFERENCES - PAGE 3', 0, 0, 'C');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_029.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

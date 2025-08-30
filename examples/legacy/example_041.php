@@ -86,7 +86,7 @@ $pdf->Annotation(85, 27, 5, 5, 'text file', array('Subtype'=>'FileAttachment', '
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_041.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

@@ -86,7 +86,7 @@ $pdf->ImageEps('images/tcpdf_box.ai', 10, 40, 150, '', 'http://www.tcpdf.org', t
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_032.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

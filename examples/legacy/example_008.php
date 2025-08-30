@@ -108,7 +108,7 @@ $pdf->Write(5, $utf8text, '', 0, '', false, 0, false, false, 0);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

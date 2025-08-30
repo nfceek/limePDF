@@ -186,7 +186,7 @@ $pdf->endTOCPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_059.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

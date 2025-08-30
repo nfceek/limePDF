@@ -111,8 +111,7 @@ foreach($core_fonts as $font) {
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_055.pdf', 'D');
-
+$pdf->Output($outputFile, $outputType);
 //============================================================+
 // END OF FILE
 //============================================================+

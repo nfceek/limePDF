@@ -171,7 +171,7 @@ $pdf->MultiCell(0, 0, $txt, 0, 'J', false, 1, '', '', true, 0, false, true, 0, '
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_064.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

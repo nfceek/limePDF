@@ -142,7 +142,7 @@ $pdf->Text(73, $starty + 8, 'My TCPDF Yellow');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_037.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

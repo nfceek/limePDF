@@ -123,7 +123,7 @@ $pdf->copyPage(2);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_044.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

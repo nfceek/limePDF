@@ -97,7 +97,7 @@ $pdf->Image('images/img.png', 50, 140, 100, '', '', 'http://www.tcpdf.org', '', 
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_042.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

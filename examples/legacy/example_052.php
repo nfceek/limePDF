@@ -116,7 +116,7 @@ $pdf->addEmptySignatureAppearance(180, 80, 15, 15);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_052.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

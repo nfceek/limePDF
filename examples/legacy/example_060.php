@@ -103,7 +103,7 @@ $pdf->Cell(0, 12, 'Second Page', 1, 1, 'C');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_060.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

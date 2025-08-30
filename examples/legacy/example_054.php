@@ -124,7 +124,7 @@ $pdf->lastPage();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_054.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

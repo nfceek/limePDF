@@ -203,7 +203,7 @@ $pdf->IncludeJS($js);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

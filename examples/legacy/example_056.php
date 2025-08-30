@@ -128,7 +128,7 @@ $pdf->registrationMarkCMYK(150, 155, 8);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_056.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

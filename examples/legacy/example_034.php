@@ -91,7 +91,7 @@ $pdf->StopTransform();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_034.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

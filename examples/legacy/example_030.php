@@ -183,7 +183,7 @@ $pdf->Text(10, 250, 'CoonsPatchMesh()');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_030.pdf', 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

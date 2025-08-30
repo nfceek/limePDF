@@ -112,7 +112,7 @@ $pdf->commitTransaction();
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_047.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

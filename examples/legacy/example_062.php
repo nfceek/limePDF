@@ -135,7 +135,7 @@ $pdf->printTemplate($template_id, 95, 125, 80, 80, '', '', false);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_062.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

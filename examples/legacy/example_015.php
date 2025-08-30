@@ -173,7 +173,7 @@ $pdf->Bookmark('External URL', 0, 0, '', 'B', array(0,0,255), -1, 'http://www.tc
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output($OutputFile, 'D');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

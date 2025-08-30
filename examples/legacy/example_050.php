@@ -205,7 +205,7 @@ $pdf->Text(140, 205, 'QRCODE H - NO PADDING');
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_050.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

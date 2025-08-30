@@ -126,7 +126,7 @@ $pdf->setFontSpacing(0);
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_063.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE

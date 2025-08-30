@@ -100,7 +100,7 @@ $pdf->MultiCell(80, 0, "[CID-0 font] : Cras eros leo, porttitor porta, accumsan 
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_033.pdf', 'I');
+$pdf->Output($outputFile, $outputType);
 
 //============================================================+
 // END OF FILE
