@@ -1,89 +1,51 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_024.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
 //
-// Description : Example 024 for TCPDF class
-//               Object Visibility and Layers
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Object Visibility and Layers
+//               
+//
+// Last Update : 8-31-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Object Visibility and Layers
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group drawing
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_024.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Object Visibility and Layers';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// set Output File Name
-$OutputFile = 'example_024.pdf';
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// ---------- Dont Edit below here -----------------------------
+	//  Set text for cell(s)
+		$pdfText = 'You can limit the visibility of PDF objects to screen or printer by using the setVisibility() method.' .
+					'Check the print preview of this document to display the alternative text.';
 
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
-require_once '../../vendor/autoload.php'; 
+// ----- Dont Edit below here ---------------------------------------------------------
 
-use LimePDF\TCPDF;
-use LimePDF\Config\ConfigManager;
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
-
-
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 024');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
-
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 024', PDF_HEADER_STRING);
-
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
 
 // set font
 $pdf->setFont('times', '', 18);
@@ -98,10 +60,7 @@ $pdf->AddPage();
  * show on screen but won't print.
  */
 
-$txt = 'You can limit the visibility of PDF objects to screen or printer by using the setVisibility() method.
-Check the print preview of this document to display the alternative text.';
-
-$pdf->Write(0, $txt, '', 0, '', true, 0, false, false, 0);
+$pdf->Write(0, $pdfText, '', 0, '', true, 0, false, false, 0);
 
 // change font size
 $pdf->setFontSize(40);
