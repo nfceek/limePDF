@@ -1,72 +1,55 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_037.php
-// Begin       : 2008-09-12
-// Last Update : 2013-09-30
 //
-// Description : Example 037 for TCPDF class
-//               Spot colors
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original limePDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Spot colors
+//               
+//
+// Last Update : 8-31-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Spot colors.
- * @author Nicola Asuni
- * @since 2008-09-12
- * @group color
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_037.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Spot colors';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 037');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = '<h1>Example of Spot Colors</h1>Spot colors are single ink colors, rather than colors produced by four (CMYK), '.
+		'six (CMYKOG) or more inks in the printing process (process colors). They can be obtained by special vendors, but often '.
+		'the printers have found their own way of mixing inks to match defined colors.<br /><br />As long as no open standard '.
+		'for spot colours exists, limePDF users will have to buy a colour book by one of the colour manufacturers and insert the '.
+		'values and names of spot colours directly into the $spotcolor array in <b><em>include/limePDF_colors.php</em></b> file, '.
+		'or define them using the <b><em>AddSpotColor()</em></b> method.<br /><br />Common industry standard spot colors are: '.
+		'<br /><span color="#008800">ANPA-COLOR, DIC, FOCOLTONE, GCMI, HKS, PANTONE, TOYO, TRUMATCH</span>.';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 037', PDF_HEADER_STRING);
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set font
 $pdf->setFont('helvetica', '', 11);
@@ -74,11 +57,8 @@ $pdf->setFont('helvetica', '', 11);
 // add a page
 $pdf->AddPage();
 
-$html = '<h1>Example of Spot Colors</h1>Spot colors are single ink colors, rather than colors produced by four (CMYK), six (CMYKOG) or more inks in the printing process (process colors). They can be obtained by special vendors, but often the printers have found their own way of mixing inks to match defined colors.<br /><br />As long as no open standard for spot colours exists, TCPDF users will have to buy a colour book by one of the colour manufacturers and insert the values and names of spot colours directly into the $spotcolor array in <b><em>include/tcpdf_colors.php</em></b> file, or define them using the <b><em>AddSpotColor()</em></b> method.<br /><br />Common industry standard spot colors are:<br /><span color="#008800">ANPA-COLOR, DIC, FOCOLTONE, GCMI, HKS, PANTONE, TOYO, TRUMATCH</span>.';
-
 // Print text using writeHTMLCell()
-$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, 'J', true);
-
+$pdf->writeHTMLCell(0, 0, '', '', $pdfText, 0, 1, 0, true, 'J', true);
 
 $pdf->setFont('helvetica', '', 10);
 
@@ -86,13 +66,13 @@ $pdf->setFont('helvetica', '', 10);
 // $c, $m, $y and $k (2nd, 3rd, 4th and 5th parameter) are the CMYK color components.
 // AddSpotColor($name, $c, $m, $y, $k)
 
-$pdf->AddSpotColor('My TCPDF Dark Green', 100, 50, 80, 45);
-$pdf->AddSpotColor('My TCPDF Light Yellow', 0, 0, 55, 0);
-$pdf->AddSpotColor('My TCPDF Black', 0, 0, 0, 100);
-$pdf->AddSpotColor('My TCPDF Red', 30, 100, 90, 10);
-$pdf->AddSpotColor('My TCPDF Green', 100, 30, 100, 0);
-$pdf->AddSpotColor('My TCPDF Blue', 100, 60, 10, 5);
-$pdf->AddSpotColor('My TCPDF Yellow', 0, 20, 100, 0);
+$pdf->AddSpotColor('My limePDF Dark Green', 100, 50, 80, 45);
+$pdf->AddSpotColor('My limePDF Light Yellow', 0, 0, 55, 0);
+$pdf->AddSpotColor('My limePDF Black', 0, 0, 0, 100);
+$pdf->AddSpotColor('My limePDF Red', 30, 100, 90, 10);
+$pdf->AddSpotColor('My limePDF Green', 100, 30, 100, 0);
+$pdf->AddSpotColor('My limePDF Blue', 100, 60, 10, 5);
+$pdf->AddSpotColor('My limePDF Yellow', 0, 20, 100, 0);
 
 // Select the spot color
 // $tint (the second parameter) is the intensity of the color (0-100).
@@ -100,44 +80,44 @@ $pdf->AddSpotColor('My TCPDF Yellow', 0, 20, 100, 0);
 // setDrawSpotColor($name, $tint=100)
 // setFillSpotColor($name, $tint=100)
 
-$pdf->setTextSpotColor('My TCPDF Black', 100);
-$pdf->setDrawSpotColor('My TCPDF Black', 100);
+$pdf->setTextSpotColor('My limePDF Black', 100);
+$pdf->setDrawSpotColor('My limePDF Black', 100);
 
 $starty = 100;
 
 // print some spot colors
 
-$pdf->setFillSpotColor('My TCPDF Dark Green', 100);
+$pdf->setFillSpotColor('My limePDF Dark Green', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Dark Green');
+$pdf->Text(73, $starty + 8, 'My limePDF Dark Green');
 
 $starty += 24;
-$pdf->setFillSpotColor('My TCPDF Light Yellow', 100);
+$pdf->setFillSpotColor('My limePDF Light Yellow', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Light Yellow');
+$pdf->Text(73, $starty + 8, 'My limePDF Light Yellow');
 
 
 // --- default values defined on spotcolors.php ---
 
 $starty += 24;
-$pdf->setFillSpotColor('My TCPDF Red', 100);
+$pdf->setFillSpotColor('My limePDF Red', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Red');
+$pdf->Text(73, $starty + 8, 'My limePDF Red');
 
 $starty += 24;
-$pdf->setFillSpotColor('My TCPDF Green', 100);
+$pdf->setFillSpotColor('My limePDF Green', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Green');
+$pdf->Text(73, $starty + 8, 'My limePDF Green');
 
 $starty += 24;
-$pdf->setFillSpotColor('My TCPDF Blue', 100);
+$pdf->setFillSpotColor('My limePDF Blue', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Blue');
+$pdf->Text(73, $starty + 8, 'My limePDF Blue');
 
 $starty += 24;
-$pdf->setFillSpotColor('My TCPDF Yellow', 100);
+$pdf->setFillSpotColor('My limePDF Yellow', 100);
 $pdf->Rect(30, $starty, 40, 20, 'DF');
-$pdf->Text(73, $starty + 8, 'My TCPDF Yellow');
+$pdf->Text(73, $starty + 8, 'My limePDF Yellow');
 
 // ---------------------------------------------------------
 
