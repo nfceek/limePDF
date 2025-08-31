@@ -1,72 +1,53 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_042.php
-// Begin       : 2008-12-23
-// Last Update : 2013-05-14
 //
-// Description : Example 042 for TCPDF class
-//               Test Image with alpha channel
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Test Image with alpha channel
+//               
+//
+// Last Update : 8-31-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Test Image with alpha channel
- * @author Nicola Asuni
- * @since 2008-12-23
- * @group image
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_042.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Test Image with alpha channel';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 042');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = 'LimePDF test PNG Alpha Channel ';
+		$pdfImages1 = dirname(__DIR__, 2) . 'images/image_with_alpha.png';
+		$pdfImages2 = dirname(__DIR__, 2) . 'images/alpha.png';
+		$pdfImages3 = dirname(__DIR__, 2) . 'images/img.png';
+		$pdfHook = 'https://www.limepdf.com';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 042', PDF_HEADER_STRING);
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set JPEG quality
 //$pdf->setJPEGQuality(75);
@@ -77,22 +58,22 @@ $pdf->setFont('helvetica', '', 18);
 $pdf->AddPage();
 
 // create background text
-$background_text = str_repeat('TCPDF test PNG Alpha Channel ', 50);
+$background_text = str_repeat($pdfText, 50);
 $pdf->MultiCell(0, 5, $background_text, 0, 'J', 0, 2, '', '', true, 0, false);
 
 // --- Method (A) ------------------------------------------
 // the Image() method recognizes the alpha channel embedded on the image:
 
-$pdf->Image('images/image_with_alpha.png', 50, 50, 100, '', '', 'http://www.tcpdf.org', '', false, 300);
+$pdf->Image($pdfImages1, 50, 50, 100, '', '', $pdfHook, '', false, 300);
 
 // --- Method (B) ------------------------------------------
 // provide image + separate 8-bit mask
 
 // first embed mask image (w, h, x and y will be ignored, the image will be scaled to the target image's size)
-$mask = $pdf->Image('images/alpha.png', 50, 140, 100, '', '', '', '', false, 300, '', true);
+$mask = $pdf->Image($pdfImages2, 50, 140, 100, '', '', '', '', false, 300, '', true);
 
 // embed image, masked with previously embedded mask
-$pdf->Image('images/img.png', 50, 140, 100, '', '', 'http://www.tcpdf.org', '', false, 300, '', false, $mask);
+$pdf->Image($pdfImages1, 50, 140, 100, '', '', $pdfHook, '', false, 300, '', false, $mask);
 
 // ---------------------------------------------------------
 
