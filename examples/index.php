@@ -22,7 +22,7 @@ echo '<'.'?'.'xml version="1.0" encoding="UTF-8"'.'?'.'>';
 <ol>
 <li>Simple PDF with default Header and Footer: [<a href="legacy/example_001.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Simple PDF without Header and Footer: [<a href="legacy/example_002.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
-<li>Custom Header and Footer: [<a href="legacy/example_003.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
+<li>Custom Header and Footer: [<a href="legacy/example_003.php" title="PDF [new window]" target="_blank">PDF</a>] --fix</li>
 <li>Cell stretching: [<a href="legacy/example_004.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>Multicell: [<a href="legacy/example_005.php" title="PDF [new window]" target="_blank">PDF</a>]</li>
 <li>WriteHTML and RTL support: [<a href="legacy/example_006.php" title="PDF [new window]" target="_blank">PDF</a>]</li>

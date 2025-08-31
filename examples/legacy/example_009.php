@@ -1,6 +1,6 @@
 <?php 
 //============================================================+
-// File name   : example_006.php
+// File name   : example_009.php
 //
 // Author: Brad Smith
 // (c) Copyright 2025, Brad Smith - LimePDF.com
@@ -11,69 +11,43 @@
 //
 // Description : Test Image
 //               
-//               
 //
-// Last Update : 8-27-2025
+// Last Update : 8-31-2025
 //============================================================+
 
-require_once __DIR__ . '/../../src/PDF.php';
-require_once '../../vendor/autoload.php'; 
+use LimePDF\Config\PdfBootstrap;
 
 use LimePDF\Pdf;
 
 $pdf = new Pdf();
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-use LimePDF\Config\ConfigManager;
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_009.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Test Image';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
+    //  Set an image
+        $pdfImage = dirname(__DIR__) . '/images/image_demo.jpg';
 
-// 1) set Output File Name
-	$outputFile = 'example_006.pdf';
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// 2) set Output type ( I = In Browser & D = Download )
-	$outputType = 'I';
-
-// 3) Set an image
-    $pdfImage = dirname(__DIR__) . '/images/image_demo.jpg';
-
-// ---------- Dont Edit below here ----------------------------------------------------------------------------
-
-$cfgArray = $config->toArray();
-$pdfConfig = [
-    'author' => $cfgArray['author'],
-    'creator' => $cfgArray['creator'],
-	'title' => $cfgArray['title'],
-    'font' => [
-        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
-        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
-        'mono' => $cfgArray['fontMonospaced'],
-    ],  
-	'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
-    'margins' => [
-        'header' => $cfgArray['marginHeader'],
-        'footer' => $cfgArray['marginFooter'],
-        'top'    => $cfgArray['marginTop'],
-        'bottom' => $cfgArray['marginBottom'],
-        'left'   => $cfgArray['marginLeft'],
-        'right'  => $cfgArray['marginRight'],
-    ],
-    'layout' => [
-        'pageFormat' => $cfgArray['pageFormat'],
-        'orientation' => $cfgArray['pageOrientation'],
-        'unit' => $cfgArray['unit'],
-        'imageScale' => $cfgArray['imageScaleRatio'],
-    ],
-    'meta' => [
-        'subject' => $cfgArray['subject'],
-        'keywords' => $cfgArray['keywords'],
-    ]
-];
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 class MyPdf extends Pdf
 {

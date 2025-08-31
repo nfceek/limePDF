@@ -1,4 +1,4 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_004.php
 //
@@ -12,7 +12,7 @@
 // Description : Cell stretching
 //               
 //
-// Last Update : 8-30-2025
+// Last Update : 8-31-2025
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;
