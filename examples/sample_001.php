@@ -49,7 +49,7 @@ $config->loadFromArray([
 
 // 5) Set the Text    
     $pdfText = '<h2>Sample # 001</h2>';
-    $pdfText .= '<h1>Welcome to <a href="http://www.limePDF.org" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
+    $pdfText .= '<h1>Welcome to <a href="http://www.limePDF.com" style="text-decoration:none;"><span style=";color:#527201">lime</span>';
     $pdfText .= '<span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Sample file for the limePDF library.</i>';
     $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
     $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';

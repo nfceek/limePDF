@@ -12,42 +12,37 @@
 // Description : Cell stretching
 //               
 //
-// Last Update : 8-27-2025
+// Last Update : 8-30-2025
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;
 require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_004.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Cell stretching';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-//--Do Not Edit Above - make changes in ConfigManager ----------------------
+// ----- Form Specific Parameters-------------------------------------------------------
 
-//  Set File name
-    $outputFile = 'Example_004.pdf';
+	//  Set text for cell(s)
+		$pdfText = 'TEST CELL STRETCH:';
 
-//  Set Output type ( I = In Browser & D = Download )
-    $outputType = 'I';
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// Header output ( true / false)
-	$outputHeader = true;
-
-//  Set the header Title 
-	$pdfHeader = $outputFile;
-
-// Set the sub Title
-	$pdfSubHeader = 'Cell stretching';
-
-//  Set the Header logo
-	$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
-
-//  Set Footer output
-	$outputFooter = true;
-
-//  Set text for cell(s)
-	$pdfText = 'TEST CELL STRETCH:';
-
-// ---------- Dont Edit below here ---------------------------------------
-
-// filename + type
+// send form parameters 
 $pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set font
