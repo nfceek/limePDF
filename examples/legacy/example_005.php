@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : example_004.php
+// File name   : example_005.php
 //
 // Author: Brad Smith
 // (c) Copyright 2025, Brad Smith - LimePDF.com
@@ -12,32 +12,27 @@
 // Description : Multicell
 //               
 //
-// Last Update : 8-27-2025
-//============================================================+
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_005.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Multicell';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-require_once __DIR__ . '/../../src/PDF.php';
-require_once '../../vendor/autoload.php'; 
-
-use LimePDF\Pdf;
-
-$pdf = new Pdf();
-
-use LimePDF\Config\ConfigManager;
-
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
-
-
-// ---------- ONLY EDIT THIS AREA --------------------------------
-
-// 1) set Output File Name
-	$outputFile = 'example_004.pdf';
-
-// 2) set Output type ( I = In Browser & D = Download )
-	$outputType = 'I';
+// ----- Form Specific Parameters-------------------------------------------------------
 
 // 3) set text for cell(s)
 	$pdfText1 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
@@ -47,114 +42,10 @@ $config->loadFromArray([
 	$pdfText2 .= '\n';
 	$pdfText3 = '"CUSTOM PADDING:\nLeft=2, Top=4, Right=6, Bottom=8\nLorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue.\n";';
 
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// 4) Set the doc Title 
-    $pdfTitle = 'limePDF Example 005';
-
-// 5) Set the Header logo
-    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
-
-// 6) Set a Logo   
-    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
-
-// ---------- Dont Edit below here -----------------------------
-
-$cfgArray = $config->toArray();
-$pdfConfig = [
-    'author' => $cfgArray['author'],
-    'creator' => $cfgArray['creator'],
-	'title' => $cfgArray['title'],
-    'font' => [
-        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
-        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
-        'mono' => $cfgArray['fontMonospaced'],
-    ],  
-	'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
-    'margins' => [
-        'header' => $cfgArray['marginHeader'],
-        'footer' => $cfgArray['marginFooter'],
-        'top'    => $cfgArray['marginTop'],
-        'bottom' => $cfgArray['marginBottom'],
-        'left'   => $cfgArray['marginLeft'],
-        'right'  => $cfgArray['marginRight'],
-    ],
-    'layout' => [
-        'pageFormat' => $cfgArray['pageFormat'],
-        'orientation' => $cfgArray['pageOrientation'],
-        'unit' => $cfgArray['unit'],
-        'imageScale' => $cfgArray['imageScaleRatio'],
-    ],
-    'meta' => [
-        'subject' => $cfgArray['subject'],
-        'keywords' => $cfgArray['keywords'],
-    ]
-];
-
-// create new PDF document
-$pdf = new PDF($pdfConfig['layout']['orientation'], $pdfConfig['layout']['unit'], $pdfConfig['layout']['pageFormat'], true, 'UTF-8', false);
-
-// set document information
-$pdf->setCreator( $pdfConfig['creator']);
-$pdf->setAuthor($pdfConfig['author']);
-$pdf->setTitle($pdfConfig['title']);
-$pdf->setSubject($pdfConfig['meta']['subject']);
-$pdf->setKeywords($pdfConfig['meta']['keywords']);
-
-// remove default header/footer
-$pdf->setPrintHeader(true);
-$pdf->setPrintFooter(true);
-
-// set default header data
-//$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 004', PDF_HEADER_STRING);
-$pdf->setHeaderData(
-	$imgHeader,
-	$pdfConfig['headerLogoWidth'],
-	$pdfTitle,
-	$pdfConfig['headerString'],
-	array(0,64,255),
-	array(0,64,128)
-);
-
-// set header and footer fonts
-$pdf->setHeaderFont([
-	$pdfConfig['font']['main'][0],
-	'',
-	$pdfConfig['font']['main'][1]]
-);
-
-$pdf->setFooterFont([
-	$pdfConfig['font']['data'][0],
-	'',
-	$pdfConfig['font']['data'][1]]
-);
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont($pdfConfig['font']['mono']);
-
-// set margins
-$pdf->setMargins(
-	$pdfConfig['margins']['left'], 
-	$pdfConfig['margins']['top'], 
-	$pdfConfig['margins']['right']
-);
-
-$pdf->setHeaderMargin($pdfConfig['margins']['header']);
-$pdf->setFooterMargin($pdfConfig['margins']['footer']);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, $pdfConfig['margins']['bottom']);
-
-// set image scale factor
-$pdf->setImageScale($pdfConfig['layout']['imageScale']);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set font
 $pdf->setFont('times', '', 10);

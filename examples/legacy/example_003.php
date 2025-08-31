@@ -12,75 +12,42 @@
 // Description : Custom page header and footer
 //               
 //
-// Last Update : 8-26-2025
+// Last Update : 8-30-2025
 //============================================================+
 
-declare(strict_types=1);
-
-require_once __DIR__ . '/../../vendor/autoload.php';
-
+use LimePDF\Config\PdfBootstrap;
 use LimePDF\Pdf;
-use LimePDF\Config\ConfigManager;
 
-//-------- do not edit above (make changes in ConfigManager file) ------------------------------------------------
+$pdf = new Pdf();
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// 1) set Output File Name
-	$outputFile = 'example_003.pdf';
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_002.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = false;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Custom page header and footer';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = false;
+//--------------------------------------------------------------------------------------
 
-// 2) set Output type ( I = In Browser & D = Download )
-	$outputType = 'I';
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// 3) set Text
+//  Set Text
 	$pdfText = "LimePDF Example 003\n\n";
 	$pdfText .= "Custom page header and footer are defined by extending the PDF class\n\n and overriding the Header() and Footer() methods.";
 
-// 4) Edit the loadFromArray vars as needed	
-$config = new ConfigManager();
-$config->loadFromArray([
-    'headerLogo'      => __DIR__ . '/../images/limePDF_logo.png',
-	'headerLogoType'  => 'PNG',	// PNG | JPG
-    'headerLogoWidth' => 20,
-    'headerTitle'     => 'LimePDF Example 003',
-]);
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// 5) Set the Header logo
-    $imgHeader = dirname(__DIR__) . '/images/limePDF_logo.png';
-
-// 6) Set a Logo   
-    $pdfLogo = dirname(__DIR__) . '/images/limePDF_logo.png';
-
-// ---------- Dont Edit below here ----------------------------------------------------------------------------
-$cfgArray = $config->toArray();
-$pdfConfig = [
-    'author' => $cfgArray['author'],
-    'creator' => $cfgArray['creator'],
-	'title' => $cfgArray['title'],
-    'font' => [
-        'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
-        'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
-        'mono' => $cfgArray['fontMonospaced'],
-    ],  
-	'headerString' => $cfgArray['headerString'],
-    'headerLogoWidth' => $cfgArray['headerLogoWidth'],  
-    'margins' => [
-        'header' => $cfgArray['marginHeader'],
-        'footer' => $cfgArray['marginFooter'],
-        'top'    => $cfgArray['marginTop'],
-        'bottom' => $cfgArray['marginBottom'],
-        'left'   => $cfgArray['marginLeft'],
-        'right'  => $cfgArray['marginRight'],
-    ],
-    'layout' => [
-        'pageFormat' => $cfgArray['pageFormat'],
-        'orientation' => $cfgArray['pageOrientation'],
-        'unit' => $cfgArray['unit'],
-        'imageScale' => $cfgArray['imageScaleRatio'],
-    ],
-    'meta' => [
-        'subject' => $cfgArray['subject'],
-        'keywords' => $cfgArray['keywords'],
-    ]
-];
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 class MyPdf extends Pdf
 {

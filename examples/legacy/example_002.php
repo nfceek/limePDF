@@ -12,28 +12,39 @@
 // Description : Default page header and footer are disabled
 //               
 //
-// Last Update : 8-26-2025
+// Last Update : 8-30-2025
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;
 require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-//--Do Not Edit Above - make changes in ConfigManager or Bootstrap file) --
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_002.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = false;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Default page header and footer are disabled';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = false;
+//--------------------------------------------------------------------------------------
 
-// 1) What is the File name to create:
-    $outputFile = 'example_001.pdf';
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// 2) set Output type ( I = In Browser & D = Download )
-    $outputType = 'I';
-
-// 3) set Text
+// Set Text
 	$pdfText = "LimePDF Example 002\n\n";
 	$pdfText .= "Default page header and footer are disabled using\nsetPrintHeader()\nand\nsetPrintFooter()\nmethods.";
 
-// ---------- Dont Edit below here ---------------------------------------
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// filename + type
-$pdf = PdfBootstrap::create($outputFile, $outputType ); 
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set font
 $pdf->setFont('times', 'BI', 20);
