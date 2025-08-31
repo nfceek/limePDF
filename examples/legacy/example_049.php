@@ -1,72 +1,53 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_049.php
-// Begin       : 2009-04-03
-// Last Update : 2024-03-18
 //
-// Description : Example 049 for TCPDF class
-//               WriteHTML with TCPDF callback functions
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original LimePDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : WriteHTML with LimePDF callback functions
+//               
+//
+// Last Update : 8-31-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: WriteHTML with TCPDF callback functions
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group html
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_049.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'WriteHTML with LimePDF callback functions';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 049');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = '<h1>Test LimePDF Methods in HTML</h1><h2 style="color:red;">IMPORTANT:</h2>
+		<span style="color:red;">If you are using user-generated content, the limepdf tag should be considered unsafe.<br />
+		Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.<br />
+		This feature is disabled by default by the <b>K_LimePDF_CALLS_IN_HTML</b> constant on LimePDF configuration file.</span>
+		<h2>write1DBarcode method in HTML</h2>';
+		
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 049', PDF_HEADER_STRING);
-
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // set font
 $pdf->setFont('helvetica', '', 10);
@@ -78,40 +59,35 @@ $pdf->AddPage();
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 IMPORTANT:
-If you are printing user-generated content, the tcpdf tag should be considered unsafe.
-This tag is disabled by default by the K_TCPDF_CALLS_IN_HTML constant on TCPDF configuration file.
+If you are printing user-generated content, the limepdf tag should be considered unsafe.
+This tag is disabled by default by the K_LimePDF_CALLS_IN_HTML constant on LimePDF configuration file.
 Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.
 
-For security reasons, the content of the TCPDF tag must be prepared and encoded with the serializeTCPDFtag() method (see the example below).
+For security reasons, the content of the LimePDF tag must be prepared and encoded with the serializeLimePDFtag() method (see the example below).
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-$html = '<h1>Test TCPDF Methods in HTML</h1>
-<h2 style="color:red;">IMPORTANT:</h2>
-<span style="color:red;">If you are using user-generated content, the tcpdf tag should be considered unsafe.<br />
-Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.<br />
-This feature is disabled by default by the <b>K_TCPDF_CALLS_IN_HTML</b> constant on TCPDF configuration file.</span>
-<h2>write1DBarcode method in HTML</h2>';
 
-$data = $pdf->serializeTCPDFtag('write1DBarcode', array('CODE 39', 'C39', '', '', 80, 30, 0.4, array('position'=>'S', 'border'=>true, 'padding'=>4, 'fgcolor'=>array(0,0,0), 'bgcolor'=>array(255,255,255), 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
-$html .= '<tcpdf data="'.$data.'" />';
 
-$data = $pdf->serializeTCPDFtag('write1DBarcode', array('CODE 128', 'C128', '', '', 80, 30, 0.4, array('position'=>'S', 'border'=>true, 'padding'=>4, 'fgcolor'=>array(0,0,0), 'bgcolor'=>array(255,255,255), 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
-$html .= '<tcpdf data="'.$data.'" />';
+$data = $pdf->serializeLimePDFtag('write1DBarcode', array('CODE 39', 'C39', '', '', 80, 30, 0.4, array('position'=>'S', 'border'=>true, 'padding'=>4, 'fgcolor'=>array(0,0,0), 'bgcolor'=>array(255,255,255), 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
+$pdfText .= '<limepdf data="'.$data.'" />';
 
-$data = $pdf->serializeTCPDFtag('AddPage');
-$html .= '<tcpdf data="'.$data.'" /><h2>Graphic Functions</h2>';
+$data = $pdf->serializeLimePDFtag('write1DBarcode', array('CODE 128', 'C128', '', '', 80, 30, 0.4, array('position'=>'S', 'border'=>true, 'padding'=>4, 'fgcolor'=>array(0,0,0), 'bgcolor'=>array(255,255,255), 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
+$pdfText .= '<limepdf data="'.$data.'" />';
 
-$data = $pdf->serializeTCPDFtag('SetDrawColor', array(0));
-$html .= '<tcpdf data="'.$data.'" />';
+$data = $pdf->serializeLimePDFtag('AddPage');
+$pdfText .= '<limepdf data="'.$data.'" /><h2>Graphic Functions</h2>';
 
-$data = $pdf->serializeTCPDFtag('Rect', array(50, 50, 40, 10, 'DF', array(), array(0,128,255)));
-$html .= '<tcpdf data="'.$data.'" />';
+$data = $pdf->serializeLimePDFtag('SetDrawColor', array(0));
+$pdfText .= '<limepdf data="'.$data.'" />';
+
+$data = $pdf->serializeLimePDFtag('Rect', array(50, 50, 40, 10, 'DF', array(), array(0,128,255)));
+$pdfText .= '<limepdf data="'.$data.'" />';
 
 
 // output the HTML content
-$pdf->writeHTML($html, true, 0, true, 0);
+$pdf->writeHTML($pdfText, true, 0, true, 0);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
