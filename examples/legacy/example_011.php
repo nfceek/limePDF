@@ -1,107 +1,54 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_011.php
-// Begin       : 2008-03-04
-// Last Update : 2013-05-14
 //
-// Description : Example 011 for TCPDF class
-//               Colored Table (very simple table)
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Colored Table (very simple table)
+//               
+//
+// Last Update : 8-31-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Colored Table
- * @author Nicola Asuni
- * @since 2008-03-04
- * @group table
- * @group color
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// ---------- ONLY EDIT THIS AREA --------------------------------
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_011.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Colored Table (very simple table)';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// 1) load your table Data
-$PrintText = '../data/table_data_demo.txt';
+// ----- Form Specific Parameters-------------------------------------------------------
+	//  Load your table Data
+		$PrintText = '../data/table_data_demo.txt';
 
-// 2) add Column Titles
-$ColumnTitles = ['Country', 'Capitals', 'Area (sq km)', 'Pop. (thousands)'];
+	//  Add Column Titles
+		$ColumnTitles = ['Country', 'Capitals', 'Area (sq km)', 'Pop. (thousands)'];
 
-// 3) set Output File Name
-$OutputFile = 'example_011.pdf';
+// ----- Dont Edit below here ---------------------------------------------------------
 
-
-// ---------- Dont Edit below here -----------------------------
-
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
-require_once '../../vendor/autoload.php'; 
-
-use LimePDF\TCPDF;
-use LimePDF\Config\ConfigManager;
-
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
-
-// extend TCPF with custom functions
-class MYPDF extends TCPDF {
-
-	// Load table data from file
-	public function LoadData($file) {
-		// Read file lines
-		$lines = file($file);
-		$data = array();
-		foreach($lines as $line) {
-			$data[] = explode(';', chop($line));
-		}
-		return $data;
-	}
-
-	// Colored table
-	public function ColoredTable($header,$data) {
-		// Colors, line width and bold font
-		$this->setFillColor(255, 0, 0);
-		$this->setTextColor(255);
-		$this->setDrawColor(128, 0, 0);
-		$this->setLineWidth(0.3);
-		$this->setFont('', 'B');
-		// Header
-		$w = array(40, 35, 40, 45);
-		$num_headers = count($header);
-		for($i = 0; $i < $num_headers; ++$i) {
-			$this->Cell($w[$i], 7, $header[$i], 1, 0, 'C', 1);
-		}
-		$this->Ln();
-		// Color and font restoration
-		$this->setFillColor(224, 235, 255);
-		$this->setTextColor(0);
-		$this->setFont('');
-		// Data
-		$fill = 0;
-		foreach($data as $row) {
-			$this->Cell($w[0], 6, $row[0], 'LR', 0, 'L', $fill);
-			$this->Cell($w[1], 6, $row[1], 'LR', 0, 'L', $fill);
-			$this->Cell($w[2], 6, number_format($row[2]), 'LR', 0, 'R', $fill);
-			$this->Cell($w[3], 6, number_format($row[3]), 'LR', 0, 'R', $fill);
-			$this->Ln();
-			$fill=!$fill;
-		}
-		$this->Cell(array_sum($w), 0, '', 'T');
-	}
-}
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // create new PDF document
-$pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+//$pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
 $pdf->setCreator(PDF_CREATOR);
