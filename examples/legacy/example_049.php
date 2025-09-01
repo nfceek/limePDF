@@ -12,7 +12,7 @@
 // Description : WriteHTML with LimePDF callback functions
 //               
 //
-// Last Update : 8-31-2025
+// Last Update : 9-1-2025
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;
@@ -66,8 +66,6 @@ Please use this feature only if you are in control of the HTML content and you a
 For security reasons, the content of the LimePDF tag must be prepared and encoded with the serializeLimePDFtag() method (see the example below).
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
 
 
 $data = $pdf->serializeLimePDFtag('write1DBarcode', array('CODE 39', 'C39', '', '', 80, 30, 0.4, array('position'=>'S', 'border'=>true, 'padding'=>4, 'fgcolor'=>array(0,0,0), 'bgcolor'=>array(255,255,255), 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));

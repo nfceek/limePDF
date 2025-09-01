@@ -1,72 +1,68 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_052.php
-// Begin       : 2009-05-07
-// Last Update : 2013-05-14
 //
-// Description : Example 052 for TCPDF class
-//               Certification Signature (experimental)
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original LimePDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Certification Signature (experimental)
+//               
+//
+// Last Update : 9-1-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Certification Signature (experimental)
- * @author Nicola Asuni
- * @since 2009-05-07
- * @group security
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_052.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'WCertification Signature (experimental)';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 052-Next');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = 'Next This is a <b color="#FF0000">digitally signed document</b> 
+		using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this 
+		signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat 
+		Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />
+		For more information check the source code of this example and the source code 
+		documentation for the <i>setSignature()</i> method.<br /><br />
+		<a href="https://limePDF.com">limePDF.com</a>';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 052', PDF_HEADER_STRING);
+		
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+	// send form parameters 
+	$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+	$pdfImage = dirname(__DIR__, 2) . '/examples/images/limepdf_signature.png';
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+// set font
+$pdf->setFont('helvetica', '', 10);
 
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
+// add a page
+$pdf->AddPage();
 
 /*
 NOTES:
@@ -76,18 +72,18 @@ NOTES:
 */
 
 // set certificate file
-$certificate = 'file://data/cert/tcpdf.crt';
+$certificate = 'file://data/cert/limepdf.crt';
 
 // set additional information
 $info = array(
-	'Name' => 'TCPDF',
+	'Name' => 'LIMEPDF',
 	'Location' => 'Office',
-	'Reason' => 'Testing TCPDF-Next',
-	'ContactInfo' => 'http://www.tcpdf.org',
+	'Reason' => 'Testing LimePDF-Next',
+	'ContactInfo' => 'http://limePDF.com',
 	);
 
 // set document signature
-$pdf->setSignature($certificate, $certificate, 'tcpdfdemo', '', 2, $info);
+$pdf->setSignature($certificate, $certificate, 'limepdfdemo', '', 2, $info);
 
 // set font. 'helvetica' MUST be used to avoid a PHP notice from PHP 7.4+
 $pdf->setFont('helvetica', '', 12);
@@ -96,14 +92,13 @@ $pdf->setFont('helvetica', '', 12);
 $pdf->AddPage();
 
 // print a line of text
-$text = 'Next This is a <b color="#FF0000">digitally signed document</b> using the default (example) <b>tcpdf.crt</b> certificate.<br />To validate this signature you have to load the <b color="#006600">tcpdf.fdf</b> on the Arobat Reader to add the certificate to <i>List of Trusted Identities</i>.<br /><br />For more information check the source code of this example and the source code documentation for the <i>setSignature()</i> method.<br /><br /><a href="http://www.tcpdf.org">www.tcpdf.org</a>';
-$pdf->writeHTML($text, true, 0, true, 0);
+$pdf->writeHTML($pdfText, true, 0, true, 0);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // *** set signature appearance ***
 
 // create content for signature (image and/or text)
-$pdf->Image('images/tcpdf_signature.png', 180, 60, 15, 15, 'PNG');
+$pdf->Image($pdfImage, 180, 60, 15, 15, 'PNG');
 
 // define active area for signature appearance
 $pdf->setSignatureAppearance(180, 60, 15, 15);

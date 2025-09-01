@@ -96,19 +96,19 @@ $style = array(
 );
 
 // QRCODE,L : QR-CODE Low error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,L', 20, 30, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,L', 20, 30, 50, 50, $style, 'N');
 $pdf->Text(20, 25, 'QRCODE L');
 
 // QRCODE,M : QR-CODE Medium error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,M', 20, 90, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,M', 20, 90, 50, 50, $style, 'N');
 $pdf->Text(20, 85, 'QRCODE M');
 
 // QRCODE,Q : QR-CODE Better error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,Q', 20, 150, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,Q', 20, 150, 50, 50, $style, 'N');
 $pdf->Text(20, 145, 'QRCODE Q');
 
 // QRCODE,H : QR-CODE Best error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,H', 20, 210, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,H', 20, 210, 50, 50, $style, 'N');
 $pdf->Text(20, 205, 'QRCODE H');
 
 // -------------------------------------------------------------------
@@ -144,13 +144,13 @@ $pdf->Text(20, 205, 'QRCODE H');
 
 */
 
-$pdf->write2DBarcode('www.tcpdf.org', 'PDF417', 80, 90, 0, 30, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'PDF417', 80, 90, 0, 30, $style, 'N');
 $pdf->Text(80, 85, 'PDF417 (ISO/IEC 15438:2006)');
 
 // -------------------------------------------------------------------
 // DATAMATRIX (ISO/IEC 16022:2006)
 
-$pdf->write2DBarcode('http://www.tcpdf.org', 'DATAMATRIX', 80, 150, 50, 50, $style, 'N');
+$pdf->write2DBarcode('https://limePDF.com', 'DATAMATRIX', 80, 150, 50, 50, $style, 'N');
 $pdf->Text(80, 145, 'DATAMATRIX (ISO/IEC 16022:2006)');
 
 // -------------------------------------------------------------------
@@ -164,7 +164,7 @@ $style = array(
 );
 
 // QRCODE,H : QR-CODE Best error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,H', 80, 210, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,H', 80, 210, 50, 50, $style, 'N');
 $pdf->Text(80, 205, 'QRCODE H - COLORED');
 
 // new style
@@ -176,7 +176,7 @@ $style = array(
 );
 
 // QRCODE,H : QR-CODE Best error correction
-$pdf->write2DBarcode('www.tcpdf.org', 'QRCODE,H', 140, 210, 50, 50, $style, 'N');
+$pdf->write2DBarcode('limePDF.com', 'QRCODE,H', 140, 210, 50, 50, $style, 'N');
 $pdf->Text(140, 205, 'QRCODE H - NO PADDING');
 
 // ---------------------------------------------------------
