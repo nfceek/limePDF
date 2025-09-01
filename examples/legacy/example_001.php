@@ -42,7 +42,8 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
     // Set the Text    
         $pdfText = '<h1>Example # 001</h1>';
-        $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.com" style="text-decoration:none;"><span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Example file for the limePDF library.</i>';
+        $pdfText .= '<br /><h1>Welcome to <a href="http://www.limePDF.com" style="text-decoration:none;">';
+		$pdfText .= '<span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a>!</h1><i>This is the first Example file for the limePDF library.</i>';
         $pdfText .= '<p>This text is printed using the <i>writeHTMLCell()</i> method but you can also use: <i>Multicell(), writeHTML(), Write(), Cell() and Text()</i>.';
         $pdfText .= '</p><p>Please check the source code documentation and other examples for further information.</p>';
         $pdfText .= '1) Here is the Logo as an inline HTML Img:<br /><img src="http://limepdf/examples/images/limePDF_logo.png"><br /><br />';
