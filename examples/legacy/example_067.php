@@ -1,4 +1,4 @@
-<?php
+<?php HTML tables with !important in style
 //============================================================+
 // File name   : example_067.php
 // Begin       : 2022-01-07

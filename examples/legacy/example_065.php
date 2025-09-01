@@ -1,72 +1,53 @@
-<?php
+<?php 
 //============================================================+
 // File name   : example_065.php
-// Begin       : 2011-09-28
-// Last Update : 2013-05-14
 //
-// Description : Example 065 for TCPDF class
-//               Creates an example PDF/A-3b document using TCPDF
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : Creates an example PDF/A-3b document using LimePDF
+//               
+//
+// Last Update : 9-1-2025
 //============================================================+
 
-/**
- * Creates an example PDF/A-3b document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: PDF/A-3b mode
- * @author Nicola Asuni
- * @since 2011-09-28
- * @group A-3b
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_065.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'Creates an example PDF/A-3b document using LimePDF';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false, 3);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 065');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = '<h1>Example of <a href="limepdf.com" style="text-decoration:none;background-color:#CC0000;color:black;">
+		&nbsp;<span style="color:black;">TC</span><span style="color:white;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> 
+		PDF/A-3b </span> mode.</h1><i>This document conforms to the standard <b>PDF/A-3b (ISO 19005-3:2012)</b>.</i> <p>Please check the source code documentation 
+		and other examples for further information (<a href="limepdf.com">limepdf.com</a>).</p> <p style="color:#CC0000;"></a></p>';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 065', PDF_HEADER_STRING);
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
 
 // set default font subsetting mode
 $pdf->setFontSubsetting(true);
@@ -79,15 +60,10 @@ $pdf->setFont('helvetica', '', 14, '', true);
 $pdf->AddPage();
 
 // Set some content to print
-$html = <<<EOD
-<h1>Example of <a href="http://www.tcpdf.org" style="text-decoration:none;background-color:#CC0000;color:black;">&nbsp;<span style="color:black;">TC</span><span style="color:white;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> PDF/A-3b </span> mode.</h1>
-<i>This document conforms to the standard <b>PDF/A-3b (ISO 19005-3:2012)</b>.</i>
-<p>Please check the source code documentation and other examples for further information (<a href="http://www.tcpdf.org">http://www.tcpdf.org</a>).</p>
-<p style="color:#CC0000;">TO IMPROVE AND EXPAND TCPDF I NEED YOUR SUPPORT, PLEASE <a href="http://sourceforge.net/donate/index.php?group_id=128076">MAKE A DONATION!</a></p>
-EOD;
+
 
 // Print text using writeHTMLCell()
-$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
+$pdf->writeHTMLCell(0, 0, '', '', $pdfText, 0, 1, 0, true, '', true);
 
 // ---------------------------------------------------------
 

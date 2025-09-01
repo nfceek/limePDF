@@ -12,7 +12,7 @@
 // Description : HTML tables and table headers
 //               
 //
-// Last Update : 8-31-2025
+// Last Update : 9-1-2025
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;

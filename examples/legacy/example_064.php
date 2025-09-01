@@ -1,91 +1,77 @@
-<?php
+<?php  
 //============================================================+
 // File name   : example_064.php
-// Begin       : 2010-10-13
-// Last Update : 2013-05-14
 //
-// Description : Example 064 for TCPDF class
-//               No-write page regions
+// Author: Brad Smith
+// (c) Copyright 2025, Brad Smith - LimePDF.com
 //
-// Author: Nicola Asuni
+//  * Original TCPDF Copyright (c) 2002-2023:
+//  * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
 //
-// (c) Copyright:
-//               Nicola Asuni
-//               Tecnick.com LTD
-//               www.tecnick.com
-//               info@tecnick.com
+//
+// Description : No-write page regions
+//               
+//
+// Last Update : 9-1-2025
 //============================================================+
 
-/**
- * Creates an example PDF TEST document using TCPDF
- * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: No-write page regions
- * @author Nicola Asuni
- * @since 2010-10-14
- * @group page
- * @group pdf
- */
+use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
-// Include the main TCPDF library (search for installation path).
-require_once('tcpdf_include.php');
+// ----- Standard Form Parameters---------------------------------------------------------
+	//  Set File name
+		$outputFile = 'Example_064.pdf';
+	//  Set Output type ( I = In Browser & D = Download )
+		$outputType = 'I';
+	// Header output ( true / false)
+		$outputHeader = true;
+	//  Set the header Title 
+		$pdfHeader = $outputFile;
+	// Set the sub Title
+		$pdfSubHeader = 'No-write page regions';
+	//  Set the Header logo
+		$pdfHeaderImage = dirname(__DIR__, 2) . '/examples/images/limePDF_logo.png';	
+	//  Set Footer output
+		$outputFooter = true;
+//--------------------------------------------------------------------------------------
 
-// create new PDF document
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+// ----- Form Specific Parameters-------------------------------------------------------
 
-// set document information
-$pdf->setCreator(PDF_CREATOR);
-$pdf->setAuthor('Nicola Asuni');
-$pdf->setTitle('TCPDF Example 064');
-$pdf->setSubject('TCPDF Tutorial');
-$pdf->setKeywords('TCPDF, PDF, example, test, guide');
+	//  Set text for cell(s)
+		$pdfText = '<p style="text-align:justify;color:blue;font-size:12pt;"><span style="color:red;font-size:14pt;font-weight:bold;">TEST PAGE REGIONS:</span> <span style="color:green;">A no-write region is a portion of the page with a rectangular or trapezium shape that will not be covered when writing text or html code. A region is always aligned on the left or right side of the page ad is defined using a vertical segment. You can set multiple regions for the same page. You can combine several adjacent regions to approximate curved shapes.</span> Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, 
+		ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. Vivamus sed risus lectus, nec interdum nunc.
+		Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa.
+		Integer non sem eget neque mattis accumsan. Maecenas eu nisl mauris, sit amet interdum ipsum. In pharetra erat vel lectus venenatis elementum. Nulla non elit ligula, sit amet mollis urna. Morbi ut gravida est. Mauris tincidunt sem et turpis molestie malesuada. Curabitur vel nulla risus, sed mollis erat. Suspendisse vehicula accumsan purus nec varius. Donec fermentum lorem id felis sodales dictum. Quisque et dolor ipsum. Nam luctus consectetur dui vitae fermentum. Curabitur sodales consequat augue, id ultricies augue tempor ac. Aliquam ac magna id ipsum vehicula bibendum. Sed elementum congue tristique. <img src="images/image_demo.jpg" width="5mm" height="5mm" /> Phasellus vel lorem eu lectus porta sodales. Etiam neque tortor, sagittis id pharetra quis, laoreet vel arcu.
+		Cras quam mi, ornare laoreet laoreet vel, vehicula at lacus. Maecenas a lacus accumsan augue convallis sagittis sed quis odio. Morbi sit amet turpis diam, dictum convallis urna. Cras eget interdum augue. Cras eu nisi sit amet dolor faucibus porttitor. Suspendisse potenti. Nunc vitae dolor risus, at cursus libero. Suspendisse bibendum tellus non nibh hendrerit tristique. Mauris eget orci elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam porta libero non ante laoreet semper. Proin volutpat sodales mi, ac fermentum erat sagittis in. Vivamus at viverra felis. Ut pretium facilisis ante et pharetra.
+		Nulla facilisi. Cras varius quam eget libero aliquam vitae tincidunt leo rutrum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque a nisl massa, quis pretium urna. Proin vel porttitor tortor. Cras rhoncus congue velit in bibendum. Donec pharetra semper augue id lacinia. Quisque magna quam, hendrerit eu aliquam et, pellentesque ut tellus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas nulla quam, rutrum eu feugiat at, elementum eu libero. Maecenas ullamcorper leo et turpis rutrum ac laoreet eros faucibus. Phasellus condimentum lorem quis neque imperdiet quis molestie enim iaculis. Phasellus risus est, vestibulum ut convallis ultrices, dignissim nec erat. Etiam congue lobortis laoreet. Nulla ut neque sed velit dapibus semper. Quisque nec dolor id nibh eleifend iaculis. Vivamus vitae fermentum odio. Etiam malesuada quam in nulla aliquam sed convallis dui feugiat.</p>';
 
-// set default header data
-$pdf->setHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE.' 064', PDF_HEADER_STRING);
+		// define some html content for testing
+		$pdfText2 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. 
+		Vivamus sed risus lectus, nec interdum nunc. Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa. Integer non sem eget neque mattis accumsan. Maecenas eu nisl mauris, sit amet interdum ipsum. In pharetra erat vel lectus venenatis elementum. Nulla non elit ligula, sit amet mollis urna. Morbi ut gravida est. Mauris tincidunt 
+		sem et turpis molestie malesuada. Curabitur vel nulla risus, sed mollis erat. Suspendisse vehicula accumsan purus nec varius. Donec fermentum lorem id felis sodales dictum. Quisque et dolor ipsum. Nam luctus consectetur dui vitae fermentum. Curabitur sodales consequat augue, id ultricies augue tempor ac. Aliquam ac magna id ipsum vehicula bibendum. Sed elementum congue tristique. Phasellus vel lorem eu lectus porta sodales. Etiam neque tortor, sagittis id pharetra quis, laoreet vel arcu. Cras quam mi, ornare laoreet laoreet vel, vehicula at lacus. Maecenas a lacus accumsan augue convallis sagittis sed quis odio. Morbi sit amet turpis diam, dictum convallis urna. Cras eget interdum augue. Cras eu nisi sit amet dolor faucibus porttitor. Suspendisse potenti. Nunc vitae dolor risus, at cursus libero. Suspendisse bibendum tellus non nibh hendrerit tristique. Mauris eget orci elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam porta libero non ante laoreet semper.
+		Proin volutpat sodales mi, ac fermentum erat sagittis in. Vivamus at viverra felis. Ut pretium facilisis ante et pharetra. Nulla facilisi. Cras varius quam eget libero aliquam vitae tincidunt leo rutrum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque a nisl massa, quis pretium urna. Proin vel porttitor tortor. Cras rhoncus congue velit in bibendum. Donec pharetra semper augue id lacinia. Quisque magna quam, hendrerit eu aliquam et, pellentesque ut tellus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas nulla quam, rutrum eu feugiat at, elementum eu libero. Maecenas ullamcorper leo et turpis rutrum ac laoreet eros faucibus. Phasellus condimentum lorem quis neque imperdiet quis molestie enim iaculis. Phasellus risus est, vestibulum ut convallis ultrices, dignissim nec erat. Etiam congue lobortis laoreet. Nulla ut neque sed velit dapibus semper. Quisque nec dolor id nibh eleifend iaculis. 
+		Vivamus vitae fermentum odio. Etiam malesuada quam in nulla aliquam sed convallis dui feugiat.'."\n";
 
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+		$pdfImage = dirname(__DIR__, 2) . '/examples/images/image_demo.jpg';
+// ----- Dont Edit below here ---------------------------------------------------------
 
-// set default monospaced font
-$pdf->setDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+// send form parameters 
+$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
-// set margins
-$pdf->setMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-$pdf->setHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->setFooterMargin(PDF_MARGIN_FOOTER);
-
-// set auto page breaks
-$pdf->setAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-// set image scale factor
-$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
-// ---------------------------------------------------------
 
 // set font
 $pdf->setFont('helvetica', '', 8);
 
 
 // define some html content for testing
-$txt = '<p style="text-align:justify;color:blue;font-size:12pt;"><span style="color:red;font-size:14pt;font-weight:bold;">TEST PAGE REGIONS:</span> <span style="color:green;">A no-write region is a portion of the page with a rectangular or trapezium shape that will not be covered when writing text or html code. A region is always aligned on the left or right side of the page ad is defined using a vertical segment. You can set multiple regions for the same page. You can combine several adjacent regions to approximate curved shapes.</span> Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. Vivamus sed risus lectus, nec interdum nunc.
-Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa.
-Integer non sem eget neque mattis accumsan. Maecenas eu nisl mauris, sit amet interdum ipsum. In pharetra erat vel lectus venenatis elementum. Nulla non elit ligula, sit amet mollis urna. Morbi ut gravida est. Mauris tincidunt sem et turpis molestie malesuada. Curabitur vel nulla risus, sed mollis erat. Suspendisse vehicula accumsan purus nec varius. Donec fermentum lorem id felis sodales dictum. Quisque et dolor ipsum. Nam luctus consectetur dui vitae fermentum. Curabitur sodales consequat augue, id ultricies augue tempor ac. Aliquam ac magna id ipsum vehicula bibendum. Sed elementum congue tristique. <img src="images/image_demo.jpg" width="5mm" height="5mm" /> Phasellus vel lorem eu lectus porta sodales. Etiam neque tortor, sagittis id pharetra quis, laoreet vel arcu.
-Cras quam mi, ornare laoreet laoreet vel, vehicula at lacus. Maecenas a lacus accumsan augue convallis sagittis sed quis odio. Morbi sit amet turpis diam, dictum convallis urna. Cras eget interdum augue. Cras eu nisi sit amet dolor faucibus porttitor. Suspendisse potenti. Nunc vitae dolor risus, at cursus libero. Suspendisse bibendum tellus non nibh hendrerit tristique. Mauris eget orci elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam porta libero non ante laoreet semper. Proin volutpat sodales mi, ac fermentum erat sagittis in. Vivamus at viverra felis. Ut pretium facilisis ante et pharetra.
-Nulla facilisi. Cras varius quam eget libero aliquam vitae tincidunt leo rutrum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque a nisl massa, quis pretium urna. Proin vel porttitor tortor. Cras rhoncus congue velit in bibendum. Donec pharetra semper augue id lacinia. Quisque magna quam, hendrerit eu aliquam et, pellentesque ut tellus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas nulla quam, rutrum eu feugiat at, elementum eu libero. Maecenas ullamcorper leo et turpis rutrum ac laoreet eros faucibus. Phasellus condimentum lorem quis neque imperdiet quis molestie enim iaculis. Phasellus risus est, vestibulum ut convallis ultrices, dignissim nec erat. Etiam congue lobortis laoreet. Nulla ut neque sed velit dapibus semper. Quisque nec dolor id nibh eleifend iaculis. Vivamus vitae fermentum odio. Etiam malesuada quam in nulla aliquam sed convallis dui feugiat.</p>';
 
 
 // add a page
 $pdf->AddPage();
 
 // print some graphic content
-$pdf->Image('images/image_demo.jpg', 155,  30, 40, 40, 'JPG', '', '', true);
-$pdf->Image('images/image_demo.jpg',  15, 230, 40, 40, 'JPG', '', '', true);
+$pdf->Image($pdfImage, 155,  30, 40, 40, 'JPG', '', '', true);
+$pdf->Image($pdfImage,  15, 230, 40, 40, 'JPG', '', '', true);
 
 // define some graphic styles
 $styleA = array('width' => 0.254, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 0, 0));
@@ -140,7 +126,7 @@ array('page' => '', 'xt' =>  58, 'yt' => 230, 'xb' =>  58, 'yb' => 270, 'side' =
 $pdf->setPageRegions($regions);
 
 // write html text
-$pdf->writeHTML($txt, true, false, true, false, '');
+$pdf->writeHTML($pdfText, true, false, true, false, '');
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -162,11 +148,8 @@ $pdf->Polygon(array(195,110, 179.693,113.045, 166.716,121.716, 158.045,134.693, 
 
 $pdf->Ln(15);
 
-// define some html content for testing
-$txt = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed imperdiet lectus. Phasellus quis velit velit, non condimentum quam. Sed neque urna, ultrices ac volutpat vel, laoreet vitae augue. Sed vel velit erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras eget velit nulla, eu sagittis elit. Nunc ac arcu est, in lobortis tellus. Praesent condimentum rhoncus sodales. In hac habitasse platea dictumst. Proin porta eros pharetra enim tincidunt dignissim nec vel dolor. Cras sapien elit, ornare ac dignissim eu, ultricies ac eros. Maecenas augue magna, ultrices a congue in, mollis eu nulla. Nunc venenatis massa at est eleifend faucibus. Vivamus sed risus lectus, nec interdum nunc. Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi, id vehicula quam laoreet elementum. Phasellus egestas interdum erat, et viverra ipsum ultricies ac. Praesent sagittis augue at augue volutpat eleifend. Cras nec orci neque. Mauris bibendum posuere blandit. Donec feugiat mollis dui sit amet pellentesque. Sed a enim justo. Donec tincidunt, nisl eget elementum aliquam, odio ipsum ultrices quam, eu porttitor ligula urna at lorem. Donec varius, eros et convallis laoreet, ligula tellus consequat felis, ut ornare metus tellus sodales velit. Duis sed diam ante. Ut rutrum malesuada massa, vitae consectetur ipsum rhoncus sed. Suspendisse potenti. Pellentesque a congue massa. Integer non sem eget neque mattis accumsan. Maecenas eu nisl mauris, sit amet interdum ipsum. In pharetra erat vel lectus venenatis elementum. Nulla non elit ligula, sit amet mollis urna. Morbi ut gravida est. Mauris tincidunt sem et turpis molestie malesuada. Curabitur vel nulla risus, sed mollis erat. Suspendisse vehicula accumsan purus nec varius. Donec fermentum lorem id felis sodales dictum. Quisque et dolor ipsum. Nam luctus consectetur dui vitae fermentum. Curabitur sodales consequat augue, id ultricies augue tempor ac. Aliquam ac magna id ipsum vehicula bibendum. Sed elementum congue tristique. Phasellus vel lorem eu lectus porta sodales. Etiam neque tortor, sagittis id pharetra quis, laoreet vel arcu. Cras quam mi, ornare laoreet laoreet vel, vehicula at lacus. Maecenas a lacus accumsan augue convallis sagittis sed quis odio. Morbi sit amet turpis diam, dictum convallis urna. Cras eget interdum augue. Cras eu nisi sit amet dolor faucibus porttitor. Suspendisse potenti. Nunc vitae dolor risus, at cursus libero. Suspendisse bibendum tellus non nibh hendrerit tristique. Mauris eget orci elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam porta libero non ante laoreet semper. Proin volutpat sodales mi, ac fermentum erat sagittis in. Vivamus at viverra felis. Ut pretium facilisis ante et pharetra. Nulla facilisi. Cras varius quam eget libero aliquam vitae tincidunt leo rutrum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque a nisl massa, quis pretium urna. Proin vel porttitor tortor. Cras rhoncus congue velit in bibendum. Donec pharetra semper augue id lacinia. Quisque magna quam, hendrerit eu aliquam et, pellentesque ut tellus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas nulla quam, rutrum eu feugiat at, elementum eu libero. Maecenas ullamcorper leo et turpis rutrum ac laoreet eros faucibus. Phasellus condimentum lorem quis neque imperdiet quis molestie enim iaculis. Phasellus risus est, vestibulum ut convallis ultrices, dignissim nec erat. Etiam congue lobortis laoreet. Nulla ut neque sed velit dapibus semper. Quisque nec dolor id nibh eleifend iaculis. Vivamus vitae fermentum odio. Etiam malesuada quam in nulla aliquam sed convallis dui feugiat.'."\n";
-
 // write text
-$pdf->MultiCell(0, 0, $txt, 0, 'J', false, 1, '', '', true, 0, false, true, 0, 'T', false);
+$pdf->MultiCell(0, 0, $pdfText2, 0, 'J', false, 1, '', '', true, 0, false, true, 0, 'T', false);
 
 // ---------------------------------------------------------
 

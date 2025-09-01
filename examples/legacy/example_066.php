@@ -1,4 +1,4 @@
-<?php
+<?php Creates an example PDF/A-3b document using TCPDF
 
 /**
  * Example 066 for TCPDF library
