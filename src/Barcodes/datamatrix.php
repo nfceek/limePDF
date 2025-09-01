@@ -43,6 +43,8 @@
 * @version 1.0.008
 */
 
+namespace LimePDF\Barcodes;
+
 // custom definitions
 if (!defined('DATAMATRIXDEFS')) {
 

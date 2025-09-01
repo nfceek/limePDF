@@ -79,6 +79,8 @@
  * @version 1.0.010
  */
 
+namespace LimePDF\Barcodes;
+
 // definitions
 if (!defined('QRCODEDEFS')) {
 

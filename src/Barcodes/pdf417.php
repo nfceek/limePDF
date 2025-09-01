@@ -53,6 +53,8 @@
  * @version 1.0.005
  */
 
+namespace LimePDF\Barcodes;
+
 // definitions
 if (!defined('PDF417DEFS')) {
 
