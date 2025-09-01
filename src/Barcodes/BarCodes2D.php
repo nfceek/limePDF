@@ -263,7 +263,7 @@ class Barcodes2D {
 				break;
 			}
 			case 'PDF417': { // PDF417 (ISO/IEC 15438:2006)
-				require_once(__DIR__ . '/datamatrix.php');
+				require_once(__DIR__ . '/pdf417.php');
 				if (!isset($mode[1]) OR ($mode[1] === '')) {
 					$aspectratio = 2; // default aspect ratio (width / height)
 				} else {
@@ -294,7 +294,7 @@ class Barcodes2D {
 				break;
 			}
 			case 'QRCODE': { // QR-CODE
-				require_once(__DIR__ . '/datamatrix.php');
+				require_once(__DIR__ . '/qrcode.php');
 				if (!isset($mode[1]) OR (!in_array($mode[1],array('L','M','Q','H')))) {
 					$mode[1] = 'L'; // Ddefault: Low error correction
 				}
