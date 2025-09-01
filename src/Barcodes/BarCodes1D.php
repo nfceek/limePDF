@@ -41,8 +41,8 @@
  */
 
 /**
- * @class TCPDFBarcode
- * PHP class to creates array representations for common 1D barcodes to be used with TCPDF (http://www.tcpdf.org).<br>
+ * @class Barcodes1D
+ * PHP class to creates array representations for common 1D barcodes to be used with LimePDF (https://limepdf.com).<br>
  * @package com.tecnick.tcpdf
  * @version 1.0.027
  * @author Nicola Asuni
@@ -50,7 +50,7 @@
 
 namespace LimePDF\Barcodes;
 
-class BarCodes1D {
+class Barcodes1D {
 
 	/**
 	 * Array representation of barcode.

@@ -34,22 +34,22 @@
 
 /**
  * @file
- * PHP class to creates array representations for 2D barcodes to be used with TCPDF.
+ * PHP class to creates array representations for 2D barcodes to be used with LImePDF.
  * @package com.tecnick.tcpdf
  * @author Nicola Asuni
  * @version 1.0.015
  */
 
 /**
- * @class TCPDF2DBarcode
- * PHP class to creates array representations for 2D barcodes to be used with TCPDF (http://www.tcpdf.org).
+ * @class Barcode2D
+ * PHP class to creates array representations for 2D barcodes to be used with LimePDF (https://limepdf.com).
  * @package com.tecnick.tcpdf
  * @version 1.0.015
  * @author Nicola Asuni
  */
 namespace LimePDF\Barcodes;
 
-class BarCodes2D {
+class Barcodes2D {
 
 	/**
 	 * Array representation of barcode.
