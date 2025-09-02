@@ -16,11 +16,11 @@
 //============================================================+
 
 use LimePDF\Config\PdfBootstrap;
+require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 use LimePDF\Pdf;
-
 $pdf = new Pdf();
-require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
+
 
 // ----- Standard Form Parameters---------------------------------------------------------
 	//  Set File name

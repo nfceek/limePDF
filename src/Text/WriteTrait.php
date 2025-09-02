@@ -458,8 +458,59 @@ trait WriteTrait{
         return $this->handleWordWrapping($chars, $uchars, $i, $j, $sep, $shy, $w, $constraints, $params, $charMetrics, $tmp_shy_replacement_width);
     }
     
+    // /**
+    //  * Handle overflow when no separator is found
+    //  */
+    // private function handleNoSeparatorOverflow(
+    //     array $chars,
+    //     array $uchars,
+    //     int $i,
+    //     int $j, 
+    //     float $w,
+    //     array $constraints,
+    //     array $params
+    // ): array {
+    //     $margin = $params['margin'];
+        
+    //     // Check if line was already started
+    //     $lineStarted = $this->rtl 
+    //         ? ($this->x <= ($this->w - $this->rMargin - $this->cell_padding['R'] - $margin['R'] - $constraints['chrwidth']))
+    //         : ($this->x >= ($this->lMargin + $this->cell_padding['L'] + $margin['L'] + $constraints['chrwidth']));
+        
+    //     if ($lineStarted) {
+    //         // Print void cell and go to next line
+    //         $this->Cell($w, $params['h'], '', 0, 1);
+    //         $linebreak = true;
+            
+    //         if ($params['firstline']) {
+    //             return ['return' => $this->UniArrSubString($uchars, $j), 'state' => null];
+    //         }
+    //     } else {
+    //         // Truncate the word
+    //         $result = $this->renderTruncatedWord($chars, $uchars, $i, $j, $w, $constraints, $params);
+    //         if ($result['return'] !== null) {
+    //             return $result;
+    //         }
+    //         $j = $i;
+    //         --$i;
+    //     }
+        
+    //     $this->handlePageBreakMargins($margin);
+    //     $newW = $this->getRemainingWidth();
+    //     $newWmax = $newW - $this->cell_padding['L'] - $this->cell_padding['R'];
+        
+    //     return [
+    //         'return' => null,
+    //         'state' => [$i, $j, -1, false, $newW, $newWmax, $linebreak ?? false, 1, 0]
+    //     ];
+    // }
+   
     /**
      * Handle overflow when no separator is found
+     * 
+     *  PHP 7 & PHP 8.2 Compliant
+     * 
+     *  updated: 9-2-2025
      */
     private function handleNoSeparatorOverflow(
         array $chars,
@@ -471,17 +522,20 @@ trait WriteTrait{
         array $params
     ): array {
         $margin = $params['margin'];
-        
+
+        // Fallback if chrwidth is not set
+        $chrwidth = $constraints['chrwidth'] ?? 0;
+
         // Check if line was already started
         $lineStarted = $this->rtl 
-            ? ($this->x <= ($this->w - $this->rMargin - $this->cell_padding['R'] - $margin['R'] - $constraints['chrwidth']))
-            : ($this->x >= ($this->lMargin + $this->cell_padding['L'] + $margin['L'] + $constraints['chrwidth']));
-        
+            ? ($this->x <= ($this->w - $this->rMargin - $this->cell_padding['R'] - $margin['R'] - $chrwidth))
+            : ($this->x >= ($this->lMargin + $this->cell_padding['L'] + $margin['L'] + $chrwidth));
+
         if ($lineStarted) {
             // Print void cell and go to next line
             $this->Cell($w, $params['h'], '', 0, 1);
             $linebreak = true;
-            
+
             if ($params['firstline']) {
                 return ['return' => $this->UniArrSubString($uchars, $j), 'state' => null];
             }
@@ -494,17 +548,18 @@ trait WriteTrait{
             $j = $i;
             --$i;
         }
-        
+
         $this->handlePageBreakMargins($margin);
         $newW = $this->getRemainingWidth();
         $newWmax = $newW - $this->cell_padding['L'] - $this->cell_padding['R'];
-        
+
         return [
             'return' => null,
-            'state' => [$i, $j, -1, false, $newW, $newWmax, $linebreak ?? false, 1, 0]
+            'state'  => [$i, $j, -1, false, $newW, $newWmax, $linebreak ?? false, 1, 0]
         ];
     }
-    
+
+
     /**
      * Handle word wrapping when separator is found
      */

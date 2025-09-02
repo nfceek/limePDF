@@ -32,6 +32,29 @@
         <li><a href="legacy/example_003.php" target="_blank">Custom Header & Footer</a></li>
         <li><a href="legacy/example_028.php" target="_blank">Multiple Page Formats</a></li>
         <li><a href="legacy/example_029.php" target="_blank">Viewer Display Preferences</a></li>
+        <li><a href="legacy/example_010.php" target="_blank">Multiple columns</a></li>
+        <li><a href="legacy/example_027.php" target="_blank">1D Barcodes</a></li>
+        <li><a href="legacy/example_050.php" target="_blank">2D Barcode (QR-Code, Datamatrix ECC200 and PDF417)</a></li>       
+      </ul>
+    </details>
+
+    <details>
+      <summary>HTML & Javascript</summary>
+      <ul>
+        <li><a href="legacy/example_039.php" target="_blank">HTML Justification</a></li>
+        <li><a href="legacy/example_053.php" target="_blank">Javascript functions</a></li>
+        <li><a href="legacy/example_014.php" target="_blank">Javascript & Forms</a></li>
+        <li><a href="legacy/example_049.php" target="_blank">Methods in HTML</a></li>
+        <li><a href="legacy/example_048.php" target="_blank">Table header and rowspan</a></li>
+        <li><a href="legacy/example_011.php" target="_blank">Colored Tables</a></li>
+        <li><a href="legacy/example_021.php" target="_blank">WriteHTML Alignment</a></li>
+        <li><a href="legacy/example_006.php" target="_blank">WriteHTML and RTL support</a></li>
+        <li><a href="legacy/example_007.php" target="_blank">Independent columns with WriteHTMLCell</a></li>
+        <li><a href="legacy/example_059.php" target="_blank">Table Of Content with HTML templates</a></li>
+        <li><a href="legacy/example_066.php" target="_blank">Using WriteHTMLCell</a></li>       
+        <li><a href="legacy/example_054.php" target="_blank">XHTML Form</a></li>
+        <li><a href="legacy/example_061.php" target="_blank">XHTML + CSS</a></li>
+        <li><a href="legacy/example_062.php" target="_blank">XObject Templates</a></li>
       </ul>
     </details>
 
@@ -42,7 +65,10 @@
         <li><a href="legacy/example_005.php" target="_blank">Multicell</a></li>
         <li><a href="legacy/example_017.php" target="_blank">Independent Columns (MultiCell)</a></li>
         <li><a href="legacy/example_020.php" target="_blank">Complex Multicell Alignment</a></li>
-        <li><a href="legacy/example_021.php" target="_blank">WriteHTML Alignment</a></li>
+        <li><a href="legacy/example_060.php" target="_blank">Advanced page settings</a></li>
+        <li><a href="legacy/example_063.php" target="_blank">Text stretching and spacing (tracking/kerning)</a></li>
+        <li><a href="legacy/example_064.php" target="_blank">No-write page regions</a></li>
+        <li><a href="legacy/example_067.php" target="_blank">Shorthand border styles including !important</a></li>
         <li><a href="legacy/example_057.php" target="_blank">Cell Vertical Alignments</a></li>
       </ul>
     </details>
@@ -50,6 +76,8 @@
     <details>
       <summary>Graphics & Colors</summary>
       <ul>
+        <li><a href="legacy/example_009.php" target="_blank">Image</a></li>
+        <li><a href="legacy/example_051.php" target="_blank">Full page background</a></li>
         <li><a href="legacy/example_012.php" target="_blank">Graphic Functions</a></li>
         <li><a href="legacy/example_013.php" target="_blank">Graphic Transformations</a></li>
         <li><a href="legacy/example_022.php" target="_blank">CMYK Colors</a></li>
@@ -58,13 +86,32 @@
         <li><a href="legacy/example_034.php" target="_blank">Clipping Masks</a></li>
         <li><a href="legacy/example_035.php" target="_blank">Line Styles</a></li>
         <li><a href="legacy/example_037.php" target="_blank">Spot Colors</a></li>
+        <li><a href="legacy/example_058.php" target="_blank">SVG Image</a></li>
+        <li><a href="legacy/example_032.php" target="_blank">EPS/AI vectorial image</a></li>
+        <li><a href="legacy/example_042.php" target="_blank">Image with Alpha Channel Transparency</a></li>
       </ul>
     </details>
 
     <details>
+      <summary>Groups & Bookmarks</summary>
+      <ul> 
+        <li><a href="legacy/example_015.php" target="_blank">Bookmarks (Table of Content)</a></li>
+        <li><a href="legacy/example_023.php" target="_blank">Page Groups</a></li>
+        <li><a href="legacy/example_028.php" target="_blank">Multiple page formats</a></li>
+        <li><a href="legacy/example_036.php" target="_blank">Text Annotations</a></li>
+        <li><a href="legacy/example_040.php" target="_blank">Booklet (double-sided pages)</a></li>
+        <li><a href="legacy/example_044.php" target="_blank">Move, Copy and Delete page</a></li>
+        <li><a href="legacy/example_045.php" target="_blank">Table Of Content with Bookmarks</a></li>
+        <li><a href="legacy/example_046.php" target="_blank">Text hyphenation</a></li>
+        <li><a href="legacy/example_047.php" target="_blank">Transactions and UNDO</a></li>
+      </ul>
+    </details> 
+
+    <details>
       <summary>Advanced Features</summary>
       <ul>
-        <li><a href="legacy/example_014.php" target="_blank">Javascript & Forms</a></li>
+        <li><a href="legacy/example_056.php" target="_blank">Crop Marks and Registration Marks</a></li>
+        <li><a href="legacy/example_043.php" target="_blank">Disk caching</a></li>
         <li><a href="legacy/example_016.php" target="_blank">Document Encryption</a></li>
         <li><a href="legacy/example_024.php" target="_blank">Object Layers</a></li>
         <li><a href="legacy/example_025.php" target="_blank">Transparency</a></li>
@@ -73,6 +120,7 @@
         <li><a href="legacy/example_052.php" target="_blank">Digital Signature</a></li>
         <li><a href="legacy/example_065.php" target="_blank">PDF/A-3b Document</a></li>
         <li><a href="legacy/example_068.php" target="_blank">PDF/A-3b + Embedded File</a></li>
+        <li><a href="legacy/example_008.php" target="_blank">External UTF-8 text file</a></li>
       </ul>
     </details>
 

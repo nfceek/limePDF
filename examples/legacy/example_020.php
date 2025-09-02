@@ -53,23 +53,52 @@ $pdf->setFont('helvetica', '', 20);
 // add a page
 $pdf->AddPage();
 
-$pdf->Write(0, 'Example of text layout using Multicell()', '', 0, 'L', true, 0, false, false, 0);
+// $pdf->Write(0, 'Example of text layout using Multicell()', '', 0, 'L', true, 0, false, false, 0);
 
-$pdf->Ln(5);
+// $pdf->Ln(5);
 
-$pdf->setFont('times', '', 9);
+// $pdf->setFont('times', '', 9);
 
-//$pdf->setCellPadding(0);
-//$pdf->setLineWidth(2);
+// //$pdf->setCellPadding(0);
+// //$pdf->setLineWidth(2);
 
-// set color for background
-$pdf->setFillColor(255, 255, 200);
+// // set color for background
+// $pdf->setFillColor(255, 255, 200);
 
-// print some rows just as example
-for ($i = 0; $i < 10; ++$i) {
-	$pdf->MultiRow('Row '.($i+1), $pdfText."\n");
-}
+// // print some rows just as example
+// for ($i = 0; $i < 10; ++$i) {
+// 	$pdf->MultiRow('Row '.($i+1), $pdfText."\n");
+// }
 
+
+	// set font
+	$pdf->SetFont('helvetica', '', 10);
+
+	// table header
+	$pdf->SetFillColor(200, 220, 255);
+	$pdf->Cell(90, 10, 'Column 1', 1, 0, 'C', 1);
+	$pdf->Cell(90, 10, 'Column 2', 1, 1, 'C', 1);
+
+	// table body rows
+	$data = [
+		['This is a long paragraph that would normally go into column 1', 'This is another block of text for column 2'],
+		['Second row, column 1 text goes here', 'Second row, column 2 text goes here'],
+	];
+
+	foreach ($data as [$col1, $col2]) {
+		// Get starting X/Y
+		$x = $pdf->GetX();
+		$y = $pdf->GetY();
+
+		// Output col1
+		$pdf->MultiCell(90, 0, $col1, 1, 'L', 0, 0);
+
+		// Reset position for col2
+		$pdf->SetXY($x + 90, $y);
+
+		// Output col2
+		$pdf->MultiCell(90, 0, $col2, 1, 'L', 0, 1);
+	}
 // reset pointer to the last page
 $pdf->lastPage();
 
