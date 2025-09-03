@@ -37,6 +37,8 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 // ----- Form Specific Parameters-------------------------------------------------------
 
+		$imageFile  = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.png');
+		$imageFile2 = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.tcpdf_box.svg');
 
 // ----- Dont Edit below here ---------------------------------------------------------
 
@@ -58,12 +60,12 @@ Some special characters: &lt; € &euro; &#8364; &amp; è &egrave; &copy; &gt; \
 <h2>List</h2>
 List example:
 <ol>
-	<li><img src="images/logo_example.png" alt="test alt attribute" width="30" height="30" border="0" /> test image</li>
+	<li><img src="' . $imageFile . '" alt="test alt attribute" width="30" height="30" border="0" /> test image</li>
 	<li><b>bold text</b></li>
 	<li><i>italic text</i></li>
 	<li><u>underlined text</u></li>
 	<li><b>b<i>bi<u>biu</u>bi</i>b</b></li>
-	<li><a href="http://www.tecnick.com" dir="ltr">link to http://www.tecnick.com</a></li>
+	<li><a href="limepdf.com" dir="ltr">link to https://LimePDF.com</a></li>
 	<li>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.<br />Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</li>
 	<li>SUBLIST
 		<ol>
@@ -86,7 +88,7 @@ List example:
 	<dd>White cold drink</dd>
 </dl>
 <div style="text-align:center">IMAGES<br />
-<img src="images/logo_example.png" alt="test alt attribute" width="100" height="100" border="0" /><img src="../images/tcpdf_box.svg" alt="test alt attribute" width="100" height="100" border="0" /><img src="images/logo_example.jpg" alt="test alt attribute" width="100" height="100" border="0" />
+<img src="' . $imageFile . '" alt="test alt attribute" width="100" height="100" border="0" /><img src="' . $imageFile2 . '" alt="test alt attribute" width="100" height="100" border="0" /><img src="' . $imageFile . '" alt="test alt attribute" width="100" height="100" border="0" />
 </div>';
 
 // output the HTML content
@@ -189,13 +191,13 @@ $pdf->AddPage();
 // create some HTML content
 $html = '<h1>Image alignments on HTML table</h1>
 <table cellpadding="1" cellspacing="1" border="1" style="text-align:center;">
-<tr><td><img src="images/logo_example.png" border="0" height="41" width="41" /></td></tr>
-<tr style="text-align:left;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="top" /></td></tr>
-<tr style="text-align:center;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="middle" /></td></tr>
-<tr style="text-align:right;"><td><img src="images/logo_example.png" border="0" height="41" width="41" align="bottom" /></td></tr>
-<tr><td style="text-align:left;"><img src="images/logo_example.png" border="0" height="41" width="41" align="top" /></td></tr>
-<tr><td style="text-align:center;"><img src="images/logo_example.png" border="0" height="41" width="41" align="middle" /></td></tr>
-<tr><td style="text-align:right;"><img src="images/logo_example.png" border="0" height="41" width="41" align="bottom" /></td></tr>
+<tr><td><img src="' . $imageFile . '" border="0" height="41" width="41" /></td></tr>
+<tr style="text-align:left;"><td><img src="' . $imageFile . '" border="0" height="41" width="41" align="top" /></td></tr>
+<tr style="text-align:center;"><td><img src="' . $imageFile . '" border="0" height="41" width="41" align="middle" /></td></tr>
+<tr style="text-align:right;"><td><img src="' . $imageFile . '" border="0" height="41" width="41" align="bottom" /></td></tr>
+<tr><td style="text-align:left;"><img src="' . $imageFile . '" border="0" height="41" width="41" align="top" /></td></tr>
+<tr><td style="text-align:center;"><img src="' . $imageFile . '" border="0" height="41" width="41" align="middle" /></td></tr>
+<tr><td style="text-align:right;"><img src="' . $imageFile . '" border="0" height="41" width="41" align="bottom" /></td></tr>
 </table>';
 
 // output the HTML content
@@ -208,7 +210,6 @@ $html = '<h1>Embedded Images</h1>
 <tr><td>src="data..."</td><td><img src="@DATA2@" border="0" height="41" width="41" /></td></tr>
 </table>';
 
-$imageFile = "images/logo_example.png";
 if (file_exists($imageFile)) {
     $data = base64_encode(file_get_contents($imageFile));
     $html = str_replace("@DATA1@", "@" . $data, $html);
@@ -353,7 +354,7 @@ $pdf->AddPage();
 
 $html = <<<EOF
 <h1>Test custom bullet image for list items</h1>
-<ul style="font-size:14pt;list-style-type:img|png|4|4|images/logo_example.png">
+<ul style="font-size:14pt;list-style-type:img|png|4|4|' . $imageFile . '">
 	<li>test custom bullet image</li>
 	<li>test custom bullet image</li>
 	<li>test custom bullet image</li>

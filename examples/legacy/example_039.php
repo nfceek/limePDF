@@ -43,8 +43,6 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 		$imageFile  = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.png');
 		$imageFile2 = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.tcpdf_box.svg');
 
-		//var_dump($imageFile2, file_exists($imageFile2));
-
 // ----- Dont Edit below here ---------------------------------------------------------
 
 // send form parameters 
