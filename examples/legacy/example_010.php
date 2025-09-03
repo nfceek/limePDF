@@ -15,6 +15,7 @@
 // Last Update : 8-31-2025
 //============================================================+
 
+use LimePDF\PDF;
 use LimePDF\Config\PdfBootstrap;
 require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
@@ -45,23 +46,8 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 // ---------- Dont Edit below here -----------------------------
 
-// Include the main TCPDF library (search for installation path).
-require_once __DIR__ . '/../../tcpdf.php';
-require_once '../../vendor/autoload.php'; 
-
-use LimePDF\TCPDF;
-use LimePDF\Config\ConfigManager;
-
-// Instantiate and load ConfigManager
-$config = new ConfigManager();
-$config->loadFromArray([
-]);
-
-/**
- * Extend TCPDF to work with multiple columns
- */
-class MC_TCPDF extends TCPDF {
-
+    class CustomPdf extends PDF
+    {
 	/**
 	 * Print chapter
 	 * @param int $num chapter number
@@ -125,10 +111,10 @@ class MC_TCPDF extends TCPDF {
 // EXAMPLE
 // ---------------------------------------------------------
 // create new PDF document
-$pdf = new MC_TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new CustomPdf('P', 'mm', 'A4', true, 'UTF-8', false);
 
 // send form parameters 
-$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
+//$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 // ---------------------------------------------------------
 

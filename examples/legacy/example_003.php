@@ -45,55 +45,6 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 // ----- Dont Edit below here ---------------------------------------------------------
 
-// send form parameters 
-//$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
-
-// class MyPdf extends Pdf
-// {
-//     protected ConfigManager $config;
-
-//     public function __construct(ConfigManager $config)
-//     {
-//         parent::__construct();
-//         $this->config = $config;
-//     }
-
-//     // Page header
-//     public function Header(): void
-//     {
-//         $logo = $this->config->get('headerLogo');
-//         $logoWidth = (float) $this->config->get('headerLogoWidth', 20);
-// 		$logoType = $this->config->get('headerLogoType');
-
-//         if ($logo && file_exists($logo)) {
-//             $this->Image(
-//                 $logo,
-//                 10, 10,
-//                 $logoWidth,
-//                 '', $logoType,
-//                 '', 'T',
-//                 false, 300,
-//                 '', false, false, 0, false, false, false
-//             );
-//         }
-
-//         $this->SetFont('helvetica', 'B', 16);
-//         $this->Cell(0, 15, $this->config->get('headerTitle', ''), 0, false, 'C', 0, '', 0, false, 'M', 'M');
-//     }
-
-//     // Page footer
-//     public function Footer(): void
-//     {
-//         $this->SetY(-15);
-//         $this->SetFont('helvetica', 'I', 8);
-//         $this->Cell(
-//             0, 10,
-//             'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(),
-//             0, false, 'C', 0, '', 0, false, 'T', 'M'
-//         );
-//     }
-// }
-
     class CustomPdf extends PDF
     {
         // Override the header
