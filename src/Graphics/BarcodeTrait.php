@@ -3,6 +3,7 @@
 namespace LimePDF\Graphics;
 
 use LimePDF\Support\StaticTrait;
+use LimePDF\Barcodes\Barcodes1D;
 
 trait BarcodeTrait {
 
@@ -39,12 +40,12 @@ trait BarcodeTrait {
 	public function write1DBarcode($code, $type, $x=null, $y=null, $w=null, $h=null, $xres=null, $style=array(), $align='') {
 		if ($this->empty_string(trim($code))) {
 			return;
-		}
-		require_once(dirname(__FILE__).'/tcpdf_barcodes_1d.php');
+		}  
+		require_once(dirname(__DIR__,2).'/src/Barcodes/Barcodes1D.php');
 		// save current graphic settings
 		$gvars = $this->getGraphicVars();
 		// create new barcode object
-		$barcodeobj = new TCPDFBarcode($code, $type);
+		$barcodeobj = new Barcodes1D($code, $type);
 		$arrcode = $barcodeobj->getBarcodeArray();
 		if (empty($arrcode) OR ($arrcode['maxw'] <= 0)) {
 			$this->Error('Error in 1D barcode string');
