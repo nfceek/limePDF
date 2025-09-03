@@ -40,6 +40,11 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 	//  Set text for cell(s)
 		$pdfText = 'Example of HTML Justification';
 
+		$imageFile  = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.png');
+		$imageFile2 = realpath(dirname(__DIR__, 2) . '/examples/images/logo_example.tcpdf_box.svg');
+
+		//var_dump($imageFile2, file_exists($imageFile2));
+
 // ----- Dont Edit below here ---------------------------------------------------------
 
 // send form parameters 
@@ -54,18 +59,18 @@ $pdf->setFont('helvetica', 'B', 20);
 $pdf->Write(0, $pdfText, '', 0, 'L', true, 0, false, false, 0);
 
 // create some HTML content
-$html = '<span style="text-align:justify;">a <u>abc</u> abcdefghijkl (abcdef) abcdefg <b>abcdefghi</b> a ((abc)) abcd '.
-'<img src="../images/logo_example.png" border="0" height="41" width="41" />  '.
-'<img src="../images/tcpdf_box.svg" alt="test alt attribute" width="80" height="60" border="0" /> '. 
-'abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg '. 
-'<b>abcdefghi</b> a <u>abc</u> abcd abcdef abcdefg <b>abcdefghi</b> a abc \(abcd\) abcdef abcdefg '. 
-'<b>abcdefghi</b> a abc \\\(abcd\\\) abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg '. 
-'<b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg abcdefghi a '. 
-'abc abcd <a href="http://limepdf.com">abcdef abcdefg</a> start a abc before '. 
-'<span style="background-color:yellow">yellow color</span> after a abc abcd abcdef abcdefg abcdefghi a abc abcd end '. 
-'abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg '. 
-'abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi '.
-'a abc abcd abcdef abcdefg abcdefghi<br />abcd abcdef abcdefg abcdefghi<br />abcd abcde abcdef</span>';
+$html = '<span style="text-align:justify;">a <u>abc</u> abcdefghijkl (abcdef) abcdefg <b>abcdefghi</b> a ((abc)) abcd ';
+$html .= '<img src="' . $imageFile . '" border="0" height="41" width="41" />  ';
+$html .= '<img src="' . $imageFile2 . '" alt="test alt attribute" width="80" height="60" border="0" /> ';
+$html .= 'abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg ';
+$html .= '<b>abcdefghi</b> a <u>abc</u> abcd abcdef abcdefg <b>abcdefghi</b> a abc \(abcd\) abcdef abcdefg ';
+$html .= '<b>abcdefghi</b> a abc \\\(abcd\\\) abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg ';
+$html .= '<b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg abcdefghi a '; 
+$html .= 'abc abcd <a href="http://limepdf.com">abcdef abcdefg</a> start a abc before ';
+$html .= '<span style="background-color:yellow">yellow color</span> after a abc abcd abcdef abcdefg abcdefghi a abc abcd end ';
+$html .= 'abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg '; 
+$html .= 'abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi ';
+$html .= 'a abc abcd abcdef abcdefg abcdefghi<br />abcd abcdef abcdefg abcdefghi<br />abcd abcde abcdef</span>';
 
 // set core font
 $pdf->setFont('helvetica', '', 10);
