@@ -1,6 +1,6 @@
 <?php
 
-namespace LimePDF\Graphics;
+namespace LimePDF\Barcodes;
 
 use LimePDF\Support\StaticTrait;
 use LimePDF\Barcodes\Barcodes1D;
@@ -359,11 +359,11 @@ trait BarcodeTrait {
 		if ($this->empty_string(trim($code))) {
 			return;
 		}
-		require_once(dirname(__FILE__).'/tcpdf_barcodes_2d.php');
+		require_once(dirname(__DIR__,2).'/src/Barcodes/Barcodes2D.php');
 		// save current graphic settings
 		$gvars = $this->getGraphicVars();
 		// create new barcode object
-		$barcodeobj = new TCPDF2DBarcode($code, $type);
+		$barcodeobj = new Barcodes2D($code, $type);
 		$arrcode = $barcodeobj->getBarcodeArray();
 		if (empty($arrcode) OR !isset($arrcode['num_rows']) OR ($arrcode['num_rows'] == 0) OR !isset($arrcode['num_cols']) OR ($arrcode['num_cols'] == 0)) {
 			$this->Error('Error in 2D barcode string');

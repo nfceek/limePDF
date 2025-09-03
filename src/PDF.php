@@ -9,9 +9,10 @@ namespace LimePDF;
 	require_once(dirname(__FILE__) . '/AutoConfig.php');
 
 	// includes Vars
+	use LimePDF\Barcodes\BarcodeTrait;
+
 	use LimePDF\Encryption\EncryptionTrait;
 
-	use LimePDF\Graphics\BarcodeTrait;
 	use LimePDF\Graphics\ColumnsTrait;
 	use LimePDF\Graphics\DrawTrait;
 	use LimePDF\Graphics\GraphicsTrait;
