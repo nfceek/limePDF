@@ -38,8 +38,8 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 // ----- Form Specific Parameters-------------------------------------------------------
 
 	//  Set text for cell(s)
-		$pdfText = '<h1>Example of <a href="limepdf.com" style="text-decoration:none;background-color:#CC0000;color:black;">
-		&nbsp;<span style="color:black;">TC</span><span style="color:white;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> 
+		$pdfText = '<h1>Example of <a href="limepdf.com" style="text-decoration:none;background-color:#fff;color:black;">
+		&nbsp;<span style="color:#527201">Lime</span><span style="color:black;">PDF</span>&nbsp;</a> document in <span style="background-color:#99ccff;color:black;"> 
 		PDF/A-3b </span> mode.</h1><i>This document conforms to the standard <b>PDF/A-3b (ISO 19005-3:2012)</b>.</i> <p>Please check the source code documentation 
 		and other examples for further information (<a href="limepdf.com">limepdf.com</a>).</p> <p style="color:#CC0000;"></a></p>';
 

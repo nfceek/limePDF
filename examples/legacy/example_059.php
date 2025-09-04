@@ -15,6 +15,7 @@
 // Last Update : 8-31-2025
 //============================================================+
 
+use LimePDF\PDF;
 use LimePDF\Config\PdfBootstrap;
 require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
@@ -44,9 +45,10 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 
 /**
- * TCPDF class extension with custom header and footer for TOC page
+ *  Class extension with custom header and footer for TOC page
  */
-class TOC_TCPDF extends PDF {
+    class CustomPdf extends PDF
+    {
 
 	/**
  	 * Overwrite Header() method.
@@ -80,8 +82,9 @@ class TOC_TCPDF extends PDF {
 
 
 // send form parameters 
-$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
+//$pdf = new CustomPdf($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
+$pdf = new CustomPdf('P', 'mm', 'A4', true, 'UTF-8', false);
 // set font
 $pdf->setFont('helvetica', '', 10);
 

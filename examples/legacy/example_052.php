@@ -46,11 +46,6 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 		documentation for the <i>setSignature()</i> method.<br /><br />
 		<a href="https://limePDF.com">limePDF.com</a>';
 
-		
-// ----- Dont Edit below here ---------------------------------------------------------
-
-	// send form parameters 
-	$pdf = PdfBootstrap::create($outputFile, $outputType, $outputHeader, $outputFooter, $pdfHeader, $pdfSubHeader, $pdfHeaderImage); 
 
 	$pdfImage = dirname(__DIR__, 2) . '/examples/images/limepdf_signature.png';
 // ----- Dont Edit below here ---------------------------------------------------------

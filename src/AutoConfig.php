@@ -148,9 +148,9 @@ if (!defined('K_BLANK_IMAGE')) {
 	define ('K_BLANK_IMAGE', '_blank.png');
 }
 
-if (!defined('PDF_PAGE_FORMAT')) {
-	define ('PDF_PAGE_FORMAT', 'A4');
-}
+// if (!defined('PDF_PAGE_FORMAT')) {
+// 	define ('PDF_PAGE_FORMAT', 'A4');
+// }
 
 if (!defined('PDF_PAGE_ORIENTATION')) {
 	define ('PDF_PAGE_ORIENTATION', 'P');

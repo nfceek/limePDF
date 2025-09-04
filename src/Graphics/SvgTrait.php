@@ -2,7 +2,7 @@
 
 namespace LimePDF\Graphics;
 
-use LimePDF\Include\ColorsTrait;
+use LimePDF\Include\ImagesTrait;
 use LimePDF\Include\ImageTrait;
 use LimePDF\Support\StaticTrait;
 
@@ -411,10 +411,10 @@ trait SvgTrait {
 			$this->setAlpha($svgstyle['opacity'], 'Normal', $svgstyle['opacity'], false);
 		}
 		// color
-		$fill_color = $this->convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
+		$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
 		$this->setFillColorArray($fill_color);
 		// text color
-		$text_color = $this->convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
+		$text_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
 		$this->setTextColorArray($text_color);
 		// clip
 		if (preg_match('/rect\(([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)[\s]*+([a-z0-9\-\.]*+)\)/si', $svgstyle['clip'], $regs)) {
@@ -538,7 +538,7 @@ trait SvgTrait {
 				$this->Gradient($gradient['type'], $gradient['coords'], $gradient['stops']);
 			}
 		} elseif ($svgstyle['fill'] != 'none') {
-			$fill_color = $this->convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
+			$fill_color = LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
 			if ($svgstyle['fill-opacity'] != 1) {
 				$this->setAlpha($this->alpha['CA'], 'Normal', $svgstyle['fill-opacity'], false);
 			} elseif (preg_match('/rgba\(\d+%?,\s*\d+%?,\s*\d+%?,\s*(\d+(?:\.\d+)?)\)/i', $svgstyle['fill'], $rgba_matches)) {
@@ -559,7 +559,7 @@ trait SvgTrait {
 				$this->setAlpha($rgba_matches[1], 'Normal', $this->alpha['ca'], false);
 			}
 			$stroke_style = array(
-				'color' => $this->convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
+				'color' => LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
 				'width' => $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false),
 				'cap' => $svgstyle['stroke-linecap'],
 				'join' => $svgstyle['stroke-linejoin']
@@ -1107,7 +1107,7 @@ trait SvgTrait {
 			$attribs['style'] = ';'.$attribs['style'];
 		}
 		foreach ($prev_svgstyle as $key => $val) {
-			if (in_array($key, $this->$svginheritprop)) {
+			if (in_array($key, self::$svginheritprop)) {
 				// inherit previous value
 				$svgstyle[$key] = $val;
 			}
@@ -1347,7 +1347,7 @@ trait SvgTrait {
 						$offset /= 100;
 					}
 				}
-				$stop_color = isset($svgstyle['stop-color'])?$this->convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
+				$stop_color = isset($svgstyle['stop-color'])?LIMEPDF_COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
 				$opacity = isset($svgstyle['stop-opacity'])?$svgstyle['stop-opacity']:1;
 				$this->svggradients[$this->svggradientid]['stops'][] = array('offset' => $offset, 'color' => $stop_color, 'opacity' => $opacity);
 				break;

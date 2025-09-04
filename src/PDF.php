@@ -431,7 +431,12 @@ class PDF {
 	private function shouldThrowExceptions(): bool 
 	{
 		return !defined('K_TCPDF_THROW_EXCEPTION_ERROR') || K_TCPDF_THROW_EXCEPTION_ERROR;
-}
+	}
+
+	public static function unichrWrapper($c, $unicode = true) {
+		return self::unichr($c, $unicode);
+	}
+
 
 } // END OF  CLASS
 

@@ -58,8 +58,7 @@ $pdf->AddPage();
 
 // Set some content to print
 $html = <<<HTML
-<h1>Example of <a href="limepdf.com" style="text-decoration:none;background-color:#fff;color:black;">&nbsp;
-<span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a> document in 
+<h1>Example of <a href="limepdf.com" style="text-decoration:none;background-color:#fff;color:black;">&nbsp;<span style=";color:#527201">lime</span><span style="color:black;">PDF</span>&nbsp;</a> document in 
 <span style="background-color:#99ccff;color:black;"> PDF/A-3b </span> mode.</h1>
 <i>This document conforms to the standard <b>Factur-X 1.07 / ZUGFeRD 2.3</b>.</i>
 <p>Please check the source code documentation and other examples for further information (<a href="limepdf.com">limepdf.com</a>).</p>

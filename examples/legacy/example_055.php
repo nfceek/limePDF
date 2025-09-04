@@ -15,6 +15,7 @@
 // Last Update : 8-31-2025
 //============================================================+
 
+use LimePDF\Include\FontTrait;
 use LimePDF\Config\PdfBootstrap;
 require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
@@ -75,7 +76,7 @@ foreach($core_fonts as $font) {
 		if (($i > 0) AND (($i % 16) == 0)) {
 			$pdf->Ln();
 		}
-		$pdf->Cell(11.25, 11.25, TCPDF_FONTS::unichr($i), 1, 0, 'C', false, '', 0, false, 'T', 'M');
+		$pdf->Cell(11.25, 11.25, $pdf::unichr($i), 1, 0, 'C', false, '', 0, false, 'T', 'M');
 	}
 
 	$pdf->Ln(20);
