@@ -7,9 +7,16 @@ use LimePDF\Support\StaticTrait;
 
 trait EncryptionTrait {
 
+	// In EncryptionTrait class
+	protected string $enc_padding = "\x28\xBF\x4E\x5E\x4E\x75\x8A\x41\x64\x00\x4E\x56\xFF\xFA\x01\x08\x2E\x2E\x00\xB6\xD0\x68\x3E\x80\x2F\x0C\xA9\xFE\x64\x53\x69\x7A";
+
+
  	// ENCRYPTION METHODS ----------------------------------
 
 	/**
+	 *  NOTE: This trait has been fixed to get the example 016 file to run. IT DOES NOT guarantee that the excryption works !
+	 *  update: 9-5-2025
+	 * 
 	 * Compute encryption key depending on object number where the encrypted data is stored.
 	 * This is used for all strings and streams without crypt filter specifier.
 	 * @param int $n object number
@@ -66,14 +73,22 @@ trait EncryptionTrait {
 	 * @protected
 	 * @since 2.0.000 (2008-01-02)
 	 * @author Nicola Asuni
+	 * 
+	 * Php 7 & Php 8.2 Compliant
 	 */
 	protected function _Uvalue() {
 		if ($this->encryptdata['mode'] == 0) { // RC4-40
-			return $this->_RC4($this->encryptdata['key'], $this->$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
+			return $this->_RC4(
+				$this->encryptdata['key'],
+				$this->enc_padding,
+				$this->last_enc_key,
+				$this->last_enc_key_c
+			);
 		} elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
-			$tmp = $this->_md5_16($this->$enc_padding.$this->encryptdata['fileid']);
+			$tmp = $this->_md5_16($this->enc_padding . $this->encryptdata['fileid']);
 			$enc = $this->_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
 			$len = strlen($tmp);
+
 			for ($i = 1; $i <= 19; ++$i) {
 				$ek = '';
 				for ($j = 0; $j < $len; ++$j) {
@@ -81,17 +96,46 @@ trait EncryptionTrait {
 				}
 				$enc = $this->_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
 			}
+
 			$enc .= str_repeat("\x00", 16);
 			return substr($enc, 0, 32);
 		} elseif ($this->encryptdata['mode'] == 3) { // AES-256
 			$seed = $this->_md5_16($this->getRandomSeed());
-			// User Validation Salt
 			$this->encryptdata['UVS'] = substr($seed, 0, 8);
-			// User Key Salt
 			$this->encryptdata['UKS'] = substr($seed, 8, 16);
-			return hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UVS'], true).$this->encryptdata['UVS'].$this->encryptdata['UKS'];
+
+			return hash('sha256',
+				$this->encryptdata['user_password'] . $this->encryptdata['UVS'],
+				true
+			) . $this->encryptdata['UVS'] . $this->encryptdata['UKS'];
 		}
 	}
+
+	// protected function _Uvalue() {
+	// 	if ($this->encryptdata['mode'] == 0) { // RC4-40
+	// 		return $this->_RC4($this->encryptdata['key'], $this->$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
+	// 	} elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
+	// 		$tmp = $this->_md5_16($this->$enc_padding.$this->encryptdata['fileid']);
+	// 		$enc = $this->_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
+	// 		$len = strlen($tmp);
+	// 		for ($i = 1; $i <= 19; ++$i) {
+	// 			$ek = '';
+	// 			for ($j = 0; $j < $len; ++$j) {
+	// 				$ek .= chr(ord($this->encryptdata['key'][$j]) ^ $i);
+	// 			}
+	// 			$enc = $this->_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
+	// 		}
+	// 		$enc .= str_repeat("\x00", 16);
+	// 		return substr($enc, 0, 32);
+	// 	} elseif ($this->encryptdata['mode'] == 3) { // AES-256
+	// 		$seed = $this->_md5_16($this->getRandomSeed());
+	// 		// User Validation Salt
+	// 		$this->encryptdata['UVS'] = substr($seed, 0, 8);
+	// 		// User Key Salt
+	// 		$this->encryptdata['UKS'] = substr($seed, 8, 16);
+	// 		return hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UVS'], true).$this->encryptdata['UVS'].$this->encryptdata['UKS'];
+	// 	}
+	// }
 
 	/**
 	 * Compute UE value (used for encryption)
@@ -210,8 +254,8 @@ trait EncryptionTrait {
 				$this->encryptdata['perms'] = $this->_AESnopad($this->encryptdata['key'], $perms);
 			} else { // RC4-40, RC4-128, AES-128
 				// Pad passwords
-				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].$this->$enc_padding, 0, 32);
-				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].$this->$enc_padding, 0, 32);
+				$this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].$this->enc_padding, 0, 32);
+				$this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].$this->enc_padding, 0, 32);
 				// Compute O value
 				$this->encryptdata['O'] = $this->_Ovalue();
 				// get default permissions (reverse byte order)

@@ -38,7 +38,11 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 // ----- Form Specific Parameters-------------------------------------------------------
 
 	//  Set text for cell(s)
-		$pdfText = '';
+		$pdfText = 'Encryption Example Consult the source code documentation for the SetProtection() method.';
+
+		$user_pass='1234';
+
+		$certPath = '../data/cert/tcpdf.crt';
 
 // ----- Dont Edit below here ---------------------------------------------------------
 
@@ -81,7 +85,7 @@ $pdf->setProtection(array('print', 'copy'), '', null, 0, null);
 
 // Example with public-key
 // To open the document you need to install the private key (tcpdf.p12) on the Acrobat Reader. The password is: 1234
-//$pdf->setProtection($permissions=array('print', 'copy'), $user_pass='', $owner_pass=null, $mode=1, $pubkeys=array(array('c' => 'file://../config/cert/tcpdf.crt', 'p' => array('print'))));
+//$pdf->setProtection($permissions=array('print', 'copy'), $user_pass, $owner_pass=null, $mode=1, $pubkeys=array(array('c' => $certPath, 'p' => array('print'))));
 
 // *********************************************************
 
@@ -93,15 +97,8 @@ $pdf->setFont('times', '', 16);
 // add a page
 $pdf->AddPage();
 
-// set some text to print
-$txt = <<<EOD
-Encryption Example
-
-Consult the source code documentation for the SetProtection() method.
-EOD;
-
 // print a block of text using Write()
-$pdf->Write(0, $txt, '', 0, 'L', true, 0, false, false, 0);
+$pdf->Write(0, $pdfText, '', 0, 'L', true, 0, false, false, 0);
 
 
 // ---------------------------------------------------------
