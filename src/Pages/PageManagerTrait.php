@@ -367,21 +367,6 @@ trait PageManagerTrait {
 				$txt = $outline['t'].' ';
 			}
 			$this->Write(0, $txt, $link, false, $aligntext, false, 0, false, false, 0, $numwidth, null);
-			// $this->Write(
-			// 	$h,
-			// 	$txt,
-			// 	$link,
-			// 	$fill,
-			// 	$align,
-			// 	$ln,
-			// 	$stretch,
-			// 	$firstline,
-			// 	$firstblock,
-			// 	$maxh,
-			// 	$wadj,
-			// 	null // ✅ instead of ''
-			// );
-
 			if ($this->rtl) {
 				$tw = $this->x - $this->lMargin;
 			} else {

@@ -1091,7 +1091,13 @@ trait PutTrait {
 					} elseif ($o['u'][0] == '%') {
 						// embedded PDF file
 						$filename = basename(substr($o['u'], 1));
-						$out .= ' /A <</S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($o['p'] - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
+						//$out .= ' /A <</S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($o['p'] - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
+						if (isset($this->embeddedfiles[$filename]) && isset($this->embeddedfiles[$filename]['a'])) {
+							$out .= ' /A <</S /GoToE /D [0 /Fit] /NewWindow true /T << /R /C /P '.($o['p'] - 1).' /A '.$this->embeddedfiles[$filename]['a'].' >> >>';
+						} else {
+							// fallback: missing embedded file reference
+							$out .= ' /A <</S /URI /URI '.$this->_datastring($this->unhtmlentities($filename), $oid).'>>';
+						}
 					} elseif ($o['u'][0] == '*') {
 						// embedded generic file
 						$filename = basename(substr($o['u'], 1));

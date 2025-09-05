@@ -12,26 +12,35 @@ trait SignatureTrait {
 	 * @protected
 	 * @author Nicola Asuni
 	 * @since 4.6.008 (2009-05-07)
+	 * 
+	 *  Php 7 & Php 8.2 Compliant
 	 */
 	protected function _putsignature() {
-		if ((!$this->sign) OR (!isset($this->signature_data['cert_type']))) {
+		if ((!$this->sign) || (!isset($this->signature_data['cert_type']))) {
 			return;
 		}
+
+		// Build a placeholder /ByteRange string (will be replaced with real values later)
+		$pad = 20; // length of zeros to reserve
+		$zero = str_repeat('0', $pad);
+		$byterange_string = "/ByteRange [0 $zero $zero $zero]";
+
 		$sigobjid = ($this->sig_obj_id + 1);
-		$out = $this->_getobj($sigobjid)."\n";
+		$out  = $this->_getobj($sigobjid) . "\n";
 		$out .= '<< /Type /Sig';
 		$out .= ' /Filter /Adobe.PPKLite';
 		$out .= ' /SubFilter /adbe.pkcs7.detached';
-		$out .= ' '.$this->$byterange_string;
-		$out .= ' /Contents<'.str_repeat('0', $this->signature_max_length).'>';
-		if (empty($this->signature_data['approval']) OR ($this->signature_data['approval'] != 'A')) {
+		$out .= ' ' . $byterange_string;
+		$out .= ' /Contents<' . str_repeat('0', $this->signature_max_length) . '>';
+
+		if (empty($this->signature_data['approval']) || ($this->signature_data['approval'] != 'A')) {
 			$out .= ' /Reference ['; // array of signature reference dictionaries
 			$out .= ' << /Type /SigRef';
 			if ($this->signature_data['cert_type'] > 0) {
 				$out .= ' /TransformMethod /DocMDP';
 				$out .= ' /TransformParams <<';
 				$out .= ' /Type /TransformParams';
-				$out .= ' /P '.$this->signature_data['cert_type'];
+				$out .= ' /P ' . $this->signature_data['cert_type'];
 				$out .= ' /V /1.2';
 			} else {
 				$out .= ' /TransformMethod /UR3';
@@ -39,24 +48,68 @@ trait SignatureTrait {
 				$out .= ' /Type /TransformParams';
 				$out .= ' /V /2.2';
 				if (!$this->empty_string($this->ur['document'])) {
-					$out .= ' /Document['.$this->ur['document'].']';
+					$out .= ' /Document[' . $this->ur['document'] . ']';
 				}
 				if (!$this->empty_string($this->ur['form'])) {
-					$out .= ' /Form['.$this->ur['form'].']';
+					$out .= ' /Form[' . $this->ur['form'] . ']';
 				}
 				if (!$this->empty_string($this->ur['signature'])) {
-					$out .= ' /Signature['.$this->ur['signature'].']';
+					$out .= ' /Signature[' . $this->ur['signature'] . ']';
 				}
 				if (!$this->empty_string($this->ur['annots'])) {
-					$out .= ' /Annots['.$this->ur['annots'].']';
+					$out .= ' /Annots[' . $this->ur['annots'] . ']';
 				}
 				if (!$this->empty_string($this->ur['ef'])) {
-					$out .= ' /EF['.$this->ur['ef'].']';
+					$out .= ' /EF[' . $this->ur['ef'] . ']';
 				}
 				if (!$this->empty_string($this->ur['formex'])) {
-					$out .= ' /FormEX['.$this->ur['formex'].']';
+					$out .= ' /FormEX[' . $this->ur['formex'] . ']';
 				}
 			}
+		// protected function _putsignature() {
+		// 	if ((!$this->sign) OR (!isset($this->signature_data['cert_type']))) {
+		// 		return;
+		// 	}
+		// 	$sigobjid = ($this->sig_obj_id + 1);
+		// 	$out = $this->_getobj($sigobjid)."\n";
+		// 	$out .= '<< /Type /Sig';
+		// 	$out .= ' /Filter /Adobe.PPKLite';
+		// 	$out .= ' /SubFilter /adbe.pkcs7.detached';
+		// 	$out .= ' '.$this->$byterange_string;
+		// 	$out .= ' /Contents<'.str_repeat('0', $this->signature_max_length).'>';
+		// 	if (empty($this->signature_data['approval']) OR ($this->signature_data['approval'] != 'A')) {
+		// 		$out .= ' /Reference ['; // array of signature reference dictionaries
+		// 		$out .= ' << /Type /SigRef';
+		// 		if ($this->signature_data['cert_type'] > 0) {
+		// 			$out .= ' /TransformMethod /DocMDP';
+		// 			$out .= ' /TransformParams <<';
+		// 			$out .= ' /Type /TransformParams';
+		// 			$out .= ' /P '.$this->signature_data['cert_type'];
+		// 			$out .= ' /V /1.2';
+		// 		} else {
+		// 			$out .= ' /TransformMethod /UR3';
+		// 			$out .= ' /TransformParams <<';
+		// 			$out .= ' /Type /TransformParams';
+		// 			$out .= ' /V /2.2';
+		// 			if (!$this->empty_string($this->ur['document'])) {
+		// 				$out .= ' /Document['.$this->ur['document'].']';
+		// 			}
+		// 			if (!$this->empty_string($this->ur['form'])) {
+		// 				$out .= ' /Form['.$this->ur['form'].']';
+		// 			}
+		// 			if (!$this->empty_string($this->ur['signature'])) {
+		// 				$out .= ' /Signature['.$this->ur['signature'].']';
+		// 			}
+		// 			if (!$this->empty_string($this->ur['annots'])) {
+		// 				$out .= ' /Annots['.$this->ur['annots'].']';
+		// 			}
+		// 			if (!$this->empty_string($this->ur['ef'])) {
+		// 				$out .= ' /EF['.$this->ur['ef'].']';
+		// 			}
+		// 			if (!$this->empty_string($this->ur['formex'])) {
+		// 				$out .= ' /FormEX['.$this->ur['formex'].']';
+		// 			}
+		// 		}
 			$out .= ' >>'; // close TransformParams
 			// optional digest data (values must be calculated and replaced later)
 			//$out .= ' /Data ********** 0 R';

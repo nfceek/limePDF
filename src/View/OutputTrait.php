@@ -28,23 +28,50 @@ trait OutputTrait {
 			$dest = $dest ? 'D' : 'F';
 		}
 		$dest = strtoupper($dest);
+	if ($this->sign) {
+		// *** apply digital signature to the document ***
+		// get the document content
+		$pdfdoc = $this->getBuffer();
+		// remove last newline
+		$pdfdoc = substr($pdfdoc, 0, -1);
+		// remove filler space
+		$byterange_string_len = strlen($this->byterange_string);
+		// define the ByteRange
+		$byte_range = [];
+		$byte_range[0] = 0;
+		$byte_range[1] = strpos($pdfdoc, $this->byterange_string) + $byterange_string_len + 10;
+		$byte_range[2] = $byte_range[1] + $this->signature_max_length + 2;
+		$byte_range[3] = strlen($pdfdoc) - $byte_range[2];
 
-		if ($this->sign) {
-			// *** apply digital signature to the document ***
-			// get the document content
-			$pdfdoc = $this->getBuffer();
-			// remove last newline
-			$pdfdoc = substr($pdfdoc, 0, -1);
-			// remove filler space
-			$byterange_string_len = strlen($this->$byterange_string);
-			// define the ByteRange
-			$byte_range = array();
-			$byte_range[0] = 0;
-			$byte_range[1] = strpos($pdfdoc, $this->$byterange_string) + $byterange_string_len + 10;
-			$byte_range[2] = $byte_range[1] + $this->signature_max_length + 2;
-			$byte_range[3] = strlen($pdfdoc) - $byte_range[2];
-			$pdfdoc = substr($pdfdoc, 0, $byte_range[1]).substr($pdfdoc, $byte_range[2]);
-			// replace the ByteRange
+		$pdfdoc = substr($pdfdoc, 0, $byte_range[1]) . substr($pdfdoc, $byte_range[2]);
+
+		// replace the ByteRange
+		$byterange = sprintf(
+			'/ByteRange[0 %u %u %u]',
+			$byte_range[1],
+			$byte_range[2],
+			$byte_range[3]
+		);
+		$byterange .= str_repeat(' ', ($byterange_string_len - strlen($byterange)));
+
+		$pdfdoc = str_replace($this->byterange_string, $byterange, $pdfdoc);
+
+		// if ($this->sign) {
+		// 	// *** apply digital signature to the document ***
+		// 	// get the document content
+		// 	$pdfdoc = $this->getBuffer();
+		// 	// remove last newline
+		// 	$pdfdoc = substr($pdfdoc, 0, -1);
+		// 	// remove filler space
+		// 	$byterange_string_len = strlen($this->byterange_string);
+		// 	// define the ByteRange
+		// 	$byte_range = array();
+		// 	$byte_range[0] = 0;
+		// 	$byte_range[1] = strpos($pdfdoc, $this->$byterange_string) + $byterange_string_len + 10;
+		// 	$byte_range[2] = $byte_range[1] + $this->signature_max_length + 2;
+		// 	$byte_range[3] = strlen($pdfdoc) - $byte_range[2];
+		// 	$pdfdoc = substr($pdfdoc, 0, $byte_range[1]).substr($pdfdoc, $byte_range[2]);
+		// 	// replace the ByteRange
 			$byterange = sprintf('/ByteRange[0 %u %u %u]', $byte_range[1], $byte_range[2], $byte_range[3]);
 			$byterange .= str_repeat(' ', ($byterange_string_len - strlen($byterange)));
 			$pdfdoc = str_replace($this->$byterange_string, $byterange, $pdfdoc);
