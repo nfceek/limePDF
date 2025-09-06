@@ -136,17 +136,17 @@
 // 	}
 // }
 
-// if (!defined('K_PATH_CACHE')) {
-// 	$K_PATH_CACHE = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir') : sys_get_temp_dir();
-// 	if (substr($K_PATH_CACHE, -1) != '/') {
-// 		$K_PATH_CACHE .= '/';
-// 	}
-// 	define ('K_PATH_CACHE', $K_PATH_CACHE);
-// }
+if (!defined('K_PATH_CACHE')) {
+	$K_PATH_CACHE = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir') : sys_get_temp_dir();
+	if (substr($K_PATH_CACHE, -1) != '/') {
+		$K_PATH_CACHE .= '/';
+	}
+	define ('K_PATH_CACHE', $K_PATH_CACHE);
+}
 
-// if (!defined('K_BLANK_IMAGE')) {
-// 	define ('K_BLANK_IMAGE', '_blank.png');
-// }
+if (!defined('K_BLANK_IMAGE')) {
+	define ('K_BLANK_IMAGE', '_blank.png');
+}
 
 // if (!defined('PDF_PAGE_FORMAT')) {
 // 	define ('PDF_PAGE_FORMAT', 'A4');
@@ -261,9 +261,9 @@
 // }
 
 // Custom cURL options for curl_setopt_array.
-// if (!defined('K_CURLOPTS')) {
-// 	define('K_CURLOPTS', array());
-// }
+if (!defined('K_CURLOPTS')) {
+	define('K_CURLOPTS', array());
+}
 
 //============================================================+
 // END OF FILE

@@ -19,7 +19,7 @@ trait StaticTrait {
 	 * Current limePDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '0.2.1';
+	private static $limepdf_version = '0.2.1';
 
 	/**
 	 * String alias for total number of pages.
@@ -1873,7 +1873,8 @@ trait StaticTrait {
             $curlopts[CURLOPT_FOLLOWLOCATION] = true;
         }
         $curlopts = array_replace($curlopts, self::CURLOPT_DEFAULT);
-        $curlopts = array_replace($curlopts, $config->get('curlOpts', []));
+		$curlopts = array_replace($curlopts, K_CURLOPTS);
+        //$curlopts = array_replace($curlopts, $config->get('curlOpts', []));
         $curlopts = array_replace($curlopts, self::CURLOPT_FIXED);
         $curlopts[CURLOPT_URL] = $url;
         curl_setopt_array($crs, $curlopts);
