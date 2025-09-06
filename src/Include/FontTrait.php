@@ -2716,7 +2716,7 @@ trait FontTrait {
 		return $ordarray;
 	}
 
-} // END OF TCPDF_FONTS CLASS
+} // END OF FONTS CLASS
 
 //============================================================+
 // END OF FILE

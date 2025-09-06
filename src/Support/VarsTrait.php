@@ -129,7 +129,7 @@ trait VarsTrait {
 	protected $currpagegroup = 0;
 	protected $extgstates;    
 	protected $jpeg_quality;    
-	protected $cell_height_ratio = K_CELL_HEIGHT_RATIO;    
+	protected $cell_height_ratio = 1.25;    
 	protected $viewer_preferences;    
 	protected $PageMode;    
 	protected $gradients = array();    

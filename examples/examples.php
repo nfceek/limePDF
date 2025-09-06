@@ -117,7 +117,7 @@
         <li><a href="legacy/example_025.php" target="_blank">Transparency</a></li>
         <li><a href="legacy/example_026.php" target="_blank">Text Rendering & Clipping</a></li>
         <li><a href="legacy/example_041.php" target="_blank">File Attachment</a></li>
-        <li><a href="legacy/example_052.php" target="_blank">Digital Signature</a></li>
+        <li><a href="legacy/example_052.php" target="_blank">Digital Signature -- Broken code</a></li>
         <li><a href="legacy/example_065.php" target="_blank">PDF/A-3b Document</a></li>
         <li><a href="legacy/example_068.php" target="_blank">PDF/A-3b + Embedded File</a></li>
         <li><a href="legacy/example_008.php" target="_blank">External UTF-8 text file</a></li>

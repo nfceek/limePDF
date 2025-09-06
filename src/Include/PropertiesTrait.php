@@ -65,7 +65,7 @@ trait PropertiesTrait {
             'bufferlen' => 0,
             'cache_file_length' => array(
 ),
-            'cell_height_ratio' => 'K_CELL_HEIGHT_RATIO',
+            'cell_height_ratio' => '1.25',
             'cell_margin' => array(
                 0 => '\'T\' => 0',
                 1 => '\'R\' => 0',

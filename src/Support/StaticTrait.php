@@ -2,13 +2,24 @@
 
 namespace LimePDF\Support;
 
+use LimePDF\Config\ConfigManager;
+
 trait StaticTrait {
+
+    protected function mergeCurlOpts(array $curlopts): array
+    {
+        $config = ConfigManager::getInstance();
+        return array_replace(
+            $curlopts,
+            $config->get('curlOpts', [])
+        );
+    }
 
 	/**
 	 * Current limePDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '0.0.7';
+	private static $tcpdf_version = '0.2.1';
 
 	/**
 	 * String alias for total number of pages.
@@ -89,23 +100,23 @@ trait StaticTrait {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
-	 * Return the current TCPDF version.
-	 * @return string TCPDF version string
+	 * Return the current LImePDF version.
+	 * @return string LImePDF version string
 	 * @since 5.9.012 (2010-11-10)
 	 * @public static
 	 */
-	public static function getTCPDFVersion() {
-		return self::$tcpdf_version;
+	public static function getLimePDFVersion() {
+		return self::$limepdf_version;
 	}
 
 	/**
-	 * Return the current TCPDF producer.
-	 * @return string TCPDF producer string
+	 * Return the current LImePDF producer.
+	 * @return string LImePDF producer string
 	 * @since 6.0.000 (2013-03-16)
 	 * @public static
 	 */
-	public static function getTCPDFProducer() {
-		return "\x54\x43\x50\x44\x46\x20".self::getTCPDFVersion()."\x20\x28\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x74\x63\x70\x64\x66\x2e\x6f\x72\x67\x29";
+	public static function getLimePDFProducer() {
+		return "\x54\x43\x50\x44\x46\x20".self::getLimePDFVersion()."\x20\x28\x68\x74\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\x74\x63\x70\x64\x66\x2e\x6f\x72\x67\x29";
 	}
 
 	/**
@@ -236,14 +247,14 @@ trait StaticTrait {
 
 	/**
 	 * Returns a temporary filename for caching object on filesystem.
-	 * @param string $type Type of file (name of the subdir on the tcpdf cache folder).
-	 * @param string $file_id TCPDF file_id.
+	 * @param string $type Type of file (name of the subdir on the LImePDF cache folder).
+	 * @param string $file_id LImePDF file_id.
 	 * @return string filename.
 	 * @since 4.5.000 (2008-12-31)
 	 * @public static
 	 */
 	public static function getObjFilename($type='tmp', $file_id='') {
-		return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_');
+		return tempnam(K_PATH_CACHE, '__limepdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_');
 	}
 
 	/**
@@ -825,15 +836,23 @@ trait StaticTrait {
 			if (is_array($prop['fillColor'])) {
 				$opt['mk']['bg'] = $prop['fillColor'];
 			} else {
-				$opt['mk']['bg'] = TCPDF_COLORS::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
-			}
+				//$opt['mk']['bg'] = TCPDF_COLORS::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
+				$opt['mk']['bg'] = $this->convertHTMLColorToDec(
+					$prop['fillColor'],
+					$this->spot_colors ?? []
+				);
+				}
 		}
 		// strokeColor: Specifies the stroke color for a field that is used to stroke the rectangle of the field with a line as large as the line width.
 		if (isset($prop['strokeColor'])) {
 			if (is_array($prop['strokeColor'])) {
 				$opt['mk']['bc'] = $prop['strokeColor'];
 			} else {
-				$opt['mk']['bc'] = TCPDF_COLORS::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
+				//$opt['mk']['bc'] = TCPDF_COLORS::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
+				$opt['mk']['bc'] = $this->convertHTMLColorToDec(
+					$prop['fillColor'],
+					$this->spot_colors ?? []
+				);
 			}
 		}
 		// rotation: The rotation of a widget in counterclockwise increments.
@@ -1854,7 +1873,7 @@ trait StaticTrait {
             $curlopts[CURLOPT_FOLLOWLOCATION] = true;
         }
         $curlopts = array_replace($curlopts, self::CURLOPT_DEFAULT);
-        $curlopts = array_replace($curlopts, K_CURLOPTS);
+        $curlopts = array_replace($curlopts, $config->get('curlOpts', []));
         $curlopts = array_replace($curlopts, self::CURLOPT_FIXED);
         $curlopts[CURLOPT_URL] = $url;
         curl_setopt_array($crs, $curlopts);
@@ -1987,7 +2006,7 @@ trait StaticTrait {
 					$curlopts[CURLOPT_FOLLOWLOCATION] = true;
 				}
 				$curlopts = array_replace($curlopts, self::CURLOPT_DEFAULT);
-				$curlopts = array_replace($curlopts, K_CURLOPTS);
+				$curlopts = array_replace($curlopts, $config->get('curlOpts', []));
 				$curlopts = array_replace($curlopts, self::CURLOPT_FIXED);
 				$curlopts[CURLOPT_URL] = $url;
 				curl_setopt_array($crs, $curlopts);

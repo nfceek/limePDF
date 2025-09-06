@@ -3,7 +3,7 @@
  * limePDF - Modern PHP PDF Generator
  *
  * @package    limePDF
- * @author     Brad Smith <youremail@example.com>
+ * @author     Brad Smith
  * @copyright  2025 Brad Smith
  * @license    LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.html)
  * @link       https://github.com/yourusername/limePDF
@@ -59,7 +59,7 @@ class ConfigManager
     protected function getDefaults(): array
     {
         return [
-            'allowedTcpdfTags' => '',           
+            'allowedLimepdfTags' => '',           
             'author' => 'limePDF',
             'title' => 'limePDF',
             'blankimage' => '_blank.png',
@@ -104,8 +104,8 @@ class ConfigManager
 
             'titleMagnification' => 1.3,
             'thaiTopChars' => true,
-            'tcpdfcAllsinhtml' => false,
-            'tcpdfThrowExceptionerror' => false,
+            'limepdfcAllsinhtml' => false,
+            'limepdfThrowExceptionerror' => false,
             'timeZone' => date_default_timezone_get(),
 
             'unit' => 'mm',

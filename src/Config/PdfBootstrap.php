@@ -54,6 +54,14 @@ class PdfBootstrap
             false
         );
 
+        $pdf->setCellHeightRatio($pdfConfig['cellHeightRatio'] ?? 1.25);
+        
+        $curlopts = [];
+        $curlopts = array_replace(
+            $curlopts,
+            $pdfConfig['curlOpts'] ?? []
+        );
+
         // Standard setup
         $pdf->setCreator($pdfConfig['creator']);
         $pdf->setAuthor($pdfConfig['author']);

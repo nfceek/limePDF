@@ -33,7 +33,9 @@ public function Header() {
         // ✅ Always define $imgy safely
         $imgy = $this->y;
 
-        if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+		$config = ConfigManager::getInstance();
+		$blankImage = $config->get('blankImage', '_blank.png');
+        if (!empty($headerdata['logo']) && $headerdata['logo'] !== $blankImage) {
             $imgPath = $headerdata['logo'];
 
             if (!file_exists($imgPath)) {
