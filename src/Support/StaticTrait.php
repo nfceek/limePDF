@@ -2,8 +2,6 @@
 
 namespace LimePDF\Support;
 
-use LimePDF\Support\StaticTrait;
-
 trait StaticTrait {
 
 	/**

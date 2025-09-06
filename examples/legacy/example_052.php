@@ -48,6 +48,7 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 
 
 	$pdfImage = dirname(__DIR__, 2) . '/examples/images/limepdf_signature.png';
+	
 // ----- Dont Edit below here ---------------------------------------------------------
 
 // send form parameters 
