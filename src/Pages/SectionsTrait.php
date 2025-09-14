@@ -8,17 +8,17 @@ use LimePDF\Support\StaticTrait;
 
 trait SectionsTrait {
 
-
-	/**
-	 * This method is used to render the page header.
-	 * It is automatically called by AddPage() and could be overwritten in your own inherited class.
-	 * @public
-	 * 
-	 * 2025 - PHP 7 / 8+ compliant rewrite
-	 * @author Brad Smith
-	 * @since ver 1.1
-	 */
+/**
+ * This method is used to render the page header.
+ * It is automatically called by AddPage() and could be overwritten in your own inherited class.
+ * @public
+ * 
+ * 2025 - PHP 7 / 8+ compliant rewrite
+ * @author Brad Smith
+ * @since ver 1.1
+ */
 public function Header() {
+	$defaultImg = '_blank.png';
     if ($this->header_xobjid === false) {
         $this->header_xobjid = $this->startTemplate($this->w, $this->tMargin);
         $headerfont = $this->getHeaderFont();
@@ -33,7 +33,7 @@ public function Header() {
         // ✅ Always define $imgy safely
         $imgy = $this->y;
 
-        if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+        if (!empty($headerdata['logo']) && $headerdata['logo'] !== $defaultImg) {
             $imgPath = $headerdata['logo'];
 
             if (!file_exists($imgPath)) {
@@ -119,7 +119,7 @@ public function Header() {
 //         // normalize logo width for arithmetic (safe for PHP 7 & 8+)
 //         $logoWidth = isset($headerdata['logo_width']) ? (float) $headerdata['logo_width'] : 0.0;
 
-// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== $defaultImg) {
 // 			$imgPath = $headerdata['logo'];
 
 // 			// If they only gave us a filename, try K_PATH_IMAGES
@@ -141,7 +141,7 @@ public function Header() {
 // 			}
 
 //         // logo -- TODO remove after testing
-//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== $defaultImg) {
 //         //     $imgPath = K_PATH_IMAGES . $headerdata['logo'];
 //         //     $imgtype = $this->getImageFileType($imgPath);
 
@@ -212,7 +212,7 @@ public function Header() {
 //         // normalize logo width for arithmetic (safe for PHP 7 & 8+)
 //         $logoWidth = isset($headerdata['logo_width']) ? (float) $headerdata['logo_width'] : 0.0;
 
-// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+// 		if (!empty($headerdata['logo']) && $headerdata['logo'] !== $defaultImg) {
 // 			$imgPath = $headerdata['logo'];
 
 // 			// If they only gave us a filename, try K_PATH_IMAGES
@@ -234,7 +234,7 @@ public function Header() {
 // 			}
 // }
 //         // logo -- TODO remove after testing
-//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== K_BLANK_IMAGE) {
+//         // if (!empty($headerdata['logo']) && $headerdata['logo'] !== $defaultImg) {
 //         //     $imgPath = K_PATH_IMAGES . $headerdata['logo'];
 //         //     $imgtype = $this->getImageFileType($imgPath);
 

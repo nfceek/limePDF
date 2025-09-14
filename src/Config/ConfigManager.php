@@ -25,6 +25,7 @@ namespace LimePDF\Config;
 class ConfigManager
 {
     protected array $config;
+    public const THROW_EXCEPTION_ERROR = false;
 
     public function __construct(array $overrides = [])
     {
@@ -58,6 +59,11 @@ class ConfigManager
 
     protected function getDefaults(): array
     {
+        $cacheDir = ini_get('upload_tmp_dir') ?: sys_get_temp_dir();
+            if (substr($cacheDir, -1) !== DIRECTORY_SEPARATOR) {
+                $cacheDir .= DIRECTORY_SEPARATOR;
+            }
+
         return [
             'allowedLimepdfTags' => '',           
             'author' => 'limePDF',
@@ -109,6 +115,7 @@ class ConfigManager
             'timeZone' => date_default_timezone_get(),
 
             'unit' => 'mm',
+            'cachePath'          => $cacheDir,
         ];
     }
 }

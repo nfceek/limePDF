@@ -6,7 +6,7 @@ namespace LimePDF;
 	require_once dirname(__FILE__, 2) . '/vendor/autoload.php';
 
 	// limePDF configuration
-	require_once(dirname(__FILE__) . '/AutoConfig.php');
+	require_once(dirname(__FILE__) . '/legacy.php');
 
 	// includes Vars
 	use LimePDF\Barcodes\BarcodeTrait;
@@ -69,6 +69,8 @@ namespace LimePDF;
 	use LimePDF\Web\WebTrait;	
 
 class PDF {
+
+	public const THROW_EXCEPTION_ERROR = false;
 
 	use ColorsTrait;
 	use FiltersTrait;	
@@ -428,10 +430,17 @@ class PDF {
 		exit(1);
 	}
 
-	private function shouldThrowExceptions(): bool 
-	{
-		return !defined('K_TCPDF_THROW_EXCEPTION_ERROR') || K_TCPDF_THROW_EXCEPTION_ERROR;
-	}
+	// private function shouldThrowExceptions(): bool 
+	// {
+	// 	return !defined('K_TCPDF_THROW_EXCEPTION_ERROR') || K_TCPDF_THROW_EXCEPTION_ERROR;
+	// }
+
+	private function shouldThrowExceptions(): bool
+    {
+        // No global defines anymore
+        return self::THROW_EXCEPTION_ERROR;
+    }
+
 
 	public static function unichrWrapper($c, $unicode = true) {
 		return self::unichr($c, $unicode);

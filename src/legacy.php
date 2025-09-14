@@ -144,9 +144,9 @@ if (!defined('K_PATH_CACHE')) {
 	define ('K_PATH_CACHE', $K_PATH_CACHE);
 }
 
-if (!defined('K_BLANK_IMAGE')) {
-	define ('K_BLANK_IMAGE', '_blank.png');
-}
+// if (!defined('K_BLANK_IMAGE')) {
+// 	define ('K_BLANK_IMAGE', '_blank.png');
+// }
 
 // if (!defined('PDF_PAGE_FORMAT')) {
 // 	define ('PDF_PAGE_FORMAT', 'A4');
@@ -244,17 +244,17 @@ if (!defined('K_BLANK_IMAGE')) {
 // 	define('K_THAI_TOPCHARS', true);
 // }
 
-// if (!defined('K_TCPDF_CALLS_IN_HTML')) {
-// 	define('K_TCPDF_CALLS_IN_HTML', false);
-// }
+if (!defined('K_TCPDF_CALLS_IN_HTML')) {
+	define('K_TCPDF_CALLS_IN_HTML', false);
+}
 
 // if (!defined('K_ALLOWED_TCPDF_TAGS')) {
 // 	define('K_ALLOWED_TCPDF_TAGS', '');
 // }
 
-// if (!defined('K_TCPDF_THROW_EXCEPTION_ERROR')) {
-// 	define('K_TCPDF_THROW_EXCEPTION_ERROR', false);
-// }
+if (!defined('K_TCPDF_THROW_EXCEPTION_ERROR')) {
+	define('K_TCPDF_THROW_EXCEPTION_ERROR', false);
+}
 
 // if (!defined('K_TIMEZONE')) {
 // 	define('K_TIMEZONE', @date_default_timezone_get());

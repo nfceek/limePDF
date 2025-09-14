@@ -253,9 +253,24 @@ trait StaticTrait {
 	 * @since 4.5.000 (2008-12-31)
 	 * @public static
 	 */
-	public static function getObjFilename($type='tmp', $file_id='') {
-		return tempnam(K_PATH_CACHE, '__limepdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_');
-	}
+	// public static function getObjFilename($type='tmp', $file_id='') {
+	// 	// $cachePath = $this->config['cachePath'] ?? sys_get_temp_dir().DIRECTORY_SEPARATOR;
+	// 	$config = \LimePDF\Config\ConfigManager::getInstance();
+	// 	$cachePath = $config->get('cachePath', sys_get_temp_dir() . DIRECTORY_SEPARATOR);
+
+	// 	return tempnam($cachePath, '__limepdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_');
+	// }
+
+	public static function getObjFilename($type = 'tmp', $file_id = '', ?\LimePDF\Config\ConfigManager $config = null) {
+    $cachePath = $config?->get('cachePath', sys_get_temp_dir() . DIRECTORY_SEPARATOR)
+        ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR;
+
+    return tempnam(
+        $cachePath,
+        '__limepdf_'.$file_id.'_'.$type.'_'.md5(self::getRandomSeed()).'_'
+    );
+}
+
 
 	/**
 	 * Add "\" before "\", "(" and ")"

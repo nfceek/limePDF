@@ -5,12 +5,11 @@ namespace LimePDF\Graphics;
 use LimePDF\Include\ImageTrait;
 use LimePDF\Support\StaticTrait;
 use LimePDF\Include\ImageToolsTrait;
-
-
-
+use LimePDF\Config\ConfigManager;
 
 trait ImageAddTrait {
 	use ImageToolsTrait;
+
 
 	/**
      * Add an image into the PDF document.
@@ -202,7 +201,7 @@ trait ImageAddTrait {
 			}
             if (false !== $info = $this->getImageBuffer($file)) {
                 $imsize = array($info['w'], $info['h']);
-            } elseif (($imsize = @getimagesize($file)) === FALSE && strpos($file, '__tcpdf_'.$this->file_id.'_img') === FALSE){
+            } elseif (($imsize = @getimagesize($file)) === FALSE && strpos($file, '__limepdf_'.$this->file_id.'_img') === FALSE){
                 $imgdata = $this->getCachedFileContents($file);
             }
 		}
@@ -324,18 +323,19 @@ trait ImageAddTrait {
 			$newimage = false;
 			// get existing image data
 			$info = $this->getImageBuffer($file);
-			if (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE) {
+			if (strpos($file, '__limepdf_'.$this->file_id.'_imgmask_') === FALSE) {
 				// check if the newer image is larger
 				$oldsize = ($info['w'] * $info['h']);
 				if ((($oldsize < $newsize) AND ($resize)) OR (($oldsize < $pixsize) AND (!$resize))) {
 					$newimage = true;
 				}
 			}
-		} elseif (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)) {
+		} elseif (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__limepdf_'.$this->file_id.'_imgmask_') === FALSE)) {
+			$cachePath = $this->config['cachePath'] ?? sys_get_temp_dir().DIRECTORY_SEPARATOR;
 			// create temp image file (without alpha channel)
-			$tempfile_plain = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+			$tempfile_plain = $cachePath.'__limepdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 			// create temp alpha file
-			$tempfile_alpha = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+			$tempfile_alpha = $cachePath.'__limepdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 			// check for cached images
 			if (in_array($tempfile_plain, $this->imagekeys)) {
 				// get existing image data
@@ -369,7 +369,7 @@ trait ImageAddTrait {
 			if ((method_exists('LIMEPDF_IMAGES', $mtd)) AND (!($resize AND (function_exists($gdfunction) OR extension_loaded('imagick'))))) {
 				// TCPDF image functions
 				$info = $this->$mtd($file);
-				if (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)
+				if (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__limepdf_'.$this->file_id.'_imgmask_') === FALSE)
 					AND (($info === 'pngalpha') OR (isset($info['trns']) AND !empty($info['trns'])))) {
 					return $this->ImagePngAlpha($file, $x, $y, $pixw, $pixh, $w, $h, 'PNG', $link, $align, $resize, $dpi, $palign, $filehash);
 				}
@@ -576,9 +576,9 @@ trait ImageAddTrait {
 			$filehash = md5($file);
 		}
 		// create temp image file (without alpha channel)
-		$tempfile_plain = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+		$tempfile_plain = $cachePath.'__limepdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 		// create temp alpha file
-		$tempfile_alpha = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+		$tempfile_alpha = $cachePath.'__limepdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 		$parsed = false;
 		$parse_error = '';
 		// ImageMagick extension

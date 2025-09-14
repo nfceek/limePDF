@@ -18,6 +18,7 @@ class PdfBootstrap
             'author' => $cfgArray['author'],
             'creator' => $cfgArray['creator'],
             'title' => $cfgArray['title'],
+            'blankimage'  => $cfgArray['blankimage'],
             'font' => [
                 'main' => [$cfgArray['fontNameMain'], $cfgArray['fontSizeMain']],
                 'data' => [$cfgArray['fontNameData'], $cfgArray['fontSizeData']],
@@ -42,7 +43,8 @@ class PdfBootstrap
             'meta' => [
                 'subject' => $cfgArray['subject'],
                 'keywords' => $cfgArray['keywords'],
-            ]
+            ],
+            'cachePath'      => $cfgArray['cachePath'],
         ];
 
         $pdf = new Pdf(
