@@ -60,7 +60,7 @@ $pdf->AddPage();
 
 IMPORTANT:
 If you are printing user-generated content, the limepdf tag should be considered unsafe.
-This tag is disabled by default by the K_TCPDF_CALLS_IN_HTML constant on LimePDF configuration file.
+This tag is disabled by default by the limePDF_CALLS_IN_HTML constant on LimePDF configuration file.
 Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.
 
 For security reasons, the content of the LimePDF tag must be prepared and encoded with the serializeLimePDFtag() method (see the example below).

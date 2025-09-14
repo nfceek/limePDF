@@ -430,11 +430,6 @@ class PDF {
 		exit(1);
 	}
 
-	// private function shouldThrowExceptions(): bool 
-	// {
-	// 	return !defined('K_TCPDF_THROW_EXCEPTION_ERROR') || K_TCPDF_THROW_EXCEPTION_ERROR;
-	// }
-
 	private function shouldThrowExceptions(): bool
     {
         // No global defines anymore
