@@ -9,6 +9,8 @@ use LimePDF\Support\StaticTrait;
 
 trait HtmlTrait {
 
+		public const limePDF_CALLS_IN_HTML = false;
+
     /**
 	 * Output anchor link.
 	 * @param string $url link URL or internal link (i.e.: &lt;a href="#23,4.5"&gt;link to page 23 at 4.5 Y position&lt;/a&gt;)
@@ -2336,9 +2338,9 @@ trait HtmlTrait {
 				break;
 			}
 			case 'tcpdf': {
-				if (defined('K_TCPDF_CALLS_IN_HTML') AND (K_TCPDF_CALLS_IN_HTML === true)) {
-					// Special tag used to call TCPDF methods
-					// This tag is disabled by default by the K_TCPDF_CALLS_IN_HTML constant on TCPDF configuration file.
+				if (defined('limePDF_CALLS_IN_HTML') AND (limePDF_CALLS_IN_HTML === true)) {
+					// Special tag used to call LimePDF methods
+					// This tag is disabled by default by the limePDF_CALLS_IN_HTML constant on TCPDF configuration file.
 					// Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.
 					if (!empty($tag['attribute']['data'])) {
 						$tcpdf_tag_data = $this->unserializeTCPDFtag($tag['attribute']['data']);

@@ -38,7 +38,7 @@ require_once __DIR__ . '/../../src/config/PdfBootstrap.php';
 // ----- Form Specific Parameters-------------------------------------------------------
 
 	//  Set text for cell(s)
-        $InputText = 'An alternative configuration file is used on this example. Check the definition of the K_TCPDF_EXTERNAL_CONFIG constant on the source code.';
+        $InputText = 'An alternative configuration file is used on this example. ';
 
 // ----- Dont Edit below here ---------------------------------------------------------
 
