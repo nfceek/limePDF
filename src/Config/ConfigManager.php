@@ -6,7 +6,7 @@
  * @author     Brad Smith
  * @copyright  2025 Brad Smith
  * @license    LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.html)
- * @link       https://github.com/yourusername/limePDF
+ * @link       https://github.com/nfceek/limePDF
  * @version    1.0.0
  *
  * This project is a maintained fork of TCPDF by Nicola Asuni.
