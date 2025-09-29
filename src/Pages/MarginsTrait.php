@@ -1,78 +1,80 @@
 <?php
 
+/**
+ * limePDF - Modern PHP PDF Generator
+ *
+ * @package    limePDF
+ * @author     Brad Smith
+ * @copyright  2025 Brad Smith
+ * @license    LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.html)
+ * @link       https://github.com/nfceek/limePDF
+ * @version    1.0.0
+ *
+ * This file has been validated for Php 7 & Php 8.2
+ *
+ * limePDF is a refactored and modernized fork of TCPDF,
+ * focused on improved maintainability, developer experience,
+ * and integration with modern PHP frameworks and front-end tools.
+ *
+ * Original TCPDF Copyright (c) 2002-2023:
+ * Nicola Asuni - Tecnick.com LTD - info@tecnick.com
+ */
+
+
 namespace LimePDF\Pages;
 
-trait MarginsTrait {
+trait MarginsTrait
+{
+    /**
+     * Defines the left, top and right margins.
+     */
+    public function setMargins(float $left, float $top, ?float $right = null, bool $keepmargins = false): void
+    {
+        $this->lMargin = $left;
+        $this->tMargin = $top;
 
-	/**
-	 * Defines the left, top and right margins.
-	 * @param int|float $left Left margin.
-	 * @param int|float $top Top margin.
-	 * @param int|float|null $right Right margin. Default value is the left one.
-	 * @param boolean $keepmargins if true overwrites the default page margins
-	 * @public
-	 * @since 1.0
-	 * @see SetLeftMargin(), SetTopMargin(), SetRightMargin(), SetAutoPageBreak()
-	 */
-	public function setMargins($left, $top, $right=null, $keepmargins=false) {
-		//Set left, top and right margins
-		$this->lMargin = $left;
-		$this->tMargin = $top;
-		if ($right == -1 OR $right === null) {
-			$right = $left;
-		}
-		$this->rMargin = $right;
-		if ($keepmargins) {
-			// overwrite original values
-			$this->original_lMargin = $this->lMargin;
-			$this->original_rMargin = $this->rMargin;
-		}
-	}
+        if ($right === null || $right === -1.0) {
+            $right = $left;
+        }
 
-	/**
-	 * Defines the left margin. The method can be called before creating the first page. If the current abscissa gets out of page, it is brought back to the margin.
-	 * @param int|float $margin The margin.
-	 * @public
-	 * @since 1.4
-	 * @see SetTopMargin(), SetRightMargin(), SetAutoPageBreak(), SetMargins()
-	 */
-	public function setLeftMargin($margin) {
-		//Set left margin
-		$this->lMargin = $margin;
-		if (($this->page > 0) AND ($this->x < $margin)) {
-			$this->x = $margin;
-		}
-	}
+        $this->rMargin = $right;
 
-	/**
-	 * Defines the top margin. The method can be called before creating the first page.
-	 * @param int|float $margin The margin.
-	 * @public
-	 * @since 1.5
-	 * @see SetLeftMargin(), SetRightMargin(), SetAutoPageBreak(), SetMargins()
-	 */
-	public function setTopMargin($margin) {
-		//Set top margin
-		$this->tMargin = $margin;
-		if (($this->page > 0) AND ($this->y < $margin)) {
-			$this->y = $margin;
-		}
-	}
+        if ($keepmargins) {
+            $this->original_lMargin = $this->lMargin;
+            $this->original_rMargin = $this->rMargin;
+        }
+    }
 
-	/**
-	 * Defines the right margin. The method can be called before creating the first page.
-	 * @param int|float $margin The margin.
-	 * @public
-	 * @since 1.5
-	 * @see SetLeftMargin(), SetTopMargin(), SetAutoPageBreak(), SetMargins()
-	 */
-	public function setRightMargin($margin) {
-		$this->rMargin = $margin;
-		if (($this->page > 0) AND ($this->x > ($this->w - $margin))) {
-			$this->x = $this->w - $margin;
-		}
-	}
+    /**
+     * Defines the left margin.
+     */
+    public function setLeftMargin(float $margin): void
+    {
+        $this->lMargin = $margin;
+        if ($this->page > 0 && $this->x < $margin) {
+            $this->x = $margin;
+        }
+    }
 
+    /**
+     * Defines the top margin.
+     */
+    public function setTopMargin(float $margin): void
+    {
+        $this->tMargin = $margin;
+        if ($this->page > 0 && $this->y < $margin) {
+            $this->y = $margin;
+        }
+    }
 
-
+    /**
+     * Defines the right margin.
+     */
+    public function setRightMargin(float $margin): void
+    {
+        $this->rMargin = $margin;
+        if ($this->page > 0 && $this->x > ($this->w - $margin)) {
+            $this->x = $this->w - $margin;
+        }
+    }
 }
